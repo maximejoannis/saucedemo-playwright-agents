@@ -1,7 +1,6 @@
 # SauceDemo Playwright Agents
 
-# SauceDemo Playwright Agents
-
+[![QA Portal](https://img.shields.io/badge/QA%20Portal-GitHub%20Pages-c7ff4a?logo=github&logoColor=black)](https://maximejoannis.github.io/saucedemo-playwright-agents/)
 [![Playwright QA](https://github.com/maximejoannis/saucedemo-playwright-agents/actions/workflows/playwright.yml/badge.svg)](https://github.com/maximejoannis/saucedemo-playwright-agents/actions/workflows/playwright.yml)
 ![Playwright](https://img.shields.io/badge/Playwright-1.62-45ba4b?logo=playwright&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-6.x-3178C6?logo=typescript&logoColor=white)
@@ -13,7 +12,6 @@
 ![Coverage](https://img.shields.io/badge/Functional%20Coverage-100%25-brightgreen)
 ![Scenarios](https://img.shields.io/badge/Functional%20Scenarios-29%2F29-brightgreen)
 ![E2E](https://img.shields.io/badge/E2E-3%20tests-brightgreen)
-[![QA Portal](https://img.shields.io/badge/QA%20Portal-GitHub%20Pages-c7ff4a?logo=github&logoColor=black)](URL_DU_PORTAIL)
 ![License](https://img.shields.io/badge/License-ISC-blue)
 
 Projet d’automatisation QA de [SauceDemo](https://www.saucedemo.com/) basé sur **Playwright**, **TypeScript** et des **agents IA spécialisés** pour la planification, la génération et la réparation des tests.
@@ -55,17 +53,17 @@ Les comportements testés correspondent à ceux réellement observables dans l�
 
 ## Stack technique
 
-| Outil | Usage |
-| --- | --- |
-| Playwright | Automatisation navigateur |
-| TypeScript | Écriture des tests et Page Objects |
-| Node.js | Runtime et scripts de reporting |
-| Codex CLI | Exécution des agents IA |
-| Allure | Rapport d’exécution avancé |
-| ESLint | Analyse statique du code |
-| Prettier | Vérification du formatage |
-| GitHub Actions | CI/CD |
-| GitHub Pages | Publication du portail QA |
+| Outil          | Usage                              |
+| -------------- | ---------------------------------- |
+| Playwright     | Automatisation navigateur          |
+| TypeScript     | Écriture des tests et Page Objects |
+| Node.js        | Runtime et scripts de reporting    |
+| Codex CLI      | Exécution des agents IA            |
+| Allure         | Rapport d’exécution avancé         |
+| ESLint         | Analyse statique du code           |
+| Prettier       | Vérification du formatage          |
+| GitHub Actions | CI/CD                              |
+| GitHub Pages   | Publication du portail QA          |
 
 ---
 
@@ -134,14 +132,14 @@ Planifier
 
 Le plan de tests couvre six domaines :
 
-| Fonctionnalité | Passant | Non passant | Erreur |
-| --- | --- | --- | --- |
-| Authentification | ✅ | ✅ | ✅ |
-| Catalogue | ✅ | ✅ | ✅ |
-| Tri | ✅ | ✅ | ✅ |
-| Panier | ✅ | ✅ | ✅ |
-| Checkout | ✅ | ✅ | ✅ |
-| Session | ✅ | ✅ | ✅ |
+| Fonctionnalité   | Passant | Non passant | Erreur |
+| ---------------- | ------- | ----------- | ------ |
+| Authentification | ✅      | ✅          | ✅     |
+| Catalogue        | ✅      | ✅          | ✅     |
+| Tri              | ✅      | ✅          | ✅     |
+| Panier           | ✅      | ✅          | ✅     |
+| Checkout         | ✅      | ✅          | ✅     |
+| Session          | ✅      | ✅          | ✅     |
 
 Le périmètre fonctionnel actuel contient :
 
@@ -256,6 +254,18 @@ npm run test:e2e:smoke
 ```
 
 ---
+
+## 🌐 Portail QA
+
+Le portail QA centralise les résultats de l'automatisation :
+
+- couverture fonctionnelle ;
+- rapport Playwright ;
+- rapport Allure ;
+- qualité ESLint / Prettier ;
+- statut global du pipeline.
+
+👉 **[Accéder au portail QA](https://maximejoannis.github.io/saucedemo-playwright-agents/)**
 
 ## Architecture du projet
 
