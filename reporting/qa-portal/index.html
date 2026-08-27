@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="fr" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark light" />
+    <title>QA Portal — SauceDemo Playwright Automation</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Aller au contenu</a>
+    <header class="topbar">
+      <div class="shell topbar-content">
+        <a class="brand" href="./" aria-label="Accueil du portail QA"
+          ><span class="brand-mark">SD</span
+          ><span><strong>QA Portal</strong><small>SauceDemo Playwright Automation</small></span></a
+        >
+        <div class="build-meta" aria-label="Informations de génération">
+          <span>Branche <strong id="branch">Indisponible</strong></span
+          ><span>Commit <strong id="commit">Indisponible</strong></span
+          ><span>Généré <time id="generated-at">Indisponible</time></span
+          ><span id="global-badge" class="badge unavailable">UNAVAILABLE</span>
+        </div>
+        <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Activer le thème clair">◐</button>
+      </div>
+    </header>
+    <main id="main-content" class="shell">
+      <section class="hero" aria-labelledby="hero-title">
+        <div>
+          <p class="eyebrow">SAUCEDEMO · QUALITY ENGINEERING</p>
+          <h1 id="hero-title">Portail des <span>rapports QA</span></h1>
+          <p class="hero-copy">
+            Une vue consolidée de la qualité, de la couverture et des exécutions automatisées de SauceDemo.
+          </p>
+        </div>
+        <div class="status-orbit" aria-live="polite">
+          <span>QA STATUS</span><strong id="hero-status">INDISPONIBLE</strong
+          ><a id="workflow-link" class="workflow-link" hidden>Voir l’exécution ↗</a>
+        </div>
+      </section>
+      <section class="summary-section" aria-labelledby="summary-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">SYNTHÈSE</p>
+            <h2 id="summary-title">Les signaux essentiels</h2>
+          </div>
+        </div>
+        <div class="summary-grid" aria-live="polite">
+          <article class="summary-item"><span>Couverture</span><strong id="summary-coverage">—</strong></article>
+          <article class="summary-item"><span>Scénarios</span><strong id="summary-scenarios">—</strong></article>
+          <article class="summary-item"><span>Matrice</span><strong id="summary-matrix">—</strong></article>
+          <article class="summary-item"><span>E2E</span><strong id="summary-e2e">—</strong></article>
+          <article class="summary-item"><span>Qualité</span><strong id="summary-quality">—</strong></article>
+        </div>
+      </section>
+      <section class="reports-section" aria-labelledby="reports-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">RAPPORTS</p>
+            <h2 id="reports-title">Explorer les résultats</h2>
+          </div>
+        </div>
+        <div class="reports-grid">
+          <article class="report-card accent-lime">
+            <div class="card-top">
+              <span class="card-index">01</span><span id="coverage-status" class="badge unavailable">UNAVAILABLE</span>
+            </div>
+            <div>
+              <h3>Couverture fonctionnelle</h3>
+              <p>
+                Couverture du périmètre fonctionnel, scénarios automatisés et matrice Passant / Non passant / Erreur.
+              </p>
+            </div>
+            <div class="metric">
+              <strong id="coverage-metric">Indisponible</strong><span id="coverage-detail">Données non chargées</span>
+            </div>
+            <a class="report-link" href="./coverage/">Ouvrir le rapport ↗</a>
+          </article>
+          <article class="report-card accent-cyan">
+            <div class="card-top">
+              <span class="card-index">02</span
+              ><span id="functional-status" class="badge unavailable">UNAVAILABLE</span>
+            </div>
+            <div>
+              <h3>Playwright</h3>
+              <p>Rapport HTML natif Playwright de la dernière exécution.</p>
+            </div>
+            <div class="metric">
+              <strong id="functional-metric">Indisponible</strong><span id="functional-detail">Dernière exécution</span>
+            </div>
+            <a class="report-link" href="./functional/">Ouvrir le rapport ↗</a>
+          </article>
+          <article class="report-card accent-orange">
+            <div class="card-top">
+              <span class="card-index">03</span><span id="allure-status" class="badge planned">PLANNED</span>
+            </div>
+            <div>
+              <h3>Allure</h3>
+              <p>Rapport détaillé Allure : suites, étapes, pièces jointes, traces et historique.</p>
+            </div>
+            <div class="metric">
+              <strong id="allure-metric">Non généré</strong><span id="allure-detail">Rapport détaillé</span>
+            </div>
+            <a class="report-link" href="./allure/">Ouvrir le rapport ↗</a>
+          </article>
+          <article class="report-card accent-red">
+            <div class="card-top">
+              <span class="card-index">04</span><span id="quality-status" class="badge unavailable">UNAVAILABLE</span>
+            </div>
+            <div>
+              <h3>Qualité du code</h3>
+              <p>Contrôles ESLint et Prettier avec quality gate.</p>
+            </div>
+            <div class="metric">
+              <strong id="quality-metric">Indisponible</strong><span id="quality-detail">ESLint + Prettier</span>
+            </div>
+            <a class="report-link" href="./quality/">Ouvrir le rapport ↗</a>
+          </article>
+        </div>
+      </section>
+      <section class="coverage-note" aria-labelledby="coverage-note-title">
+        <p class="eyebrow">À PROPOS DE LA MÉTRIQUE</p>
+        <h2 id="coverage-note-title">Couverture fonctionnelle automatisée</h2>
+        <p>
+          Le taux d'automatisation du périmètre fonctionnel défini mesure la proportion des scénarios planifiés
+          disposant d'un test Playwright automatisé.
+        </p>
+        <p>
+          Cette métrique correspond à la couverture fonctionnelle automatisée, pas à la couverture du code source de
+          SauceDemo.
+        </p>
+        <p id="coverage-sentence" class="coverage-result" aria-live="polite">
+          Les données de couverture ne sont pas disponibles.
+        </p>
+      </section>
+    </main>
+    <footer>
+      <div class="shell"><span>SD · QA Portal</span><span>HTML, CSS &amp; JavaScript natifs</span></div>
+    </footer>
+    <script src="app.js"></script>
+  </body>
+</html>

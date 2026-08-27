@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="fr" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Couverture fonctionnelle — SauceDemo</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="#top"><span class="logo">SD</span><span>Quality Portal</span></a>
+      <nav aria-label="Navigation du rapport">
+        <a href="#coverage">Couverture</a><a href="#scenarios">Scénarios</a><a href="#method">Méthodologie</a>
+      </nav>
+      <div class="actions">
+        <button id="theme" aria-label="Changer de thème">◐</button><button id="print">Exporter PDF</button>
+      </div>
+    </header>
+    <main id="top">
+      <section class="hero">
+        <div>
+          <p class="eyebrow">SAUCEDEMO · QUALITY ENGINEERING</p>
+          <h1>COUVERTURE FONCTIONNELLE<br /><span>AUTOMATISÉE</span></h1>
+          <p>
+            Le taux d'automatisation du périmètre fonctionnel défini mesure la proportion des scénarios planifiés
+            disposant d'un test Playwright automatisé.
+          </p>
+          <p class="notice">
+            Ce taux mesure la couverture fonctionnelle automatisée et non la couverture du code source de SauceDemo.
+          </p>
+        </div>
+        <div class="score" id="score">
+          <div><strong id="scoreValue">—</strong><small>AUTOMATISÉ</small></div>
+        </div>
+      </section>
+      <section class="kpis" id="kpis"></section>
+      <section id="coverage" class="section">
+        <p class="section-number">01</p>
+        <h2>Couverture fonctionnelle</h2>
+        <p id="summary"></p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Fonctionnalité</th>
+                <th>Passant</th>
+                <th>Non passant</th>
+                <th>Erreur</th>
+                <th>Couverture</th>
+              </tr>
+            </thead>
+            <tbody id="matrix"></tbody>
+          </table>
+        </div>
+      </section>
+      <section class="section">
+        <p class="section-number">02</p>
+        <h2>Types de tests</h2>
+        <div class="bars" id="types"></div>
+        <p>
+          Les catégories Positive, Negative et Error ne sont pas mutuellement exclusives. Un scénario d'erreur peut
+          également être classé comme scénario négatif.
+        </p>
+        <h3>Suites</h3>
+        <div class="suite-grid" id="suites"></div>
+      </section>
+      <section id="scenarios" class="section">
+        <p class="section-number">03</p>
+        <h2>Scénarios fonctionnels</h2>
+        <div class="filters">
+          <label>Recherche<input id="search" type="search" placeholder="ID, titre, tag…" /></label
+          ><label
+            >Fonctionnalité<select id="featureFilter">
+              <option value="">Toutes</option>
+            </select></label
+          ><label
+            >Type<select id="typeFilter">
+              <option value="">Tous</option>
+            </select></label
+          ><label
+            >État<select id="statusFilter">
+              <option value="">Tous</option>
+              <option value="true">Automatisé</option>
+              <option value="false">Manquant</option>
+            </select></label
+          >
+        </div>
+        <div id="scenarioList" class="scenario-list"></div>
+      </section>
+      <section id="method" class="section">
+        <p class="section-number">04</p>
+        <h2>Méthodologie</h2>
+        <div class="method-grid">
+          <article>
+            <h3>Couverture des fonctionnalités</h3>
+            <code>fonctionnalités automatisées / fonctionnalités identifiées × 100</code>
+          </article>
+          <article>
+            <h3>Couverture des scénarios</h3>
+            <code>scénarios automatisés / scénarios planifiés × 100</code>
+          </article>
+          <article>
+            <h3>Couverture de matrice</h3>
+            <code>cellules Passant/Non passant/Erreur couvertes / cellules attendues × 100</code>
+          </article>
+        </div>
+        <p class="generated">Généré le <span id="generatedAt"></span></p>
+      </section>
+    </main>
+    <script src="coverage-data.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>

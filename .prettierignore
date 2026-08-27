@@ -1,0 +1,11 @@
+node_modules/
+playwright-report/
+allure-results/
+allure-report/
+test-results/
+prompts/
+tests/specs/*.md
+reports/coverage/
+reports/qa-portal/
+quality-report/
+coverage-report/
