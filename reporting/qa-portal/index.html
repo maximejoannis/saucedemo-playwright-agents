@@ -46,9 +46,17 @@
           </div>
         </div>
         <div class="summary-grid" aria-live="polite">
-          <article class="summary-item"><span>Couverture</span><strong id="summary-coverage">—</strong></article>
-          <article class="summary-item"><span>Scénarios</span><strong id="summary-scenarios">—</strong></article>
-          <article class="summary-item"><span>Matrice</span><strong id="summary-matrix">—</strong></article>
+          <article class="summary-item">
+            <span>Functional Coverage</span><strong id="summary-coverage">—</strong>
+          </article>
+          <article class="summary-item">
+            <span>Requirements Coverage</span><strong id="summary-requirements">—</strong>
+          </article>
+          <article class="summary-item"><span>User Stories</span><strong id="summary-user-stories">—</strong></article>
+          <article class="summary-item">
+            <span>Acceptance Criteria</span><strong id="summary-acceptance-criteria">—</strong>
+          </article>
+          <article class="summary-item"><span>Matrix</span><strong id="summary-matrix">—</strong></article>
           <article class="summary-item"><span>E2E</span><strong id="summary-e2e">—</strong></article>
           <article class="summary-item"><span>Qualité</span><strong id="summary-quality">—</strong></article>
         </div>
@@ -72,7 +80,8 @@
               </p>
             </div>
             <div class="metric">
-              <strong id="coverage-metric">Indisponible</strong><span id="coverage-detail">Données non chargées</span>
+              <strong id="coverage-metric">Indisponible</strong><span id="coverage-detail">Données non chargées</span
+              ><span id="requirements-detail">Requirements indisponibles</span>
             </div>
             <a class="report-link" href="./coverage/">Ouvrir le rapport ↗</a>
           </article>
@@ -116,6 +125,17 @@
             </div>
             <a class="report-link" href="./quality/">Ouvrir le rapport ↗</a>
           </article>
+        </div>
+      </section>
+      <section class="coverage-note" aria-labelledby="requirements-title">
+        <p class="eyebrow">REQUIREMENTS TRACEABILITY</p>
+        <h2 id="requirements-title">Exigences et traçabilité</h2>
+        <div class="requirements-summary">
+          <span>User Stories <strong id="requirements-us">—</strong></span
+          ><span>Acceptance Criteria <strong id="requirements-ac">—</strong></span
+          ><span>Requirement Tests <strong id="requirements-validation">—</strong></span
+          ><span>Characterization <strong id="requirements-characterization">—</strong></span
+          ><span>Untraced <strong id="requirements-untraced">—</strong></span>
         </div>
       </section>
       <section class="coverage-note" aria-labelledby="coverage-note-title">

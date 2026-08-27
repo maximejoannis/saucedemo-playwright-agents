@@ -86,14 +86,42 @@ function applyCoverage(data) {
   const coverage = data?.functionalCoverage;
   if (!coverage) return;
   const { features, scenarios, matrix } = coverage;
+  const requirements = data.requirements;
   const rate = scenarios?.rate ?? features?.rate;
   setBadge('coverage-status', rate === 100 ? 'passed' : 'available');
   setText('coverage-metric', Number.isFinite(rate) ? `${rate} %` : 'Disponible');
   setText('coverage-detail', `${scenarios?.automated ?? '—'} / ${scenarios?.planned ?? '—'} scénarios automatisés`);
+  setText(
+    'requirements-detail',
+    `${requirements?.acceptanceCriteria?.covered ?? '—'} / ${requirements?.acceptanceCriteria?.total ?? '—'} critères d’acceptation`,
+  );
   setText('summary-coverage', Number.isFinite(rate) ? `${rate} %` : '—');
   setText('summary-scenarios', `${scenarios?.automated ?? '—'} / ${scenarios?.planned ?? '—'}`);
   setText('summary-matrix', `${matrix?.covered ?? '—'} / ${matrix?.total ?? '—'}`);
+  setText(
+    'summary-requirements',
+    Number.isFinite(requirements?.acceptanceCriteria?.rate) ? `${requirements.acceptanceCriteria.rate} %` : '—',
+  );
+  setText(
+    'summary-user-stories',
+    `${requirements?.userStories?.covered ?? '—'} / ${requirements?.userStories?.total ?? '—'}`,
+  );
+  setText(
+    'summary-acceptance-criteria',
+    `${requirements?.acceptanceCriteria?.covered ?? '—'} / ${requirements?.acceptanceCriteria?.total ?? '—'}`,
+  );
   setText('summary-e2e', Number.isFinite(data.e2e?.total) ? String(data.e2e.total) : '—');
+  setText(
+    'requirements-us',
+    `${requirements?.userStories?.covered ?? '—'} / ${requirements?.userStories?.total ?? '—'}`,
+  );
+  setText(
+    'requirements-ac',
+    `${requirements?.acceptanceCriteria?.covered ?? '—'} / ${requirements?.acceptanceCriteria?.total ?? '—'}`,
+  );
+  setText('requirements-validation', requirements?.traceability?.requirementValidation ?? '—');
+  setText('requirements-characterization', requirements?.traceability?.characterization ?? '—');
+  setText('requirements-untraced', requirements?.traceability?.untraced ?? '—');
   if (features && scenarios && matrix)
     setText(
       'coverage-sentence',

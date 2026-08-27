@@ -10,7 +10,8 @@
     <header class="topbar">
       <a class="brand" href="#top"><span class="logo">SD</span><span>Quality Portal</span></a>
       <nav aria-label="Navigation du rapport">
-        <a href="#coverage">Couverture</a><a href="#scenarios">Scénarios</a><a href="#method">Méthodologie</a>
+        <a href="#coverage">Couverture</a><a href="#scenarios">Scénarios</a><a href="#requirements">Requirements</a
+        ><a href="#method">Méthodologie</a>
       </nav>
       <div class="actions">
         <button id="theme" aria-label="Changer de thème">◐</button><button id="print">Exporter PDF</button>
@@ -31,6 +32,9 @@
         </div>
         <div class="score" id="score">
           <div><strong id="scoreValue">—</strong><small>AUTOMATISÉ</small></div>
+        </div>
+        <div class="requirement-score">
+          <small>REQUIREMENTS COVERAGE</small><strong id="requirementsScore">—</strong>
         </div>
       </section>
       <section class="kpis" id="kpis"></section>
@@ -87,8 +91,57 @@
         </div>
         <div id="scenarioList" class="scenario-list"></div>
       </section>
+      <section id="requirements" class="section">
+        <p class="section-number">04 / REQUIREMENTS TRACEABILITY</p>
+        <h2>Requirements Traceability Matrix</h2>
+        <p id="requirementsSummary"></p>
+        <p class="notice">
+          Un test de caractérisation documente un comportement réellement observé de SauceDemo sans nécessairement
+          représenter le comportement fonctionnel souhaité.
+        </p>
+        <div class="filters requirements-filters">
+          <label
+            >User Story<select id="usFilter">
+              <option value="">Toutes</option>
+            </select></label
+          >
+          <label
+            >Nature<select id="natureFilter">
+              <option value="">Toutes</option>
+            </select></label
+          >
+          <label
+            >Type<select id="rtmTypeFilter">
+              <option value="">Tous</option>
+            </select></label
+          >
+          <label
+            >Automated / Untraced<select id="rtmStatusFilter">
+              <option value="">Tous</option>
+              <option value="true">Automated</option>
+              <option value="false">Untraced</option>
+            </select></label
+          >
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>User Story</th>
+                <th>Acceptance Criterion</th>
+                <th>Test Case</th>
+                <th>Type</th>
+                <th>Priority</th>
+                <th>Nature</th>
+                <th>Automated</th>
+              </tr>
+            </thead>
+            <tbody id="traceability"></tbody>
+          </table>
+        </div>
+      </section>
       <section id="method" class="section">
-        <p class="section-number">04</p>
+        <p class="section-number">05</p>
         <h2>Méthodologie</h2>
         <div class="method-grid">
           <article>
@@ -96,8 +149,20 @@
             <code>fonctionnalités automatisées / fonctionnalités identifiées × 100</code>
           </article>
           <article>
-            <h3>Couverture des scénarios</h3>
+            <h3>Functional Coverage</h3>
             <code>scénarios automatisés / scénarios planifiés × 100</code>
+          </article>
+          <article>
+            <h3>Requirements Coverage</h3>
+            <code>Acceptance Criteria couverts / Acceptance Criteria totaux × 100</code>
+          </article>
+          <article>
+            <h3>User Story Coverage</h3>
+            <code>User Stories couvertes / User Stories totales × 100</code>
+          </article>
+          <article>
+            <h3>Traceability</h3>
+            <code>US → AC → TC → Automated Test</code>
           </article>
           <article>
             <h3>Couverture de matrice</h3>
