@@ -148,9 +148,10 @@ jobs:
               e2e: coverage.e2e,
             },
             quality: {
-              status: quality.status,
+              status: quality.overallStatus ?? quality.status,
               eslint: quality.eslint,
               prettier: quality.prettier,
+              typescript: quality.typescript,
             },
           };
           fs.writeFileSync('pages-site/build-info.json', `${JSON.stringify(buildInfo, null, 2)}\n`);

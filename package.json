@@ -9,6 +9,7 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier . --write",
     "format:check": "prettier . --check",
+    "typecheck": "tsc --noEmit",
     "test:positive": "playwright test --project=chromium --grep \"@positive\"",
     "test:negative": "playwright test --project=chromium --grep \"@negative\"",
     "test:error": "playwright test --project=chromium --grep \"@error\"",

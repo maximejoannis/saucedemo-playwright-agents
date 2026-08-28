@@ -120,6 +120,7 @@ function applyQuality(data) {
 
   setText('eslintFact', label('ESLint', data.eslint));
   setText('prettierFact', label('Prettier', data.prettier));
+  setText('typescriptFact', label('TypeScript', data.typescript));
 }
 
 async function loadJson(path, fallback = null) {
