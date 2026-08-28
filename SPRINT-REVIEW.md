@@ -8,9 +8,9 @@ L'objectif est de mettre en œuvre une démarche QA complète autour de l'applic
 
 Le projet explore également l'utilisation d'**agents IA avec Codex CLI et Playwright** pour assister différentes activités du cycle d'automatisation :
 
-* planification des tests ;
-* génération des tests ;
-* maintenance et réparation des tests.
+- planification des tests ;
+- génération des tests ;
+- maintenance et réparation des tests.
 
 > La couverture présentée dans ce projet correspond au **périmètre fonctionnel défini pour cet exercice**. Elle ne représente ni une couverture exhaustive de SauceDemo, ni une couverture du code source de l'application.
 
@@ -22,18 +22,18 @@ Le projet explore également l'utilisation d'**agents IA avec Codex CLI et Playw
 
 Les principaux objectifs étaient de :
 
-* construire un projet Playwright maintenable en TypeScript ;
-* identifier les fonctionnalités principales de SauceDemo ;
-* concevoir un plan de tests fonctionnels structuré ;
-* automatiser les scénarios passants, non passants et les cas d'erreur ;
-* mettre en place des parcours E2E représentatifs ;
-* structurer le code avec un Page Object Model et des fixtures ;
-* classifier les tests afin de permettre plusieurs stratégies d'exécution ;
-* expérimenter l'utilisation d'agents IA spécialisés ;
-* produire plusieurs niveaux de reporting QA ;
-* automatiser les contrôles qualité ;
-* intégrer les tests dans une pipeline CI ;
-* publier les rapports dans un portail QA accessible publiquement.
+- construire un projet Playwright maintenable en TypeScript ;
+- identifier les fonctionnalités principales de SauceDemo ;
+- concevoir un plan de tests fonctionnels structuré ;
+- automatiser les scénarios passants, non passants et les cas d'erreur ;
+- mettre en place des parcours E2E représentatifs ;
+- structurer le code avec un Page Object Model et des fixtures ;
+- classifier les tests afin de permettre plusieurs stratégies d'exécution ;
+- expérimenter l'utilisation d'agents IA spécialisés ;
+- produire plusieurs niveaux de reporting QA ;
+- automatiser les contrôles qualité ;
+- intégrer les tests dans une pipeline CI ;
+- publier les rapports dans un portail QA accessible publiquement.
 
 ---
 
@@ -53,11 +53,11 @@ Six domaines fonctionnels principaux ont été retenus :
 
 Les scénarios couvrent plusieurs types de comportements :
 
-* cas passants ;
-* cas non passants ;
-* cas d'erreur ;
-* scénarios Smoke ;
-* scénarios de régression.
+- cas passants ;
+- cas non passants ;
+- cas d'erreur ;
+- scénarios Smoke ;
+- scénarios de régression.
 
 Trois parcours E2E supplémentaires permettent de vérifier des chaînes fonctionnelles plus larges.
 
@@ -101,11 +101,11 @@ L'application SauceDemo a d'abord été explorée afin d'identifier ses principa
 
 Cette phase a permis d'identifier :
 
-* les parcours nominaux ;
-* les contrôles de saisie ;
-* les comportements d'erreur ;
-* les comportements spécifiques de certains utilisateurs de démonstration ;
-* les interactions entre les différentes pages.
+- les parcours nominaux ;
+- les contrôles de saisie ;
+- les comportements d'erreur ;
+- les comportements spécifiques de certains utilisateurs de démonstration ;
+- les interactions entre les différentes pages.
 
 ---
 
@@ -169,11 +169,11 @@ Cette stratégie permet par exemple d'exécuter rapidement les tests Smoke ou de
 
 Le projet repose sur une séparation entre :
 
-* spécifications ;
-* Page Objects ;
-* fixtures ;
-* scénarios E2E ;
-* reporting.
+- spécifications ;
+- Page Objects ;
+- fixtures ;
+- scénarios E2E ;
+- reporting.
 
 ```text
 tests/
@@ -279,10 +279,10 @@ flowchart LR
 
 Le portail QA centralise :
 
-* la couverture fonctionnelle ;
-* les résultats Playwright ;
-* le rapport Allure ;
-* les contrôles qualité.
+- la couverture fonctionnelle ;
+- les résultats Playwright ;
+- le rapport Allure ;
+- les contrôles qualité.
 
 Il constitue le point d'entrée principal pour consulter l'état du projet.
 
@@ -335,13 +335,13 @@ Un premier risque était de produire uniquement une collection de fichiers `.spe
 
 Le projet a été structuré progressivement autour de :
 
-* Page Objects ;
-* fixtures ;
-* tags ;
-* scénarios fonctionnels ;
-* parcours E2E ;
-* reporting ;
-* CI/CD.
+- Page Objects ;
+- fixtures ;
+- tags ;
+- scénarios fonctionnels ;
+- parcours E2E ;
+- reporting ;
+- CI/CD.
 
 ### Enseignement
 
@@ -465,9 +465,9 @@ xychart-beta
 
 Les trois indicateurs atteignent 100 % sur le périmètre défini :
 
-* 6 fonctionnalités sur 6 ;
-* 29 scénarios sur 29 ;
-* 18 combinaisons fonction/type sur 18.
+- 6 fonctionnalités sur 6 ;
+- 29 scénarios sur 29 ;
+- 18 combinaisons fonction/type sur 18.
 
 ---
 
@@ -490,17 +490,17 @@ Les parcours E2E sont suivis séparément et ne viennent pas augmenter artificie
 
 À l'issue du projet :
 
-* les **6 fonctionnalités principales identifiées** sont couvertes ;
-* les **29 scénarios fonctionnels définis** sont automatisés ;
-* la matrice Passant / Non passant / Erreur du périmètre est couverte ;
-* **3 parcours E2E** complètent la validation fonctionnelle ;
-* le framework utilise des **Page Objects et fixtures** ;
-* plusieurs stratégies d'exécution sont disponibles grâce aux tags ;
-* les contrôles **ESLint et Prettier** sont intégrés ;
-* les rapports **Playwright, Allure, Couverture et Qualité** sont disponibles ;
-* une pipeline **GitHub Actions** automatise les validations ;
-* les résultats sont publiés dans un **portail QA GitHub Pages** ;
-* des **agents IA spécialisés** ont été intégrés au workflow de développement et de maintenance.
+- les **6 fonctionnalités principales identifiées** sont couvertes ;
+- les **29 scénarios fonctionnels définis** sont automatisés ;
+- la matrice Passant / Non passant / Erreur du périmètre est couverte ;
+- **3 parcours E2E** complètent la validation fonctionnelle ;
+- le framework utilise des **Page Objects et fixtures** ;
+- plusieurs stratégies d'exécution sont disponibles grâce aux tags ;
+- les contrôles **ESLint et Prettier** sont intégrés ;
+- les rapports **Playwright, Allure, Couverture et Qualité** sont disponibles ;
+- une pipeline **GitHub Actions** automatise les validations ;
+- les résultats sont publiés dans un **portail QA GitHub Pages** ;
+- des **agents IA spécialisés** ont été intégrés au workflow de développement et de maintenance.
 
 ---
 
@@ -570,14 +570,14 @@ Portail QA
 
 Le résultat est un projet open source reproductible permettant de démontrer à la fois des compétences en :
 
-* analyse et conception de tests ;
-* automatisation Playwright ;
-* TypeScript ;
-* architecture de framework ;
-* stratégie de tests ;
-* CI/CD ;
-* reporting QA ;
-* utilisation encadrée d'agents IA pour l'automatisation.
+- analyse et conception de tests ;
+- automatisation Playwright ;
+- TypeScript ;
+- architecture de framework ;
+- stratégie de tests ;
+- CI/CD ;
+- reporting QA ;
+- utilisation encadrée d'agents IA pour l'automatisation.
 
 ---
 

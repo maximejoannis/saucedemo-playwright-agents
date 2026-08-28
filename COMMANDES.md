@@ -2,17 +2,17 @@
 
 Ce document regroupe les principales commandes nécessaires pour installer et utiliser l'environnement du projet :
 
-* Node.js / npm
-* Codex CLI
-* Playwright
-* Playwright MCP
-* tests Playwright
-* suites Smoke / Regression
-* tests par catégorie
-* tests E2E
-* ESLint / Prettier
-* Allure
-* rapports de couverture et de qualité
+- Node.js / npm
+- Codex CLI
+- Playwright
+- Playwright MCP
+- tests Playwright
+- suites Smoke / Regression
+- tests par catégorie
+- tests E2E
+- ESLint / Prettier
+- Allure
+- rapports de couverture et de qualité
 
 ---
 
@@ -20,9 +20,9 @@ Ce document regroupe les principales commandes nécessaires pour installer et ut
 
 Installer :
 
-* Git
-* Node.js
-* npm
+- Git
+- Node.js
+- npm
 
 Vérifier les installations :
 
