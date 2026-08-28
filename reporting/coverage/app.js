@@ -2,21 +2,13 @@ const data = window.COVERAGE_DATA;
 const q = (selector) => document.querySelector(selector);
 const fmt = (number) => String(number).replace('.', ',');
 const fc = data.functionalCoverage;
-const req = data.requirements;
 q('#score').style.setProperty('--score', fc.scenarios.rate);
 q('#scoreValue').textContent = `${fmt(fc.scenarios.rate)}%`;
-q('#requirementsScore').textContent = `${fmt(req.acceptanceCriteria.rate)}%`;
 const cards = [
-  ['User Stories', `${req.userStories.covered}/${req.userStories.total}`, req.userStories.rate],
-  [
-    'Acceptance Criteria',
-    `${req.acceptanceCriteria.covered}/${req.acceptanceCriteria.total}`,
-    req.acceptanceCriteria.rate,
-  ],
-  ['Requirements Coverage', `${fmt(req.acceptanceCriteria.rate)}%`, 'Critères couverts'],
+  ['Fonctionnalités couvertes', `${fc.features.covered}/${fc.features.total}`, fc.features.rate],
   ['Scénarios fonctionnels', `${fc.scenarios.automated}/${fc.scenarios.planned}`, fc.scenarios.rate],
-  ['Matrice', `${fc.matrix.covered}/${fc.matrix.total}`, fc.matrix.rate],
-  ['E2E', data.e2e.total, 'Couche transverse'],
+  ['Matrice fonctionnelle', `${fc.matrix.covered}/${fc.matrix.total}`, fc.matrix.rate],
+  ['Tests E2E', data.e2e.total, 'Couche transverse'],
 ];
 q('#kpis').innerHTML = cards
   .map(
@@ -26,8 +18,6 @@ q('#kpis').innerHTML = cards
   .join('');
 q('#summary').textContent =
   `Le taux d’automatisation du périmètre fonctionnel est de ${fmt(fc.scenarios.rate)} % : ${fc.features.covered} fonctionnalités sur ${fc.features.total} et ${fc.scenarios.automated} scénarios sur ${fc.scenarios.planned} sont couverts. La matrice Passant / Non passant / Erreur est couverte à ${fmt(fc.matrix.rate)} %.`;
-q('#requirementsSummary').textContent =
-  `Les ${req.userStories.covered} User Stories reconstituées sont couvertes par l’automatisation. Les ${req.acceptanceCriteria.covered} critères d’acceptation disposent tous d’au moins un test automatisé, soit une Requirements Coverage de ${fmt(req.acceptanceCriteria.rate)} %. Les ${fc.scenarios.planned} scénarios fonctionnels sont tous tracés : ${req.traceability.requirementValidation} valident directement des exigences et ${req.traceability.characterization} caractérisent des comportements observés.`;
 q('#matrix').innerHTML = data.matrix
   .map(
     (row) =>
@@ -72,36 +62,7 @@ function renderScenarios() {
 ['search', 'featureFilter', 'typeFilter', 'statusFilter'].forEach((id) =>
   q(`#${id}`).addEventListener(id === 'search' ? 'input' : 'change', renderScenarios),
 );
-const rtmFilters = [
-  ['usFilter', 'userStory'],
-  ['natureFilter', 'nature'],
-  ['rtmTypeFilter', 'type'],
-];
-rtmFilters.forEach(([id, property]) =>
-  [...new Set(data.traceability.map((row) => row[property]))].forEach((value) =>
-    q(`#${id}`).add(new Option(value, value)),
-  ),
-);
-function renderTraceability() {
-  const filters = Object.fromEntries(rtmFilters.map(([id, property]) => [property, q(`#${id}`).value]));
-  const status = q('#rtmStatusFilter').value;
-  q('#traceability').innerHTML = data.traceability
-    .filter(
-      (row) =>
-        Object.entries(filters).every(([property, value]) => !value || row[property] === value) &&
-        (!status || String(row.automated) === status),
-    )
-    .map(
-      (row) =>
-        `<tr><td>${row.userStory}</td><td>${row.acceptanceCriterion}</td><td>${row.testCase}</td><td>${row.type}</td><td>${row.priority}</td><td class="${row.nature === 'Characterization' ? 'nature-characterization' : 'nature-validation'}">${row.nature === 'Characterization' ? 'CHARACTERIZATION' : row.nature}</td><td class="${row.automated ? 'yes' : 'no'}">${row.automated ? '✓' : 'UNTRACED'}</td></tr>`,
-    )
-    .join('');
-}
-[...rtmFilters.map(([id]) => id), 'rtmStatusFilter'].forEach((id) =>
-  q(`#${id}`).addEventListener('change', renderTraceability),
-);
 renderScenarios();
-renderTraceability();
 q('#theme').addEventListener('click', () => {
   document.documentElement.dataset.theme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
 });

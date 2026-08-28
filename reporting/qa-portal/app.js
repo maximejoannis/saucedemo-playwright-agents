@@ -13,11 +13,11 @@ function setBadge(id, status) {
   const labels = {
     passed: 'PASS',
     pass: 'PASS',
-    failed: 'FAIL',
-    fail: 'FAIL',
-    available: 'AVAILABLE',
-    planned: 'PLANNED',
-    unavailable: 'UNAVAILABLE',
+    failed: 'ÉCHEC',
+    fail: 'ÉCHEC',
+    available: 'DISPONIBLE',
+    planned: 'PLANIFIÉ',
+    unavailable: 'INDISPONIBLE',
   };
   const style = ['passed', 'pass'].includes(normalized)
     ? 'pass'
@@ -27,7 +27,7 @@ function setBadge(id, status) {
         ? normalized
         : 'unavailable';
   badge.className = `badge ${style}`;
-  badge.textContent = labels[normalized] ?? 'UNAVAILABLE';
+  badge.textContent = labels[normalized] ?? 'INDISPONIBLE';
 }
 
 async function loadJson(path) {
@@ -56,7 +56,7 @@ function applyBuildInfo(build) {
     ['passed', 'pass'].includes(build.status)
       ? 'PASS'
       : ['failed', 'fail'].includes(build.status)
-        ? 'FAIL'
+        ? 'ÉCHEC'
         : 'INDISPONIBLE',
   );
   const workflowLink = byId('workflow-link');
@@ -75,7 +75,7 @@ function applyBuildInfo(build) {
         ? ['passed', 'pass'].includes(status)
           ? 'PASS'
           : ['failed', 'fail'].includes(status)
-            ? 'FAIL'
+            ? 'ÉCHEC'
             : 'Disponible'
         : 'Non généré',
     );
@@ -86,42 +86,15 @@ function applyCoverage(data) {
   const coverage = data?.functionalCoverage;
   if (!coverage) return;
   const { features, scenarios, matrix } = coverage;
-  const requirements = data.requirements;
   const rate = scenarios?.rate ?? features?.rate;
   setBadge('coverage-status', rate === 100 ? 'passed' : 'available');
   setText('coverage-metric', Number.isFinite(rate) ? `${rate} %` : 'Disponible');
   setText('coverage-detail', `${scenarios?.automated ?? '—'} / ${scenarios?.planned ?? '—'} scénarios automatisés`);
-  setText(
-    'requirements-detail',
-    `${requirements?.acceptanceCriteria?.covered ?? '—'} / ${requirements?.acceptanceCriteria?.total ?? '—'} critères d’acceptation`,
-  );
+  setText('matrix-detail', `${matrix?.covered ?? '—'} / ${matrix?.total ?? '—'} cellules de matrice`);
   setText('summary-coverage', Number.isFinite(rate) ? `${rate} %` : '—');
   setText('summary-scenarios', `${scenarios?.automated ?? '—'} / ${scenarios?.planned ?? '—'}`);
   setText('summary-matrix', `${matrix?.covered ?? '—'} / ${matrix?.total ?? '—'}`);
-  setText(
-    'summary-requirements',
-    Number.isFinite(requirements?.acceptanceCriteria?.rate) ? `${requirements.acceptanceCriteria.rate} %` : '—',
-  );
-  setText(
-    'summary-user-stories',
-    `${requirements?.userStories?.covered ?? '—'} / ${requirements?.userStories?.total ?? '—'}`,
-  );
-  setText(
-    'summary-acceptance-criteria',
-    `${requirements?.acceptanceCriteria?.covered ?? '—'} / ${requirements?.acceptanceCriteria?.total ?? '—'}`,
-  );
   setText('summary-e2e', Number.isFinite(data.e2e?.total) ? String(data.e2e.total) : '—');
-  setText(
-    'requirements-us',
-    `${requirements?.userStories?.covered ?? '—'} / ${requirements?.userStories?.total ?? '—'}`,
-  );
-  setText(
-    'requirements-ac',
-    `${requirements?.acceptanceCriteria?.covered ?? '—'} / ${requirements?.acceptanceCriteria?.total ?? '—'}`,
-  );
-  setText('requirements-validation', requirements?.traceability?.requirementValidation ?? '—');
-  setText('requirements-characterization', requirements?.traceability?.characterization ?? '—');
-  setText('requirements-untraced', requirements?.traceability?.untraced ?? '—');
   if (features && scenarios && matrix)
     setText(
       'coverage-sentence',
@@ -138,7 +111,7 @@ function applyQuality(data) {
     ['passed', 'pass'].includes(data.status)
       ? 'PASS'
       : ['failed', 'fail'].includes(data.status)
-        ? 'FAIL'
+        ? 'ÉCHEC'
         : 'Disponible',
   );
   setText(

@@ -167,7 +167,9 @@ Soit :
 
 ### Important
 
-Cette métrique correspond à une **couverture fonctionnelle/scénario**.
+La couverture fonctionnelle mesure la proportion du périmètre fonctionnel défini disposant de tests Playwright automatisés.
+
+Cette métrique ne représente ni une couverture exhaustive de toutes les fonctionnalités possibles de SauceDemo, ni une couverture du code source de l'application.
 
 Elle ne correspond pas à :
 

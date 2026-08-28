@@ -147,7 +147,6 @@ jobs:
               matrix: coverage.functionalCoverage.matrix,
               e2e: coverage.e2e,
             },
-            requirements: coverage.requirements,
             quality: {
               status: quality.status,
               eslint: quality.eslint,

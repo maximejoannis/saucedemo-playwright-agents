@@ -13,13 +13,13 @@
       <div class="shell topbar-content">
         <a class="brand" href="./" aria-label="Accueil du portail QA"
           ><span class="brand-mark">SD</span
-          ><span><strong>QA Portal</strong><small>SauceDemo Playwright Automation</small></span></a
+          ><span><strong>Portail QA</strong><small>Automatisation SauceDemo avec Playwright</small></span></a
         >
         <div class="build-meta" aria-label="Informations de génération">
           <span>Branche <strong id="branch">Indisponible</strong></span
           ><span>Commit <strong id="commit">Indisponible</strong></span
           ><span>Généré <time id="generated-at">Indisponible</time></span
-          ><span id="global-badge" class="badge unavailable">UNAVAILABLE</span>
+          ><span id="global-badge" class="badge unavailable">INDISPONIBLE</span>
         </div>
         <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Activer le thème clair">◐</button>
       </div>
@@ -27,14 +27,14 @@
     <main id="main-content" class="shell">
       <section class="hero" aria-labelledby="hero-title">
         <div>
-          <p class="eyebrow">SAUCEDEMO · QUALITY ENGINEERING</p>
+          <p class="eyebrow">SAUCEDEMO · INGÉNIERIE QUALITÉ</p>
           <h1 id="hero-title">Portail des <span>rapports QA</span></h1>
           <p class="hero-copy">
             Une vue consolidée de la qualité, de la couverture et des exécutions automatisées de SauceDemo.
           </p>
         </div>
         <div class="status-orbit" aria-live="polite">
-          <span>QA STATUS</span><strong id="hero-status">INDISPONIBLE</strong
+          <span>ÉTAT QA</span><strong id="hero-status">INDISPONIBLE</strong
           ><a id="workflow-link" class="workflow-link" hidden>Voir l’exécution ↗</a>
         </div>
       </section>
@@ -47,16 +47,14 @@
         </div>
         <div class="summary-grid" aria-live="polite">
           <article class="summary-item">
-            <span>Functional Coverage</span><strong id="summary-coverage">—</strong>
+            <span>Couverture fonctionnelle</span><strong id="summary-coverage">—</strong>
           </article>
           <article class="summary-item">
-            <span>Requirements Coverage</span><strong id="summary-requirements">—</strong>
+            <span>Scénarios automatisés</span><strong id="summary-scenarios">—</strong>
           </article>
-          <article class="summary-item"><span>User Stories</span><strong id="summary-user-stories">—</strong></article>
           <article class="summary-item">
-            <span>Acceptance Criteria</span><strong id="summary-acceptance-criteria">—</strong>
+            <span>Matrice fonctionnelle</span><strong id="summary-matrix">—</strong>
           </article>
-          <article class="summary-item"><span>Matrix</span><strong id="summary-matrix">—</strong></article>
           <article class="summary-item"><span>E2E</span><strong id="summary-e2e">—</strong></article>
           <article class="summary-item"><span>Qualité</span><strong id="summary-quality">—</strong></article>
         </div>
@@ -71,7 +69,7 @@
         <div class="reports-grid">
           <article class="report-card accent-lime">
             <div class="card-top">
-              <span class="card-index">01</span><span id="coverage-status" class="badge unavailable">UNAVAILABLE</span>
+              <span class="card-index">01</span><span id="coverage-status" class="badge unavailable">INDISPONIBLE</span>
             </div>
             <div>
               <h3>Couverture fonctionnelle</h3>
@@ -81,14 +79,14 @@
             </div>
             <div class="metric">
               <strong id="coverage-metric">Indisponible</strong><span id="coverage-detail">Données non chargées</span
-              ><span id="requirements-detail">Requirements indisponibles</span>
+              ><span id="matrix-detail">Matrice non chargée</span>
             </div>
             <a class="report-link" href="./coverage/">Ouvrir le rapport ↗</a>
           </article>
           <article class="report-card accent-cyan">
             <div class="card-top">
               <span class="card-index">02</span
-              ><span id="functional-status" class="badge unavailable">UNAVAILABLE</span>
+              ><span id="functional-status" class="badge unavailable">INDISPONIBLE</span>
             </div>
             <div>
               <h3>Playwright</h3>
@@ -101,7 +99,7 @@
           </article>
           <article class="report-card accent-orange">
             <div class="card-top">
-              <span class="card-index">03</span><span id="allure-status" class="badge planned">PLANNED</span>
+              <span class="card-index">03</span><span id="allure-status" class="badge planned">PLANIFIÉ</span>
             </div>
             <div>
               <h3>Allure</h3>
@@ -114,7 +112,7 @@
           </article>
           <article class="report-card accent-red">
             <div class="card-top">
-              <span class="card-index">04</span><span id="quality-status" class="badge unavailable">UNAVAILABLE</span>
+              <span class="card-index">04</span><span id="quality-status" class="badge unavailable">INDISPONIBLE</span>
             </div>
             <div>
               <h3>Qualité du code</h3>
@@ -127,27 +125,16 @@
           </article>
         </div>
       </section>
-      <section class="coverage-note" aria-labelledby="requirements-title">
-        <p class="eyebrow">REQUIREMENTS TRACEABILITY</p>
-        <h2 id="requirements-title">Exigences et traçabilité</h2>
-        <div class="requirements-summary">
-          <span>User Stories <strong id="requirements-us">—</strong></span
-          ><span>Acceptance Criteria <strong id="requirements-ac">—</strong></span
-          ><span>Requirement Tests <strong id="requirements-validation">—</strong></span
-          ><span>Characterization <strong id="requirements-characterization">—</strong></span
-          ><span>Untraced <strong id="requirements-untraced">—</strong></span>
-        </div>
-      </section>
       <section class="coverage-note" aria-labelledby="coverage-note-title">
         <p class="eyebrow">À PROPOS DE LA MÉTRIQUE</p>
         <h2 id="coverage-note-title">Couverture fonctionnelle automatisée</h2>
         <p>
-          Le taux d'automatisation du périmètre fonctionnel défini mesure la proportion des scénarios planifiés
-          disposant d'un test Playwright automatisé.
+          La couverture fonctionnelle mesure la proportion du périmètre fonctionnel défini disposant de tests Playwright
+          automatisés.
         </p>
         <p>
-          Cette métrique correspond à la couverture fonctionnelle automatisée, pas à la couverture du code source de
-          SauceDemo.
+          Cette métrique ne représente ni une couverture exhaustive de toutes les fonctionnalités possibles de
+          SauceDemo, ni une couverture du code source de l'application.
         </p>
         <p id="coverage-sentence" class="coverage-result" aria-live="polite">
           Les données de couverture ne sont pas disponibles.
@@ -155,7 +142,7 @@
       </section>
     </main>
     <footer>
-      <div class="shell"><span>SD · QA Portal</span><span>HTML, CSS &amp; JavaScript natifs</span></div>
+      <div class="shell"><span>SD · Portail QA</span><span>HTML, CSS &amp; JavaScript natifs</span></div>
     </footer>
     <script src="app.js"></script>
   </body>
