@@ -12,8 +12,8 @@ const cards = [
 ];
 q('#kpis').innerHTML = cards
   .map(
-    (card, index) =>
-      `<article class="card" style="--accent:${['var(--lime)', 'var(--cyan)', 'var(--orange)'][index % 3]}"><small>${card[0]}</small><strong>${card[1]}</strong><span>${typeof card[2] === 'number' ? `${fmt(card[2])} %` : card[2]}</span></article>`,
+    (card) =>
+      `<article class="card"><small>${card[0]}</small><strong>${card[1]}</strong><span>${typeof card[2] === 'number' ? `${fmt(card[2])} %` : card[2]}</span></article>`,
   )
   .join('');
 q('#summary').textContent =
@@ -27,7 +27,7 @@ q('#matrix').innerHTML = data.matrix
 q('#types').innerHTML = ['positive', 'negative', 'error']
   .map(
     (type, index) =>
-      `<article class="bar"><span>@${type}</span><strong>${data.tags[type]}</strong><div class="track"><span style="--accent:${['var(--lime)', 'var(--orange)', 'var(--red)'][index]};--width:${(data.tags[type] / data.scenarios.length) * 100}%"></span></div></article>`,
+      `<article class="bar"><span>@${type}</span><strong>${data.tags[type]}</strong><div class="track"><span style="--accent:${['var(--primary)', 'var(--warning)', 'var(--danger)'][index]};--width:${(data.tags[type] / data.scenarios.length) * 100}%"></span></div></article>`,
   )
   .join('');
 q('#suites').innerHTML = [
@@ -63,8 +63,13 @@ function renderScenarios() {
   q(`#${id}`).addEventListener(id === 'search' ? 'input' : 'change', renderScenarios),
 );
 renderScenarios();
+const savedTheme = localStorage.getItem('qa-portal-theme');
+if (savedTheme === 'light' || savedTheme === 'dark') document.documentElement.dataset.theme = savedTheme;
 q('#theme').addEventListener('click', () => {
-  document.documentElement.dataset.theme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+  const currentTheme = document.documentElement.dataset.theme;
+  const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const nextTheme = currentTheme ? (currentTheme === 'dark' ? 'light' : 'dark') : systemDark ? 'light' : 'dark';
+  document.documentElement.dataset.theme = nextTheme;
+  localStorage.setItem('qa-portal-theme', nextTheme);
 });
-q('#print').addEventListener('click', () => window.print());
 q('#generatedAt').textContent = new Date(data.generatedAt).toLocaleString('fr-FR');
