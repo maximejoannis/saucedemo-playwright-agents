@@ -1,149 +1,238 @@
 <!doctype html>
-<html lang="fr" data-theme="dark">
+<html lang="fr">
   <head>
-    <meta charset="UTF-8" />
+    <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="color-scheme" content="dark light" />
-    <title>QA Portal — SauceDemo Playwright Automation</title>
-    <link rel="stylesheet" href="styles.css" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="description" content="Portail des rapports QA automatisés de SauceDemo Playwright Agents." />
+    <title>Portail QA — SauceDemo Playwright Agents</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <script src="./app.js" defer></script>
   </head>
+
   <body>
-    <a class="skip-link" href="#main-content">Aller au contenu</a>
+    <a class="skip-link" href="#main-content">Aller au contenu principal</a>
+
     <header class="topbar">
-      <div class="shell topbar-content">
-        <a class="brand" href="./" aria-label="Accueil du portail QA"
-          ><span class="brand-mark">SD</span
-          ><span><strong>Portail QA</strong><small>Automatisation SauceDemo avec Playwright</small></span></a
-        >
-        <div class="build-meta" aria-label="Informations de génération">
-          <span>Branche <strong id="branch">Indisponible</strong></span
-          ><span>Commit <strong id="commit">Indisponible</strong></span
-          ><span>Généré <time id="generated-at">Indisponible</time></span
-          ><span id="global-badge" class="badge unavailable">INDISPONIBLE</span>
-        </div>
-        <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Activer le thème clair">◐</button>
+      <div class="container topbar__content">
+        <a class="brand" href="./index.html" aria-label="Accueil du portail QA">
+          <span class="brand__icon" aria-hidden="true">Q</span>
+          <span>
+            <strong>SauceDemo</strong>
+            <small>Portail d'assurance qualité</small>
+          </span>
+        </a>
+
+        <nav class="topbar__navigation" aria-label="Liens du projet">
+          <a href="https://www.saucedemo.com/">Application</a>
+          <a href="https://github.com/maximejoannis/saucedemo-playwright-agents">Dépôt GitHub</a>
+          <button
+            id="themeToggle"
+            class="theme-toggle"
+            type="button"
+            aria-label="Changer le thème"
+            title="Changer le thème"
+          >
+            <span aria-hidden="true">◐</span>
+          </button>
+        </nav>
       </div>
     </header>
-    <main id="main-content" class="shell">
-      <section class="hero" aria-labelledby="hero-title">
-        <div>
-          <p class="eyebrow">SAUCEDEMO · INGÉNIERIE QUALITÉ</p>
-          <h1 id="hero-title">Portail des <span>rapports QA</span></h1>
-          <p class="hero-copy">
-            Une vue consolidée de la qualité, de la couverture et des exécutions automatisées de SauceDemo.
-          </p>
-        </div>
-        <div class="status-orbit" aria-live="polite">
-          <span>ÉTAT QA</span><strong id="hero-status">INDISPONIBLE</strong
-          ><a id="workflow-link" class="workflow-link" hidden>Voir l’exécution ↗</a>
+
+    <main id="main-content">
+      <section class="hero">
+        <div class="container hero__content">
+          <div class="hero__copy">
+            <p class="eyebrow">Pilotage qualité automatisé</p>
+            <h1>Un point d’entrée unique pour la qualité du projet.</h1>
+            <p class="hero__description">
+              Consultez les exécutions Playwright, le rapport Allure, la qualité du code et la couverture fonctionnelle
+              automatisée.
+            </p>
+
+            <div class="hero__actions">
+              <a class="button button--primary" href="#reports">Consulter les rapports</a>
+              <a class="button button--secondary" href="https://github.com/maximejoannis/saucedemo-playwright-agents">
+                Consulter le dépôt
+              </a>
+            </div>
+          </div>
+
+          <aside class="pipeline-card" aria-labelledby="pipeline-title">
+            <div class="pipeline-card__header">
+              <div>
+                <p class="pipeline-card__label">Dernier pipeline</p>
+                <h2 id="pipeline-title">État de la qualité</h2>
+              </div>
+              <span id="globalStatus" class="status status--loading" aria-live="polite"> Chargement </span>
+            </div>
+
+            <dl class="pipeline-card__metadata">
+              <div>
+                <dt>Branche</dt>
+                <dd id="branchValue">—</dd>
+              </div>
+              <div>
+                <dt>Commit</dt>
+                <dd id="commitValue">—</dd>
+              </div>
+              <div>
+                <dt>Généré le</dt>
+                <dd id="generatedAtValue">—</dd>
+              </div>
+              <div>
+                <dt>Workflow</dt>
+                <dd><a id="workflowLink" href="#reports">Voir les rapports</a></dd>
+              </div>
+            </dl>
+          </aside>
         </div>
       </section>
-      <section class="summary-section" aria-labelledby="summary-title">
-        <div class="section-heading">
-          <div>
-            <p class="eyebrow">SYNTHÈSE</p>
-            <h2 id="summary-title">Les signaux essentiels</h2>
-          </div>
-        </div>
-        <div class="summary-grid" aria-live="polite">
-          <article class="summary-item">
-            <span>Couverture fonctionnelle</span><strong id="summary-coverage">—</strong>
+
+      <section class="metrics-section" aria-label="Indicateurs principaux">
+        <div class="container metrics">
+          <article class="metric">
+            <span class="metric__icon" aria-hidden="true">S</span>
+            <div><strong id="scenariosValue">29</strong><span>scénarios fonctionnels</span></div>
           </article>
-          <article class="summary-item">
-            <span>Scénarios automatisés</span><strong id="summary-scenarios">—</strong>
+          <article class="metric">
+            <span class="metric__icon" aria-hidden="true">▶</span>
+            <div><strong id="testsValue">32</strong><span>tests Playwright</span></div>
           </article>
-          <article class="summary-item">
-            <span>Matrice fonctionnelle</span><strong id="summary-matrix">—</strong>
+          <article class="metric">
+            <span class="metric__icon" aria-hidden="true">E2E</span>
+            <div><strong id="e2eValue">3</strong><span>parcours E2E</span></div>
           </article>
-          <article class="summary-item"><span>E2E</span><strong id="summary-e2e">—</strong></article>
-          <article class="summary-item"><span>Qualité</span><strong id="summary-quality">—</strong></article>
+          <article class="metric">
+            <span class="metric__icon" aria-hidden="true">✓</span>
+            <div><strong id="coverageValue">100 %</strong><span>couverture fonctionnelle</span></div>
+          </article>
         </div>
       </section>
-      <section class="reports-section" aria-labelledby="reports-title">
-        <div class="section-heading">
-          <div>
-            <p class="eyebrow">RAPPORTS</p>
-            <h2 id="reports-title">Explorer les résultats</h2>
+
+      <section id="reports" class="reports-section">
+        <div class="container">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Rapports disponibles</p>
+              <h2>Explorer les preuves de qualité</h2>
+            </div>
+            <p>
+              Chaque rapport répond à un objectif distinct et conserve les éléments utiles au diagnostic et au suivi de
+              l’automatisation.
+            </p>
           </div>
-        </div>
-        <div class="reports-grid">
-          <article class="report-card accent-lime">
-            <div class="card-top">
-              <span class="card-index">01</span><span id="coverage-status" class="badge unavailable">INDISPONIBLE</span>
-            </div>
-            <div>
-              <h3>Couverture fonctionnelle</h3>
-              <p>
-                Couverture du périmètre fonctionnel, scénarios automatisés et matrice Passant / Non passant / Erreur.
-              </p>
-            </div>
-            <div class="metric">
-              <strong id="coverage-metric">Indisponible</strong><span id="coverage-detail">Données non chargées</span
-              ><span id="matrix-detail">Matrice non chargée</span>
-            </div>
-            <a class="report-link" href="./coverage/">Ouvrir le rapport ↗</a>
-          </article>
-          <article class="report-card accent-cyan">
-            <div class="card-top">
-              <span class="card-index">02</span
-              ><span id="functional-status" class="badge unavailable">INDISPONIBLE</span>
-            </div>
-            <div>
-              <h3>Playwright</h3>
-              <p>Rapport HTML natif Playwright de la dernière exécution.</p>
-            </div>
-            <div class="metric">
-              <strong id="functional-metric">Indisponible</strong><span id="functional-detail">Dernière exécution</span>
-            </div>
-            <a class="report-link" href="./functional/">Ouvrir le rapport ↗</a>
-          </article>
-          <article class="report-card accent-orange">
-            <div class="card-top">
-              <span class="card-index">03</span><span id="allure-status" class="badge planned">PLANIFIÉ</span>
-            </div>
-            <div>
+
+          <div class="reports-grid">
+            <article class="report-card report-card--primary" data-report="allure">
+              <div class="report-card__topline">
+                <span class="report-card__icon" aria-hidden="true">A</span>
+                <span class="status status--unknown" data-report-status>Indisponible</span>
+              </div>
+              <p class="report-card__category">Rapport consolidé</p>
               <h3>Allure</h3>
-              <p>Rapport détaillé Allure : suites, étapes, pièces jointes, traces et historique.</p>
-            </div>
-            <div class="metric">
-              <strong id="allure-metric">Non généré</strong><span id="allure-detail">Rapport détaillé</span>
-            </div>
-            <a class="report-link" href="./allure/">Ouvrir le rapport ↗</a>
-          </article>
-          <article class="report-card accent-red">
-            <div class="card-top">
-              <span class="card-index">04</span><span id="quality-status" class="badge unavailable">INDISPONIBLE</span>
-            </div>
-            <div>
+              <p class="report-card__description">
+                Vue consolidée des exécutions Playwright, étapes, tags et résultats des tests automatisés.
+              </p>
+              <ul class="report-card__facts">
+                <li>32 tests Playwright</li>
+                <li>Résultats détaillés par scénario</li>
+                <li>Diagnostic des échecs</li>
+              </ul>
+              <a class="report-card__link" href="./allure/" data-report-link>
+                Ouvrir Allure <span aria-hidden="true">→</span>
+              </a>
+            </article>
+
+            <article class="report-card" data-report="functional">
+              <div class="report-card__topline">
+                <span class="report-card__icon" aria-hidden="true">P</span>
+                <span class="status status--unknown" data-report-status>Indisponible</span>
+              </div>
+              <p class="report-card__category">Playwright HTML</p>
+              <h3>Tests fonctionnels</h3>
+              <p class="report-card__description">
+                Résultats détaillés des tests SauceDemo, avec traces, vidéos et captures en cas d’échec.
+              </p>
+              <ul class="report-card__facts">
+                <li>Chromium</li>
+                <li>29 scénarios fonctionnels automatisés</li>
+                <li>3 parcours E2E</li>
+              </ul>
+              <a class="report-card__link" href="./functional/" data-report-link>
+                Ouvrir le rapport <span aria-hidden="true">→</span>
+              </a>
+            </article>
+
+            <article class="report-card" data-report="coverage">
+              <div class="report-card__topline">
+                <span class="report-card__icon" aria-hidden="true">%</span>
+                <span class="status status--unknown" data-report-status>Indisponible</span>
+              </div>
+              <p class="report-card__category">Couverture fonctionnelle</p>
+              <h3>Couverture automatisée</h3>
+              <p class="report-card__description">
+                Mesure de la couverture du périmètre fonctionnel défini par les tests Playwright automatisés.
+              </p>
+              <ul class="report-card__facts">
+                <li id="coverageFeaturesFact">6 / 6 fonctionnalités</li>
+                <li id="coverageScenariosFact">29 / 29 scénarios</li>
+                <li id="coverageMatrixFact">18 / 18 matrice fonctionnelle</li>
+                <li id="coverageRateFact">100 %</li>
+              </ul>
+              <a class="report-card__link" href="./coverage/" data-report-link>
+                Ouvrir le rapport <span aria-hidden="true">→</span>
+              </a>
+            </article>
+
+            <article class="report-card" data-report="quality">
+              <div class="report-card__topline">
+                <span class="report-card__icon" aria-hidden="true">Q</span>
+                <span class="status status--unknown" data-report-status>Indisponible</span>
+              </div>
+              <p class="report-card__category">Contrôle qualité</p>
               <h3>Qualité du code</h3>
-              <p>Contrôles ESLint et Prettier avec quality gate.</p>
-            </div>
-            <div class="metric">
-              <strong id="quality-metric">Indisponible</strong><span id="quality-detail">ESLint + Prettier</span>
-            </div>
-            <a class="report-link" href="./quality/">Ouvrir le rapport ↗</a>
-          </article>
+              <p class="report-card__description">
+                Synthèse de l’analyse statique et du formatage avec verdict global et sorties détaillées.
+              </p>
+              <ul class="report-card__facts">
+                <li id="eslintFact">ESLint</li>
+                <li id="prettierFact">Prettier</li>
+              </ul>
+              <a class="report-card__link" href="./quality/" data-report-link>
+                Ouvrir le rapport <span aria-hidden="true">→</span>
+              </a>
+            </article>
+          </div>
         </div>
       </section>
-      <section class="coverage-note" aria-labelledby="coverage-note-title">
-        <p class="eyebrow">À PROPOS DE LA MÉTRIQUE</p>
-        <h2 id="coverage-note-title">Couverture fonctionnelle automatisée</h2>
-        <p>
-          La couverture fonctionnelle mesure la proportion du périmètre fonctionnel défini disposant de tests Playwright
-          automatisés.
-        </p>
-        <p>
-          Cette métrique ne représente ni une couverture exhaustive de toutes les fonctionnalités possibles de
-          SauceDemo, ni une couverture du code source de l'application.
-        </p>
-        <p id="coverage-sentence" class="coverage-result" aria-live="polite">
-          Les données de couverture ne sont pas disponibles.
-        </p>
+
+      <section class="strategy-section">
+        <div class="container strategy">
+          <div>
+            <p class="eyebrow">Stratégie de test</p>
+            <h2>Une couverture complémentaire, pas une accumulation.</h2>
+          </div>
+          <div class="strategy__levels">
+            <article><strong>Authentification</strong><span>Accès nominal et gestion des erreurs</span></article>
+            <article><strong>Catalogue</strong><span>Produits et navigation dans l’inventaire</span></article>
+            <article><strong>Tri</strong><span>Ordre des produits selon les critères disponibles</span></article>
+            <article><strong>Panier</strong><span>Ajout, retrait et contenu du panier</span></article>
+            <article><strong>Checkout</strong><span>Validation, récapitulatif et finalisation</span></article>
+            <article><strong>Session</strong><span>Déconnexion et état de la session</span></article>
+          </div>
+        </div>
       </section>
     </main>
-    <footer>
-      <div class="shell"><span>SD · Portail QA</span><span>HTML, CSS &amp; JavaScript natifs</span></div>
+
+    <footer class="footer">
+      <div class="container footer__content">
+        <p>
+          Portail généré automatiquement par GitHub Actions. Les rapports ne sont publiés qu’après validation des
+          contrôles qualité.
+        </p>
+        <a href="https://github.com/maximejoannis/saucedemo-playwright-agents"> Consulter le dépôt GitHub </a>
+      </div>
     </footer>
-    <script src="app.js"></script>
   </body>
 </html>

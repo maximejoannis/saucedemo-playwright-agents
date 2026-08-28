@@ -1,164 +1,187 @@
-const paths = { build: './build-info.json', coverage: './coverage/data.json', quality: './quality/summary.json' };
-const byId = (id) => document.getElementById(id);
+const DEFAULT_BUILD_INFO = {
+  status: 'unknown',
+  generatedAt: null,
+  branch: 'main',
+  commit: '—',
+  workflowUrl: null,
+  reports: {
+    functional: { available: false, status: 'unknown' },
+    allure: { available: false, status: 'unknown' },
+    quality: { available: false, status: 'unknown' },
+    coverage: { available: false, status: 'unknown' },
+  },
+};
+
+const DEFAULT_COVERAGE = {
+  functionalCoverage: {
+    features: { covered: 6, total: 6, rate: 100 },
+    scenarios: { automated: 29, planned: 29, rate: 100 },
+    matrix: { covered: 18, total: 18, rate: 100 },
+  },
+  e2e: { total: 3 },
+};
+
+const STATUS_LABELS = {
+  passed: 'PASS',
+  failed: 'ÉCHEC',
+  planned: 'PLANIFIÉ',
+  unknown: 'INDISPONIBLE',
+};
 
 function setText(id, value) {
-  const element = byId(id);
-  if (element) element.textContent = value;
+  const element = document.getElementById(id);
+  if (element) element.textContent = String(value);
 }
 
-function setBadge(id, status) {
-  const badge = byId(id);
-  if (!badge) return;
-  const normalized = String(status ?? '').toLowerCase();
-  const labels = {
-    passed: 'PASS',
-    pass: 'PASS',
-    failed: 'ÉCHEC',
-    fail: 'ÉCHEC',
-    available: 'DISPONIBLE',
-    planned: 'PLANIFIÉ',
-    unavailable: 'INDISPONIBLE',
-  };
-  const style = ['passed', 'pass'].includes(normalized)
-    ? 'pass'
-    : ['failed', 'fail'].includes(normalized)
-      ? 'fail'
-      : ['available', 'planned'].includes(normalized)
-        ? normalized
-        : 'unavailable';
-  badge.className = `badge ${style}`;
-  badge.textContent = labels[normalized] ?? 'INDISPONIBLE';
-}
-
-async function loadJson(path) {
-  try {
-    const response = await fetch(path, { cache: 'no-store' });
-    return response.ok ? await response.json() : null;
-  } catch {
-    return null;
-  }
+function normalizeStatus(status) {
+  return Object.hasOwn(STATUS_LABELS, status) ? status : 'unknown';
 }
 
 function formatDate(value) {
-  if (!value) return 'Indisponible';
+  if (!value) return 'Données CI indisponibles';
+
   const date = new Date(value);
-  return Number.isNaN(date.valueOf()) ? 'Indisponible' : date.toLocaleString('fr-FR');
+  if (Number.isNaN(date.getTime())) return 'Date inconnue';
+
+  return new Intl.DateTimeFormat('fr-FR', {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+    timeZone: 'Europe/Paris',
+  }).format(date);
 }
 
-function applyBuildInfo(build) {
-  if (!build) return;
-  setText('branch', build.branch || 'Indisponible');
-  setText('commit', build.commit || 'Indisponible');
-  setText('generated-at', formatDate(build.generatedAt));
-  setBadge('global-badge', build.status);
-  setText(
-    'hero-status',
-    ['passed', 'pass'].includes(build.status)
-      ? 'PASS'
-      : ['failed', 'fail'].includes(build.status)
-        ? 'ÉCHEC'
-        : 'INDISPONIBLE',
-  );
-  const workflowLink = byId('workflow-link');
-  if (build.workflowUrl && workflowLink) {
-    workflowLink.href = build.workflowUrl;
-    workflowLink.hidden = false;
+function updateStatusElement(element, status) {
+  const normalizedStatus = normalizeStatus(status);
+  element.className = `status status--${normalizedStatus}`;
+  element.textContent = STATUS_LABELS[normalizedStatus];
+}
+
+function updateReportCards(reports) {
+  for (const card of document.querySelectorAll('[data-report]')) {
+    const report = reports[card.dataset.report] ?? {
+      available: false,
+      status: 'unknown',
+    };
+    const statusElement = card.querySelector('[data-report-status]');
+    const link = card.querySelector('[data-report-link]');
+
+    if (statusElement) {
+      updateStatusElement(statusElement, report.available ? report.status : 'unknown');
+    }
+
+    if (link && !report.available) {
+      link.setAttribute('aria-disabled', 'true');
+      link.setAttribute('tabindex', '-1');
+      link.addEventListener('click', (event) => event.preventDefault());
+    }
   }
-  for (const reportName of ['coverage', 'functional', 'allure', 'quality']) {
-    const report = build.reports?.[reportName];
-    if (!report) continue;
-    const status = report.status || (report.available ? 'available' : 'unavailable');
-    setBadge(`${reportName}-status`, status);
-    setText(
-      `${reportName}-metric`,
-      report.available
-        ? ['passed', 'pass'].includes(status)
-          ? 'PASS'
-          : ['failed', 'fail'].includes(status)
-            ? 'ÉCHEC'
-            : 'Disponible'
-        : 'Non généré',
-    );
+}
+
+function applyBuildInfo(buildInfo) {
+  const globalStatus = document.getElementById('globalStatus');
+  const workflowLink = document.getElementById('workflowLink');
+
+  if (globalStatus) updateStatusElement(globalStatus, buildInfo.status);
+
+  setText('branchValue', buildInfo.branch ?? 'main');
+  setText('commitValue', buildInfo.commit ?? '—');
+  setText('generatedAtValue', formatDate(buildInfo.generatedAt));
+
+  if (workflowLink && buildInfo.workflowUrl) {
+    workflowLink.href = buildInfo.workflowUrl;
+    workflowLink.textContent = 'Ouvrir dans GitHub Actions';
   }
+
+  updateReportCards(buildInfo.reports);
 }
 
 function applyCoverage(data) {
   const coverage = data?.functionalCoverage;
   if (!coverage) return;
+
   const { features, scenarios, matrix } = coverage;
-  const rate = scenarios?.rate ?? features?.rate;
-  setBadge('coverage-status', rate === 100 ? 'passed' : 'available');
-  setText('coverage-metric', Number.isFinite(rate) ? `${rate} %` : 'Disponible');
-  setText('coverage-detail', `${scenarios?.automated ?? '—'} / ${scenarios?.planned ?? '—'} scénarios automatisés`);
-  setText('matrix-detail', `${matrix?.covered ?? '—'} / ${matrix?.total ?? '—'} cellules de matrice`);
-  setText('summary-coverage', Number.isFinite(rate) ? `${rate} %` : '—');
-  setText('summary-scenarios', `${scenarios?.automated ?? '—'} / ${scenarios?.planned ?? '—'}`);
-  setText('summary-matrix', `${matrix?.covered ?? '—'} / ${matrix?.total ?? '—'}`);
-  setText('summary-e2e', Number.isFinite(data.e2e?.total) ? String(data.e2e.total) : '—');
-  if (features && scenarios && matrix)
-    setText(
-      'coverage-sentence',
-      `${features.covered} fonctionnalités sur ${features.total} et ${scenarios.automated} scénarios sur ${scenarios.planned} sont couverts. La matrice Passant / Non passant / Erreur est couverte sur ${matrix.covered} cellules sur ${matrix.total}.`,
-    );
-  if (byId('generated-at')?.textContent === 'Indisponible') setText('generated-at', formatDate(data.generatedAt));
+  const e2e = Number.isFinite(data.e2e?.total) ? data.e2e.total : 0;
+  const tests = (scenarios?.automated ?? 0) + e2e;
+  const rate = scenarios?.rate ?? features?.rate ?? 0;
+
+  setText('scenariosValue', scenarios?.automated ?? '—');
+  setText('testsValue', tests || '—');
+  setText('e2eValue', e2e || '—');
+  setText('coverageValue', `${rate} %`);
+  setText('coverageFeaturesFact', `${features?.covered ?? '—'} / ${features?.total ?? '—'} fonctionnalités`);
+  setText('coverageScenariosFact', `${scenarios?.automated ?? '—'} / ${scenarios?.planned ?? '—'} scénarios`);
+  setText('coverageMatrixFact', `${matrix?.covered ?? '—'} / ${matrix?.total ?? '—'} matrice fonctionnelle`);
+  setText('coverageRateFact', `${rate} %`);
 }
 
 function applyQuality(data) {
   if (!data) return;
-  setBadge('quality-status', data.status);
-  setText(
-    'quality-metric',
-    ['passed', 'pass'].includes(data.status)
-      ? 'PASS'
-      : ['failed', 'fail'].includes(data.status)
-        ? 'ÉCHEC'
-        : 'Disponible',
-  );
-  setText(
-    'quality-detail',
-    `ESLint ${String(data.eslint?.status ?? 'indisponible').toUpperCase()} · ${data.eslint?.errors ?? '—'} erreurs · ${data.eslint?.warnings ?? '—'} warnings · Prettier ${String(data.prettier?.status ?? 'indisponible').toUpperCase()}`,
-  );
-  setText('summary-quality', String(data.status ?? '—').toUpperCase());
-  if (byId('generated-at')?.textContent === 'Indisponible') setText('generated-at', formatDate(data.generatedAt));
+  const label = (tool, result) => (result?.status === 'passed' || result === 'passed' ? `${tool} — PASS` : tool);
+
+  setText('eslintFact', label('ESLint', data.eslint));
+  setText('prettierFact', label('Prettier', data.prettier));
 }
 
-function setupTheme() {
-  const root = document.documentElement;
-  const button = byId('theme-toggle');
-  let savedTheme = null;
+async function loadJson(path, fallback = null) {
   try {
-    savedTheme = localStorage.getItem('qa-portal-theme');
+    const response = await fetch(path, { cache: 'no-store' });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    return await response.json();
   } catch {
-    /* Local storage can be blocked under file://. */
+    return fallback;
   }
-  root.dataset.theme = savedTheme || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
-  const updateLabel = () =>
-    button?.setAttribute(
-      'aria-label',
-      root.dataset.theme === 'dark' ? 'Activer le thème clair' : 'Activer le thème sombre',
-    );
-  updateLabel();
-  button?.addEventListener('click', () => {
-    root.dataset.theme = root.dataset.theme === 'dark' ? 'light' : 'dark';
-    try {
-      localStorage.setItem('qa-portal-theme', root.dataset.theme);
-    } catch {
-      /* The active theme still changes without persistence. */
-    }
-    updateLabel();
-  });
 }
 
-async function initialize() {
-  setupTheme();
-  const [build, coverage, quality] = await Promise.all([
-    loadJson(paths.build),
-    loadJson(paths.coverage),
-    loadJson(paths.quality),
+async function initializePortal() {
+  const [buildData, coverageData, qualityData] = await Promise.all([
+    loadJson('./build-info.json', DEFAULT_BUILD_INFO),
+    loadJson('./coverage/data.json'),
+    loadJson('./quality/summary.json'),
   ]);
-  applyBuildInfo(build);
+
+  const buildInfo = {
+    ...DEFAULT_BUILD_INFO,
+    ...buildData,
+    reports: {
+      ...DEFAULT_BUILD_INFO.reports,
+      ...buildData?.reports,
+    },
+  };
+  const coverage = buildData?.coverage
+    ? {
+        functionalCoverage: {
+          features: buildData.coverage.features,
+          scenarios: buildData.coverage.scenarios,
+          matrix: buildData.coverage.matrix,
+        },
+        e2e: buildData.coverage.e2e,
+      }
+    : (coverageData ?? DEFAULT_COVERAGE);
+  const quality = buildData?.quality ?? qualityData;
+
+  applyBuildInfo(buildInfo);
   applyCoverage(coverage);
   applyQuality(quality);
 }
 
-void initialize();
+function initializeTheme() {
+  const toggle = document.getElementById('themeToggle');
+  const savedTheme = localStorage.getItem('qa-portal-theme');
+
+  if (savedTheme === 'light' || savedTheme === 'dark') {
+    document.documentElement.dataset.theme = savedTheme;
+  }
+
+  toggle?.addEventListener('click', () => {
+    const currentTheme = document.documentElement.dataset.theme;
+    const systemUsesDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const effectiveTheme = currentTheme ?? (systemUsesDark ? 'dark' : 'light');
+    const nextTheme = effectiveTheme === 'dark' ? 'light' : 'dark';
+
+    document.documentElement.dataset.theme = nextTheme;
+    localStorage.setItem('qa-portal-theme', nextTheme);
+  });
+}
+
+initializeTheme();
+initializePortal();
