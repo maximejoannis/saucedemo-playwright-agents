@@ -15,25 +15,29 @@ export class LoginPage {
     this.errorMessage = page.getByTestId('error');
   }
 
-  async goto() {
+  async goto(): Promise<void> {
     await this.page.goto('/');
   }
 
-  async fillUsername(username: string) {
+  async fillUsername(username: string): Promise<void> {
     await this.usernameInput.fill(username);
   }
 
-  async fillPassword(password: string) {
+  async fillPassword(password: string): Promise<void> {
     await this.passwordInput.fill(password);
   }
 
-  async submit() {
+  async submit(): Promise<void> {
     await this.loginButton.click();
   }
 
-  async login(username: string, password: string) {
+  async login(username: string, password: string): Promise<void> {
     await this.fillUsername(username);
     await this.fillPassword(password);
     await this.submit();
+  }
+
+  async getErrorMessage(): Promise<string> {
+    return this.errorMessage.innerText();
   }
 }

@@ -1,7 +1,7 @@
 # SauceDemo Playwright Agents
 
 [![QA Portal](https://img.shields.io/badge/QA%20Portal-GitHub%20Pages-c7ff4a?logo=github&logoColor=black)](https://maximejoannis.github.io/saucedemo-playwright-agents/)
-[![Playwright QA](https://github.com/maximejoannis/saucedemo-playwright-agents/actions/workflows/playwright.yml/badge.svg)](https://github.com/maximejoannis/saucedemo-playwright-agents/actions/workflows/playwright.yml)
+[![QA Pipeline](https://github.com/maximejoannis/saucedemo-playwright-agents/actions/workflows/qa.yml/badge.svg)](https://github.com/maximejoannis/saucedemo-playwright-agents/actions/workflows/qa.yml)
 ![Playwright](https://img.shields.io/badge/Playwright-1.62-45ba4b?logo=playwright&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-6.x-3178C6?logo=typescript&logoColor=white)
 ![Node.js](https://img.shields.io/badge/Node.js-24-339933?logo=nodedotjs&logoColor=white)
@@ -281,7 +281,7 @@ Le portail QA centralise les résultats de l'automatisation :
 │
 ├── .github/
 │   └── workflows/
-│       └── playwright.yml
+│       └── qa.yml
 │
 ├── prompts/
 │   └── ...
@@ -736,7 +736,7 @@ sans framework frontend.
 Le workflow principal est :
 
 ```text
-.github/workflows/playwright.yml
+.github/workflows/qa.yml
 ```
 
 Il est déclenché sur :
@@ -747,51 +747,35 @@ pull_request vers main
 workflow_dispatch
 ```
 
-Le pipeline est organisé autour de trois jobs :
+Le pipeline est organisé autour de deux jobs :
 
 ```text
-validate
+qa
 deploy
-quality-gate
 ```
 
-### Validate
+### QA
 
 Ce job :
 
 ```text
 installe Node.js
-installe Java pour Allure
-installe les dépendances npm
-génère le rapport qualité
-génère la couverture fonctionnelle
-installe Chromium
-exécute Playwright
+installe Node.js 24 et Java 17
+installe les dépendances avec npm ci
+installe Chromium et ses dépendances Linux
+exécute le Quality Gate
+exécute les 36 tests Playwright
+génère la couverture QA
 génère Allure
-valide les rapports
-publie les artefacts QA
 prépare le site GitHub Pages
+valide et conserve les artefacts QA
 ```
 
 ### Deploy
 
-Publie le portail QA sur GitHub Pages pour les exécutions hors Pull Request.
+Publie le portail QA sur GitHub Pages uniquement après un `push` réussi sur `main`. Les Pull Requests et les lancements manuels exécutent les validations et assemblent le portail sans le déployer.
 
-### Quality Gate
-
-Vérifie le statut final de :
-
-```text
-quality
-coverage
-functional
-allure
-deploy
-```
-
-Le workflow peut continuer à générer les rapports même si une étape fonctionnelle échoue, afin de conserver les éléments nécessaires au diagnostic.
-
-Le quality gate porte ensuite le verdict final du pipeline.
+Une validation en échec bloque le déploiement. Les résultats Playwright et Allure disponibles sont néanmoins téléversés pour faciliter le diagnostic.
 
 ---
 
@@ -826,10 +810,10 @@ quality-report/
 coverage-report/
 ```
 
-dans un artefact consolidé :
+dans un artefact de diagnostic :
 
 ```text
-qa-reports
+qa-artifacts-<run-id>-<attempt>
 ```
 
 avec une rétention de 30 jours.
@@ -842,7 +826,7 @@ Lors d’une exécution sur `main`, le workflow construit une arborescence du ty
 
 ```text
 /
-├── functional/
+├── playwright/
 ├── allure/
 ├── quality/
 └── coverage/
@@ -850,23 +834,7 @@ Lors d’une exécution sur `main`, le workflow construit une arborescence du ty
 
 Le portail QA est placé à la racine.
 
-Un fichier :
-
-```text
-build-info.json
-```
-
-est également généré dynamiquement avec :
-
-- statut global ;
-- branche ;
-- commit ;
-- lien vers le workflow ;
-- disponibilité des rapports ;
-- métriques de couverture ;
-- métriques qualité.
-
-Aucune métrique métier n’est codée statiquement dans le workflow.
+Les liens du portail restent relatifs afin de fonctionner sur GitHub Pages sans URL de dépôt codée en dur.
 
 ---
 

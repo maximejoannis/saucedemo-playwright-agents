@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>Quality Gate — SauceDemo</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="container">
+      <header class="hero">
+        <p class="eyebrow">SauceDemo · Assurance qualité</p>
+        <h1>QUALITY GATE</h1>
+        <div id="global-status" class="verdict" aria-live="polite">Chargement…</div>
+        <p id="generated-at" class="metadata"></p>
+      </header>
+      <section aria-labelledby="checks-title">
+        <h2 id="checks-title">Contrôles techniques</h2>
+        <div id="checks" class="checks"></div>
+      </section>
+      <noscript>JavaScript doit être activé pour afficher ce rapport.</noscript>
+    </main>
+    <script src="quality-data.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>

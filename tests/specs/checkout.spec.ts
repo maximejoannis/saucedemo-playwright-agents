@@ -1,189 +1,156 @@
-// spec: tests/specs/plan-tests-fonctionnels-saucedemo.md
-
+import type { Page } from '@playwright/test';
 import { test, expect } from '../fixtures/test-fixtures';
-import { type Page } from '@playwright/test';
-import { InventoryPage } from '../pages/inventory.page';
 import { CartPage } from '../pages/cart.page';
 import { CheckoutPage } from '../pages/checkout.page';
+import { InventoryPage } from '../pages/inventory.page';
+import { LoginPage } from '../pages/login.page';
+import { productNames } from '../test-data/products';
+import { sauceDemoUsers } from '../test-data/users';
 
-const productName = 'Sauce Labs Backpack';
+const customer = { firstName: 'Jean', lastName: 'Dupont', postalCode: '75001' };
 
-async function openCheckout(authenticatedPage: Page) {
-  const inventoryPage = new InventoryPage(authenticatedPage);
-  const cartPage = new CartPage(authenticatedPage);
-
-  await inventoryPage.addProductByName(productName);
-  await inventoryPage.openCart();
-  await cartPage.checkout();
-
-  return { inventoryPage, cartPage, checkoutPage: new CheckoutPage(authenticatedPage) };
+async function openCheckout(page: Page, products: readonly string[] = []) {
+  const inventory = new InventoryPage(page);
+  const cart = new CartPage(page);
+  for (const product of products) await inventory.addProductByName(product);
+  await inventory.openCart();
+  await cart.checkout();
 }
 
 test.describe('Checkout', () => {
-  test('TC-CHK-01 @positive @smoke @regression @checkout - Accès au checkout depuis le panier', async ({
-    authenticatedPage,
+  // US-05
+  // AC-CHK-01
+  // TC-CHK-01
+  test('TC-CHK-01 @positive @smoke @regression @checkout - finalisation d’une commande nominale', async ({
+    authenticatedPage: page,
   }) => {
-    const inventoryPage = new InventoryPage(authenticatedPage);
-    const cartPage = new CartPage(authenticatedPage);
-    const checkoutPage = new CheckoutPage(authenticatedPage);
-
-    await inventoryPage.addProductByName(productName);
-
-    // 1. Ouvrir le panier.
-    await inventoryPage.openCart();
-
-    // 2. Cliquer sur Checkout.
-    await cartPage.checkout();
-
-    await expect(authenticatedPage).toHaveURL(/\/checkout-step-one\.html$/);
-    await expect(checkoutPage.title).toHaveText('Checkout: Your Information');
-    await expect(checkoutPage.firstNameInput).toBeVisible();
-    await expect(checkoutPage.lastNameInput).toBeVisible();
-    await expect(checkoutPage.postalCodeInput).toBeVisible();
-    await expect(checkoutPage.cancelButton).toBeVisible();
-    await expect(checkoutPage.continueButton).toBeVisible();
-    await expect(checkoutPage.cartBadge).toHaveText('1');
+    const checkout = new CheckoutPage(page);
+    // 1. Ouvrir Cart et Checkout. 2. Saisir les trois informations. 3. Continuer.
+    await openCheckout(page, ['Sauce Labs Backpack']);
+    await checkout.fillCustomerInformation(customer.firstName, customer.lastName, customer.postalCode);
+    await checkout.continue();
+    // 4. Vérifier l’article. 5. Choisir Finish.
+    await expect(checkout.itemByName('Sauce Labs Backpack')).toBeVisible();
+    await checkout.finish();
+    await expect(page).toHaveURL(/checkout-complete\.html$/);
+    await expect(checkout.title).toHaveText('Checkout: Complete!');
+    await expect(checkout.confirmationMessage).toHaveText('Thank you for your order!');
+    await expect(checkout.backHomeButton).toBeVisible();
   });
 
-  test('TC-CHK-02 @error @negative @regression @checkout - First Name obligatoire', async ({ authenticatedPage }) => {
-    const { checkoutPage } = await openCheckout(authenticatedPage);
-
-    // 1. Laisser First Name vide.
-    await checkoutPage.firstNameInput.fill('');
-
-    // 2. Saisir `Dupont` dans Last Name.
-    await checkoutPage.lastNameInput.fill('Dupont');
-
-    // 3. Saisir `75001` dans Zip/Postal Code.
-    await checkoutPage.postalCodeInput.fill('75001');
-
-    // 4. Cliquer sur Continue.
-    await checkoutPage.continue();
-
-    await expect(checkoutPage.errorMessage).toHaveText('Error: First Name is required');
-    await expect(authenticatedPage).toHaveURL(/\/checkout-step-one\.html$/);
-    await expect(checkoutPage.title).toHaveText('Checkout: Your Information');
-  });
-
-  test('TC-CHK-03 @error @negative @regression @checkout - Last Name obligatoire', async ({ authenticatedPage }) => {
-    const { checkoutPage } = await openCheckout(authenticatedPage);
-
-    // 1. Saisir `Jean` dans First Name.
-    await checkoutPage.firstNameInput.fill('Jean');
-
-    // 2. Laisser Last Name vide.
-    await checkoutPage.lastNameInput.fill('');
-
-    // 3. Saisir `75001` dans Zip/Postal Code.
-    await checkoutPage.postalCodeInput.fill('75001');
-
-    // 4. Cliquer sur Continue.
-    await checkoutPage.continue();
-
-    await expect(checkoutPage.errorMessage).toHaveText('Error: Last Name is required');
-    await expect(authenticatedPage).toHaveURL(/\/checkout-step-one\.html$/);
-    await expect(checkoutPage.title).toHaveText('Checkout: Your Information');
-  });
-
-  test('TC-CHK-04 @error @negative @regression @checkout - Postal Code obligatoire', async ({ authenticatedPage }) => {
-    const { checkoutPage } = await openCheckout(authenticatedPage);
-
-    // 1. Saisir `Jean` dans First Name.
-    await checkoutPage.firstNameInput.fill('Jean');
-
-    // 2. Saisir `Dupont` dans Last Name.
-    await checkoutPage.lastNameInput.fill('Dupont');
-
-    // 3. Laisser Zip/Postal Code vide.
-    await checkoutPage.postalCodeInput.fill('');
-
-    // 4. Cliquer sur Continue.
-    await checkoutPage.continue();
-
-    await expect(checkoutPage.errorMessage).toHaveText('Error: Postal Code is required');
-    await expect(authenticatedPage).toHaveURL(/\/checkout-step-one\.html$/);
-    await expect(checkoutPage.title).toHaveText('Checkout: Your Information');
-  });
-
-  test('TC-CHK-05 @positive @smoke @regression @checkout - Cohérence du récapitulatif', async ({
-    authenticatedPage,
+  // US-05
+  // AC-CHK-02
+  // TC-CHK-02
+  test('TC-CHK-02 @positive @regression @checkout - exactitude du récapitulatif financier', async ({
+    authenticatedPage: page,
   }) => {
-    const { checkoutPage } = await openCheckout(authenticatedPage);
-    await checkoutPage.fillCustomerInformation('Jean', 'Dupont', '75001');
-
-    // 1. Cliquer sur Continue.
-    await checkoutPage.continue();
-
-    await expect(authenticatedPage).toHaveURL(/\/checkout-step-two\.html$/);
-    await expect(checkoutPage.title).toHaveText('Checkout: Overview');
-
-    // 2. Vérifier la ligne produit, les informations de paiement et de livraison.
-    const backpack = checkoutPage.itemByName(productName);
-    await expect(backpack.getByTestId('inventory-item-name')).toHaveText(productName);
-    await expect(backpack.getByTestId('item-quantity')).toHaveText('1');
-    await expect(backpack.getByTestId('inventory-item-price')).toHaveText('$29.99');
-    await expect(checkoutPage.paymentInformation).toHaveText('SauceCard #31337');
-    await expect(checkoutPage.shippingInformation).toHaveText('Free Pony Express Delivery!');
-
-    // 3. Vérifier tous les montants.
-    await expect(checkoutPage.subtotal).toHaveText('Item total: $29.99');
-    await expect(checkoutPage.tax).toHaveText('Tax: $2.40');
-    await expect(checkoutPage.total).toHaveText('Total: $32.39');
-    await expect(checkoutPage.cancelButton).toBeVisible();
-    await expect(checkoutPage.finishButton).toBeVisible();
+    const checkout = new CheckoutPage(page);
+    // 1. Accéder au checkout. 2. Renseigner les informations. 3. Continuer.
+    await openCheckout(page, productNames);
+    await checkout.fillCustomerInformation(customer.firstName, customer.lastName, customer.postalCode);
+    await checkout.continue();
+    // 4. Additionner les prix et comparer sous-total, taxe et total.
+    const amounts = await checkout.items.getByTestId('inventory-item-price').allTextContents();
+    const sum = amounts.reduce((total, value) => total + Number(value.replace('$', '')), 0);
+    expect(sum).toBe(129.94);
+    await expect(checkout.subtotal).toHaveText('Item total: $129.94');
+    await expect(checkout.tax).toHaveText('Tax: $10.40');
+    await expect(checkout.total).toHaveText('Total: $140.34');
+    expect(sum + 10.4).toBe(140.34);
   });
 
-  test('TC-CHK-06 @positive @smoke @regression @checkout - Finalisation d’une commande', async ({
-    authenticatedPage,
+  // US-05
+  // AC-CHK-03
+  // TC-CHK-03
+  test('TC-CHK-03 @error @regression @checkout - prénom obligatoire', async ({ authenticatedPage: page }) => {
+    const checkout = new CheckoutPage(page);
+    await openCheckout(page);
+    // 1. Choisir Continue sans saisie.
+    await checkout.continue();
+    await expect(checkout.errorMessage).toHaveText('Error: First Name is required');
+    await expect(page).toHaveURL(/checkout-step-one\.html$/);
+  });
+
+  // US-05
+  // AC-CHK-04
+  // TC-CHK-04
+  test('TC-CHK-04 @error @regression @checkout - nom obligatoire', async ({ authenticatedPage: page }) => {
+    const checkout = new CheckoutPage(page);
+    await openCheckout(page);
+    // 1. Saisir Jean. 2. Choisir Continue.
+    await checkout.firstNameInput.fill('Jean');
+    await checkout.continue();
+    await expect(checkout.errorMessage).toHaveText('Error: Last Name is required');
+    await expect(page).toHaveURL(/checkout-step-one\.html$/);
+  });
+
+  // US-05
+  // AC-CHK-05
+  // TC-CHK-05
+  test('TC-CHK-05 @error @regression @checkout - code postal obligatoire', async ({ authenticatedPage: page }) => {
+    const checkout = new CheckoutPage(page);
+    await openCheckout(page);
+    // 1. Saisir prénom et nom. 2. Choisir Continue.
+    await checkout.firstNameInput.fill('Jean');
+    await checkout.lastNameInput.fill('Dupont');
+    await checkout.continue();
+    await expect(checkout.errorMessage).toHaveText('Error: Postal Code is required');
+    await expect(page).toHaveURL(/checkout-step-one\.html$/);
+  });
+
+  // US-05
+  // AC-CHK-06
+  // TC-CHK-06
+  test('TC-CHK-06 @negative @regression @checkout - commande finalisée avec panier vide', async ({
+    authenticatedPage: page,
   }) => {
-    const { checkoutPage } = await openCheckout(authenticatedPage);
-    await checkoutPage.fillCustomerInformation('Jean', 'Dupont', '75001');
-    await checkoutPage.continue();
-
-    // 1. Cliquer sur Finish.
-    await checkoutPage.finish();
-
-    // 2. Vérifier la page de confirmation.
-    await expect(authenticatedPage).toHaveURL(/\/checkout-complete\.html$/);
-    await expect(checkoutPage.title).toHaveText('Checkout: Complete!');
-    await expect(checkoutPage.confirmationMessage).toHaveText('Thank you for your order!');
-    await expect(checkoutPage.shippingMessage).toHaveText(
-      'Your order has been dispatched, and will arrive just as fast as the pony can get there!',
-    );
-    await expect(checkoutPage.backHomeButton).toBeVisible();
-    await expect(checkoutPage.generatePdfButton).toBeVisible();
-
-    // 3. Cliquer sur Back Home.
-    await checkoutPage.backHome();
-
-    await expect(authenticatedPage).toHaveURL(/\/inventory\.html$/);
-    await expect(new InventoryPage(authenticatedPage).title).toHaveText('Products');
-    await expect(checkoutPage.cartBadge).toHaveCount(0);
+    const checkout = new CheckoutPage(page);
+    // 1. Ouvrir Checkout depuis le panier vide. 2. Saisir les informations. 3. Continuer.
+    await openCheckout(page);
+    await checkout.fillCustomerInformation(customer.firstName, customer.lastName, customer.postalCode);
+    await checkout.continue();
+    // 4. Relever les montants. 5. Choisir Finish.
+    await expect(checkout.items).toHaveCount(0);
+    await expect(checkout.subtotal).toHaveText('Item total: $0');
+    await expect(checkout.total).toHaveText('Total: $0.00');
+    await checkout.finish();
+    await expect(page).toHaveURL(/checkout-complete\.html$/);
+    await expect(checkout.confirmationMessage).toHaveText('Thank you for your order!');
   });
 
-  test('TC-CHK-07 @negative @regression @checkout - Annulation du checkout', async ({ authenticatedPage }) => {
-    const { cartPage, checkoutPage } = await openCheckout(authenticatedPage);
+  // US-05
+  // AC-CHK-07
+  // TC-CHK-07
+  test('TC-CHK-07 @error @regression @checkout - nom impossible à renseigner pour problem_user', async ({ page }) => {
+    const login = new LoginPage(page);
+    const checkout = new CheckoutPage(page);
+    await login.goto();
+    await login.login(sauceDemoUsers.problem.username, sauceDemoUsers.problem.password);
+    await openCheckout(page, ['Sauce Labs Backpack']);
+    // 1. Saisir prénom, nom et code postal. 2. Relire les champs. 3. Choisir Continue.
+    await checkout.fillCustomerInformation(customer.firstName, customer.lastName, customer.postalCode);
+    await expect(checkout.lastNameInput).toHaveValue('');
+    await checkout.continue();
+    await expect(checkout.errorMessage).toHaveText('Error: Last Name is required');
+    await expect(page).toHaveURL(/checkout-step-one\.html$/);
+  });
 
-    // 1. Cliquer sur Cancel.
-    await checkoutPage.cancel();
-
-    await expect(authenticatedPage).toHaveURL(/\/cart\.html$/);
-    await expect(cartPage.productNames).toHaveText([productName]);
-    await expect(cartPage.cartBadge).toHaveText('1');
-
-    // 2. Recommencer le checkout avec des informations valides jusqu’à « Checkout: Overview ».
-    await cartPage.checkout();
-    await checkoutPage.fillCustomerInformation('Jean', 'Dupont', '75001');
-    await checkoutPage.continue();
-    await expect(checkoutPage.title).toHaveText('Checkout: Overview');
-
-    // 3. Cliquer sur Cancel.
-    await checkoutPage.cancel();
-
-    await expect(authenticatedPage).toHaveURL(/\/inventory\.html$/);
-    const inventoryPage = new InventoryPage(authenticatedPage);
-    await expect(inventoryPage.title).toHaveText('Products');
-    await expect(inventoryPage.productActionButton(productName)).toHaveText('Remove');
-    await expect(inventoryPage.cartBadge).toHaveText('1');
+  // US-05
+  // AC-CHK-08
+  // TC-CHK-08
+  test('TC-CHK-08 @error @regression @checkout - Finish inopérant pour error_user', async ({ page }) => {
+    const login = new LoginPage(page);
+    const checkout = new CheckoutPage(page);
+    await login.goto();
+    await login.login(sauceDemoUsers.error.username, sauceDemoUsers.error.password);
+    await openCheckout(page, ['Sauce Labs Backpack']);
+    await checkout.fillCustomerInformation(customer.firstName, customer.lastName, customer.postalCode);
+    await checkout.continue();
+    // 1. Vérifier le récapitulatif. 2. Choisir Finish. 3. Observer l’adresse et les messages.
+    await expect(checkout.itemByName('Sauce Labs Backpack')).toBeVisible();
+    await checkout.finish();
+    await expect(page).toHaveURL(/checkout-step-two\.html$/);
+    await expect(checkout.confirmationMessage).toBeHidden();
+    await expect(checkout.errorMessage).toBeHidden();
   });
 });

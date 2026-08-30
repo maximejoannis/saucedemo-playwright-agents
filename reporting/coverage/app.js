@@ -1,75 +1,91 @@
-const data = window.COVERAGE_DATA;
 const q = (selector) => document.querySelector(selector);
-const fmt = (number) => String(number).replace('.', ',');
-const fc = data.functionalCoverage;
-q('#score').style.setProperty('--score', fc.scenarios.rate);
-q('#scoreValue').textContent = `${fmt(fc.scenarios.rate)}%`;
-const cards = [
-  ['Fonctionnalités couvertes', `${fc.features.covered}/${fc.features.total}`, fc.features.rate],
-  ['Scénarios fonctionnels', `${fc.scenarios.automated}/${fc.scenarios.planned}`, fc.scenarios.rate],
-  ['Matrice fonctionnelle', `${fc.matrix.covered}/${fc.matrix.total}`, fc.matrix.rate],
-  ['Tests E2E', data.e2e.total, 'Couche transverse'],
-];
-q('#kpis').innerHTML = cards
-  .map(
-    (card) =>
-      `<article class="card"><small>${card[0]}</small><strong>${card[1]}</strong><span>${typeof card[2] === 'number' ? `${fmt(card[2])} %` : card[2]}</span></article>`,
-  )
-  .join('');
-q('#summary').textContent =
-  `Le taux d’automatisation du périmètre fonctionnel est de ${fmt(fc.scenarios.rate)} % : ${fc.features.covered} fonctionnalités sur ${fc.features.total} et ${fc.scenarios.automated} scénarios sur ${fc.scenarios.planned} sont couverts. La matrice Passant / Non passant / Erreur est couverte à ${fmt(fc.matrix.rate)} %.`;
-q('#matrix').innerHTML = data.matrix
-  .map(
-    (row) =>
-      `<tr><td>${row.feature}</td>${data.axes.map((axis) => `<td class="${row.cells[axis] ? 'yes' : 'no'}">${row.cells[axis] ? '✓' : '—'}</td>`).join('')}<td>${fmt(row.rate)} %</td></tr>`,
-  )
-  .join('');
-q('#types').innerHTML = ['positive', 'negative', 'error']
-  .map(
-    (type, index) =>
-      `<article class="bar"><span>@${type}</span><strong>${data.tags[type]}</strong><div class="track"><span style="--accent:${['var(--primary)', 'var(--warning)', 'var(--danger)'][index]};--width:${(data.tags[type] / data.scenarios.length) * 100}%"></span></div></article>`,
-  )
-  .join('');
-q('#suites').innerHTML = [
-  ['Smoke', data.tags.smoke],
-  ['Regression', data.tags.regression],
-  ['E2E', data.e2e.total],
-]
-  .map((item) => `<article class="suite"><span>${item[0]}</span><strong>${item[1]}</strong></article>`)
-  .join('');
-const feature = q('#featureFilter');
-const type = q('#typeFilter');
-[...new Set(data.scenarios.map((scenario) => scenario.feature))].forEach((value) =>
-  feature.add(new Option(value, value)),
-);
-data.axes.forEach((value) => type.add(new Option(value, value)));
-function renderScenarios() {
-  const term = q('#search').value.toLowerCase();
-  q('#scenarioList').innerHTML = data.scenarios
-    .filter(
-      (scenario) =>
-        (!term || JSON.stringify(scenario).toLowerCase().includes(term)) &&
-        (!feature.value || scenario.feature === feature.value) &&
-        (!type.value || scenario.type === type.value) &&
-        (!q('#statusFilter').value || String(scenario.automated) === q('#statusFilter').value),
-    )
+const escapeHtml = (value) =>
+  String(value).replace(
+    /[&<>"']/gu,
+    (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' })[character],
+  );
+const ratio = (item, left = 'covered', right = 'total') => `${item[left]} / ${item[right]}`;
+const badge = (ok, yes = 'PASS', no = 'MANQUANT') =>
+  `<span class="badge ${ok ? 'pass' : 'fail'}">${ok ? yes : no}</span>`;
+async function loadReport() {
+  const response = await fetch('data.json');
+  if (!response.ok) throw new Error(`data.json indisponible (${response.status})`);
+  const data = await response.json();
+  const summary = data.summary;
+  q('#score').textContent = `${summary.qaScopeCoverage} %`;
+  const cards = [
+    ['Fonctionnalités', ratio(summary.features)],
+    ['User Stories', ratio(summary.userStories)],
+    ['Critères d’acceptation', ratio(summary.acceptanceCriteria)],
+    ['Cas de test fonctionnels', ratio(summary.functionalTestCases, 'automated')],
+    ['E2E complémentaires', summary.e2e],
+    ['Tests Playwright', summary.playwrightTests],
+  ];
+  q('#kpis').innerHTML = cards
     .map(
-      (scenario) =>
-        `<article class="scenario"><div><strong>${scenario.id}</strong><div class="meta">${scenario.feature} · ${scenario.type} · ${scenario.priority}</div></div><div><h3>${scenario.name}</h3><div class="tags">${scenario.tags.map((tag) => `<span class="tag">${tag}</span>`).join('')}</div></div><span class="status ${scenario.automated ? '' : 'missing'}">${scenario.automated ? 'Automatisé' : 'Manquant'}</span></article>`,
+      ([label, value]) =>
+        `<article><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong><small>${label === 'E2E complémentaires' ? 'Couche transverse' : 'Couverture automatisée'}</small></article>`,
     )
     .join('');
+  q('#types').innerHTML = Object.entries(summary.types)
+    .map(([type, count]) => `<div class="stat"><span>${escapeHtml(type)}</span><strong>${count}</strong></div>`)
+    .join('');
+  q('#suites').innerHTML = [
+    ['Smoke fonctionnelle', summary.functionalSmoke],
+    ['Regression fonctionnelle', summary.functionalRegression],
+    ['Smoke E2E', summary.e2eSmoke],
+    ['Regression E2E', summary.e2eRegression],
+    ['Smoke globale', summary.globalSmoke],
+    ['Regression globale', summary.globalRegression],
+  ]
+    .map(([label, count]) => `<div class="stat"><span>${label}</span><strong>${count}</strong></div>`)
+    .join('');
+  q('#featureCards').innerHTML = data.features
+    .map(
+      (feature) =>
+        `<article class="feature"><div><p>${feature.userStory}</p><h3>${escapeHtml(feature.name)}</h3></div>${badge(feature.acceptanceCriteria.covered === feature.acceptanceCriteria.total)}<dl><div><dt>AC</dt><dd>${ratio(feature.acceptanceCriteria)}</dd></div><div><dt>TC</dt><dd>${ratio(feature.testCases, 'automated')}</dd></div><div><dt>Passants</dt><dd>${feature.types.Passant}</dd></div><div><dt>Non passants</dt><dd>${feature.types['Non passant']}</dd></div><div><dt>Erreurs</dt><dd>${feature.types.Erreur}</dd></div><div><dt>Smoke / Regression</dt><dd>${feature.smoke} / ${feature.regression}</dd></div></dl></article>`,
+    )
+    .join('');
+  q('#storyRows').innerHTML = data.userStories
+    .map(
+      (story) =>
+        `<tr><td><strong>${story.id}</strong></td><td>${escapeHtml(story.title)}</td><td>${escapeHtml(story.feature)}</td><td>${story.coveredAcceptanceCriteria} / ${story.acceptanceCriteria.length}</td><td>${story.automatedTestCases} / ${story.testCases.length}</td><td>${badge(story.status === 'PASS')}</td></tr>`,
+    )
+    .join('');
+  q('#criterionList').innerHTML = data.acceptanceCriteria
+    .map(
+      (criterion) =>
+        `<article><div><strong>${criterion.id}</strong>${badge(criterion.automated, 'AUTOMATISÉ')}</div><h3>${escapeHtml(criterion.title)}</h3><p>${escapeHtml(criterion.description)}</p><footer><span>${criterion.userStory}</span>${criterion.testCases.map((id) => `<code>${id}</code>`).join('')}</footer></article>`,
+    )
+    .join('');
+  const renderCases = () => {
+    const term = q('#filter').value.toLowerCase();
+    q('#caseRows').innerHTML = data.testCases
+      .filter((testCase) => !term || JSON.stringify(testCase).toLowerCase().includes(term))
+      .map(
+        (testCase) =>
+          `<tr><td><strong>${testCase.id}</strong></td><td>${escapeHtml(testCase.feature)}</td><td>${testCase.userStory}</td><td>${testCase.acceptanceCriteria.map((id) => `<code>${id}</code>`).join(' ')}</td><td>${escapeHtml(testCase.type)}</td><td>${testCase.priority}</td><td>${testCase.tags.includes('@smoke') ? 'Oui' : '—'}</td><td>${testCase.tags.includes('@regression') ? 'Oui' : '—'}</td><td>${badge(testCase.automated, 'OUI', 'NON')}</td></tr>`,
+      )
+      .join('');
+  };
+  q('#filter').addEventListener('input', renderCases);
+  renderCases();
+  q('#e2eCards').innerHTML = data.e2e
+    .map(
+      (test) =>
+        `<article class="feature"><div><p>${escapeHtml(test.tags.join(' '))}</p><h3>${test.id} — ${escapeHtml(test.title)}</h3></div>${badge(test.automated, 'AUTOMATISÉ')}<p>${escapeHtml(test.transversalPath ?? 'Parcours transverse')}</p><small>${escapeHtml(test.file)}</small></article>`,
+    )
+    .join('');
+  q('#generated').textContent = new Date(data.generatedAt).toLocaleString('fr-FR');
 }
-['search', 'featureFilter', 'typeFilter', 'statusFilter'].forEach((id) =>
-  q(`#${id}`).addEventListener(id === 'search' ? 'input' : 'change', renderScenarios),
-);
-renderScenarios();
-const savedTheme = localStorage.getItem('qa-portal-theme');
-if (savedTheme === 'light' || savedTheme === 'dark') document.documentElement.dataset.theme = savedTheme;
+const preferred = localStorage.getItem('qa-report-theme');
+if (preferred) document.documentElement.dataset.theme = preferred;
 q('#theme').addEventListener('click', () => {
-  const currentTheme = document.documentElement.dataset.theme;
-  const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  const nextTheme = currentTheme ? (currentTheme === 'dark' ? 'light' : 'dark') : systemDark ? 'light' : 'dark';
-  document.documentElement.dataset.theme = nextTheme;
-  localStorage.setItem('qa-portal-theme', nextTheme);
+  const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+  document.documentElement.dataset.theme = next;
+  localStorage.setItem('qa-report-theme', next);
 });
-q('#generatedAt').textContent = new Date(data.generatedAt).toLocaleString('fr-FR');
+loadReport().catch((error) => {
+  q('#content').innerHTML =
+    `<div class="shell error"><h1>Rapport indisponible</h1><p>${escapeHtml(error.message)}</p></div>`;
+});

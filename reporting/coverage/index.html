@@ -4,139 +4,126 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="color-scheme" content="light dark" />
-    <meta name="description" content="Rapport de couverture fonctionnelle automatisée SauceDemo." />
-    <title>Couverture fonctionnelle — SauceDemo</title>
+    <meta name="description" content="Traçabilité et couverture automatisée du périmètre QA SauceDemo." />
+    <title>Couverture QA — SauceDemo</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <a class="skip-link" href="#main-content">Aller au contenu principal</a>
-    <header class="topbar">
-      <div class="container topbar__content">
-        <a class="brand" href="../" aria-label="Retour au portail QA"
-          ><span class="brand__icon" aria-hidden="true">Q</span
-          ><span><strong>SauceDemo</strong><small>Portail d'assurance qualité</small></span></a
-        >
-        <nav class="topbar__navigation" aria-label="Liens du projet">
-          <a href="../">Retour au portail</a
-          ><a href="https://github.com/maximejoannis/saucedemo-playwright-agents">Dépôt GitHub</a
-          ><button id="theme" class="theme-toggle" type="button" aria-label="Changer le thème" title="Changer le thème">
-            <span aria-hidden="true">◐</span>
-          </button>
-        </nav>
+    <a class="skip" href="#content">Aller au contenu</a>
+    <header>
+      <div class="shell nav">
+        <div><strong>SauceDemo QA</strong><span>Couverture des exigences</span></div>
+        <button id="theme" type="button" aria-label="Changer le thème">◐</button>
       </div>
     </header>
-    <main id="main-content">
+    <main id="content">
       <section class="hero">
-        <div class="container hero__content">
+        <div class="shell hero-grid">
           <div>
-            <p class="eyebrow">Couverture fonctionnelle</p>
-            <h1>Couverture automatisée</h1>
-            <p class="hero__description">
-              Visualisez la couverture des fonctionnalités principales, des scénarios fonctionnels et de la matrice de
-              test.
-            </p>
-            <p class="notice">
-              La couverture fonctionnelle mesure la proportion du périmètre fonctionnel défini disposant de tests
-              Playwright automatisés.
-            </p>
-            <p class="notice">
-              Cette métrique ne représente ni une couverture exhaustive de toutes les fonctionnalités possibles de
-              SauceDemo, ni une couverture du code source de l'application.
-            </p>
+            <p class="eyebrow">REPORTING QA · PLAYWRIGHT</p>
+            <h1>La traçabilité, du besoin au test.</h1>
+            <p>Fonctionnalité → User Story → Critère d’acceptation → Cas de test → Automatisation</p>
+            <aside>
+              <strong
+                >Ce rapport mesure la couverture automatisée du périmètre fonctionnel et des critères d’acceptation
+                définis.</strong
+              >
+              Il ne représente pas une couverture de code source.
+            </aside>
           </div>
-          <aside class="score-card" aria-label="Taux d'automatisation">
-            <p class="score-card__label">Périmètre défini</p>
-            <div class="score" id="score">
-              <div><strong id="scoreValue">—</strong><small>automatisé</small></div>
-            </div>
-          </aside>
+          <div class="score"><span id="score">—</span><small>Couverture du périmètre QA défini</small></div>
         </div>
       </section>
-      <section class="metrics-section" aria-label="Indicateurs principaux">
-        <div class="container kpis" id="kpis"></div>
-      </section>
-      <div class="container report-content">
-        <section id="coverage" class="section">
-          <p class="eyebrow">Matrice de test</p>
-          <h2>Couverture fonctionnelle</h2>
-          <p id="summary" class="section-intro"></p>
-          <div class="table-wrap">
+      <nav class="tabs shell" aria-label="Sections">
+        <a href="#overview">Synthèse</a><a href="#features">Fonctionnalités</a><a href="#stories">User Stories</a
+        ><a href="#criteria">AC</a><a href="#cases">Cas de test</a><a href="#e2e">E2E</a>
+      </nav>
+      <div class="shell content">
+        <section id="overview">
+          <p class="eyebrow">VUE D’ENSEMBLE</p>
+          <h2>Couverture du périmètre défini</h2>
+          <div id="kpis" class="kpis"></div>
+          <div class="split">
+            <article class="panel">
+              <h3>Typologie fonctionnelle</h3>
+              <div id="types"></div>
+            </article>
+            <article class="panel">
+              <h3>Suites d’exécution</h3>
+              <div id="suites"></div>
+            </article>
+          </div>
+        </section>
+        <section id="features">
+          <p class="eyebrow">COUVERTURE PAR DOMAINE</p>
+          <h2>Fonctionnalités</h2>
+          <div id="featureCards" class="feature-grid"></div>
+        </section>
+        <section id="stories">
+          <p class="eyebrow">EXIGENCES UTILISATEUR</p>
+          <h2>User Stories</h2>
+          <div class="table">
             <table>
               <thead>
                 <tr>
+                  <th>ID</th>
+                  <th>Titre</th>
                   <th>Fonctionnalité</th>
-                  <th>Passant</th>
-                  <th>Non passant</th>
-                  <th>Erreur</th>
-                  <th>Couverture</th>
+                  <th>AC couverts</th>
+                  <th>TC automatisés</th>
+                  <th>Statut</th>
                 </tr>
               </thead>
-              <tbody id="matrix"></tbody>
+              <tbody id="storyRows"></tbody>
             </table>
           </div>
         </section>
-        <section class="section">
-          <p class="eyebrow">Répartition</p>
-          <h2>Types de tests</h2>
-          <div class="bars" id="types"></div>
-          <p class="section-intro">
-            Les catégories Positive, Negative et Error ne sont pas mutuellement exclusives. Un scénario d'erreur peut
-            également être classé comme scénario négatif.
+        <section id="criteria">
+          <p class="eyebrow">CRITÈRES D’ACCEPTATION</p>
+          <h2>Couverture détaillée</h2>
+          <div id="criterionList" class="criteria"></div>
+        </section>
+        <section id="cases">
+          <p class="eyebrow">CAS FONCTIONNELS</p>
+          <h2>Traçabilité de l’automatisation</h2>
+          <label class="search"
+            >Filtrer les cas de test<input id="filter" type="search" placeholder="TC, fonctionnalité, US, AC…"
+          /></label>
+          <div class="table">
+            <table>
+              <thead>
+                <tr>
+                  <th>TC</th>
+                  <th>Fonctionnalité</th>
+                  <th>US</th>
+                  <th>AC</th>
+                  <th>Type</th>
+                  <th>Priorité</th>
+                  <th>Smoke</th>
+                  <th>Regression</th>
+                  <th>Automatisé</th>
+                </tr>
+              </thead>
+              <tbody id="caseRows"></tbody>
+            </table>
+          </div>
+        </section>
+        <section id="e2e">
+          <p class="eyebrow">COUCHE TRANSVERSE</p>
+          <h2>Parcours E2E complémentaires</h2>
+          <p>
+            Ces parcours ne sont pas comptabilisés comme des cas fonctionnels et n’augmentent pas la couverture des AC.
           </p>
-          <h3>Suites</h3>
-          <div class="suite-grid" id="suites"></div>
+          <div id="e2eCards" class="feature-grid"></div>
         </section>
-        <section id="scenarios" class="section">
-          <p class="eyebrow">Catalogue automatisé</p>
-          <h2>Scénarios fonctionnels</h2>
-          <div class="filters">
-            <label>Recherche<input id="search" type="search" placeholder="ID, titre, tag…" /></label
-            ><label
-              >Fonctionnalité<select id="featureFilter">
-                <option value="">Toutes</option>
-              </select></label
-            ><label
-              >Type<select id="typeFilter">
-                <option value="">Tous</option>
-              </select></label
-            ><label
-              >État<select id="statusFilter">
-                <option value="">Tous</option>
-                <option value="true">Automatisé</option>
-                <option value="false">Manquant</option>
-              </select></label
-            >
-          </div>
-          <div id="scenarioList" class="scenario-list" aria-live="polite"></div>
-        </section>
-        <section id="method" class="section">
-          <p class="eyebrow">Mesure</p>
-          <h2>Méthodologie</h2>
-          <div class="method-grid">
-            <article>
-              <h3>Couverture des fonctionnalités</h3>
-              <code>fonctionnalités automatisées / fonctionnalités identifiées × 100</code>
-            </article>
-            <article>
-              <h3>Couverture des scénarios</h3>
-              <code>scénarios automatisés / scénarios planifiés × 100</code>
-            </article>
-            <article>
-              <h3>Couverture de matrice</h3>
-              <code>cellules Passant/Non passant/Erreur couvertes / cellules attendues × 100</code>
-            </article>
-          </div>
-          <p class="generated">Généré le <span id="generatedAt"></span></p>
-        </section>
+        <p class="generated">
+          Données calculées depuis les documents QA et les specs actives · Généré le <span id="generated"></span>
+        </p>
       </div>
     </main>
-    <footer class="footer">
-      <div class="container footer__content">
-        <p>Rapport généré automatiquement à partir du périmètre fonctionnel défini.</p>
-        <a href="../">Retour au portail QA</a>
-      </div>
+    <footer>
+      <div class="shell">Rapport de couverture fonctionnelle — aucune métrique de couverture de code source.</div>
     </footer>
-    <script src="coverage-data.js"></script>
     <script src="app.js"></script>
   </body>
 </html>

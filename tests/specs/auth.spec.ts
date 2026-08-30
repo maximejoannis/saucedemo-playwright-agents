@@ -1,111 +1,76 @@
-import { expect, test } from '@playwright/test';
+import { test, expect } from '../fixtures/test-fixtures';
 import { LoginPage } from '../pages/login.page';
-
-// spec: tests/specs/plan-tests-fonctionnels-saucedemo.md
+import { InventoryPage } from '../pages/inventory.page';
+import { sauceDemoUsers } from '../test-data/users';
 
 test.describe('Authentification', () => {
-  test.beforeEach(async ({ page }) => {
-    await new LoginPage(page).goto();
-  });
-
-  test('TC-AUTH-01 @positive @smoke @regression @auth - Connexion de l’utilisateur standard', async ({ page }) => {
-    const loginPage = new LoginPage(page);
-
-    // 1. Saisir `standard_user` dans le champ Username.
-    await loginPage.fillUsername('standard_user');
-
-    // 2. Saisir `secret_sauce` dans le champ Password.
-    await loginPage.fillPassword('secret_sauce');
-
-    // 3. Cliquer sur Login.
-    await loginPage.submit();
-
-    // 4. Vérifier la page affichée.
+  // US-01
+  // AC-AUTH-01
+  // TC-AUTH-01
+  test('TC-AUTH-01 @positive @smoke @regression @auth - connexion avec un utilisateur standard', async ({ page }) => {
+    const login = new LoginPage(page);
+    const inventory = new InventoryPage(page);
+    // 1. Saisir le nom d'utilisateur puis le mot de passe.
+    await login.goto();
+    await login.fillUsername(sauceDemoUsers.standard.username);
+    await login.fillPassword(sauceDemoUsers.standard.password);
+    // 2. Choisir Login.
+    await login.submit();
     await expect(page).toHaveURL(/\/inventory\.html$/);
-    await expect(loginPage.errorMessage).toHaveCount(0);
-    await expect(page.getByText('Swag Labs', { exact: true })).toBeVisible();
-    await expect(page.getByText('Products', { exact: true })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Open Menu' })).toBeVisible();
-    await expect(page.getByTestId('shopping-cart-link')).toBeVisible();
-    await expect(page.getByTestId('inventory-item')).toHaveCount(6);
+    await expect(inventory.title).toHaveText('Products');
+    await expect(login.errorMessage).toBeHidden();
   });
 
-  test('TC-AUTH-02 @regression @negative @auth - Refus d’identifiants incorrects', async ({ page }) => {
-    const loginPage = new LoginPage(page);
-
-    // 1. Saisir `bad_user` dans Username.
-    await loginPage.fillUsername('bad_user');
-
-    // 2. Saisir `wrong` dans Password.
-    await loginPage.fillPassword('wrong');
-
-    // 3. Cliquer sur Login.
-    await loginPage.submit();
-
-    // Résultats attendus : rester sur la connexion, afficher l’erreur et refuser le catalogue.
+  // US-01
+  // AC-AUTH-02
+  // TC-AUTH-02
+  test('TC-AUTH-02 @negative @regression @auth - refus d’identifiants inconnus', async ({ page }) => {
+    const login = new LoginPage(page);
+    // 1. Saisir les deux valeurs. 2. Choisir Login.
+    await login.goto();
+    await login.login('unknown_user', 'wrong_password');
     await expect(page).toHaveURL('https://www.saucedemo.com/');
-    await expect(loginPage.errorMessage).toHaveText(
-      'Epic sadface: Username and password do not match any user in this service',
-    );
-    await expect(loginPage.usernameInput).toBeVisible();
-    await expect(page.getByText('Products', { exact: true })).toHaveCount(0);
-    await expect(page.getByTestId('inventory-item')).toHaveCount(0);
+    await expect(login.errorMessage).toHaveText(/Username and password do not match any user in this service/);
   });
 
-  test('TC-AUTH-03 @error @negative @regression @auth - Message d’erreur pour l’utilisateur verrouillé', async ({
-    page,
-  }) => {
-    const loginPage = new LoginPage(page);
-
-    // 1. Saisir `locked_out_user` dans Username.
-    await loginPage.fillUsername('locked_out_user');
-
-    // 2. Saisir `secret_sauce` dans Password.
-    await loginPage.fillPassword('secret_sauce');
-
-    // 3. Cliquer sur Login.
-    await loginPage.submit();
-
-    // Résultats attendus : rester sur la connexion, afficher l’erreur et refuser le catalogue.
+  // US-01
+  // AC-AUTH-03
+  // TC-AUTH-03
+  test('TC-AUTH-03 @error @regression @auth - nom d’utilisateur absent', async ({ page }) => {
+    const login = new LoginPage(page);
+    await login.goto();
+    // 1. Laisser le nom vide. 2. Choisir Login.
+    await login.submit();
+    await expect(login.errorMessage).toHaveText('Epic sadface: Username is required');
+    // 3. Refaire avec seulement le mot de passe renseigné.
+    await login.fillPassword('secret_sauce');
+    await login.submit();
+    await expect(login.errorMessage).toHaveText('Epic sadface: Username is required');
     await expect(page).toHaveURL('https://www.saucedemo.com/');
-    await expect(loginPage.errorMessage).toHaveText('Epic sadface: Sorry, this user has been locked out.');
-    await expect(loginPage.usernameInput).toBeVisible();
-    await expect(page.getByText('Products', { exact: true })).toHaveCount(0);
-    await expect(page.getByTestId('inventory-item')).toHaveCount(0);
   });
 
-  test('TC-AUTH-04 @error @negative @auth - Username obligatoire', async ({ page }) => {
-    const loginPage = new LoginPage(page);
-
-    // 1. Ne renseigner que Password puis cliquer sur Login.
-    await loginPage.fillPassword('secret_sauce');
-    await loginPage.submit();
-
-    await expect(loginPage.errorMessage).toHaveText('Epic sadface: Username is required');
+  // US-01
+  // AC-AUTH-04
+  // TC-AUTH-04
+  test('TC-AUTH-04 @error @regression @auth - mot de passe absent', async ({ page }) => {
+    const login = new LoginPage(page);
+    await login.goto();
+    // 1. Saisir le nom. 2. Laisser le mot de passe vide. 3. Choisir Login.
+    await login.fillUsername(sauceDemoUsers.standard.username);
+    await login.submit();
+    await expect(login.errorMessage).toHaveText('Epic sadface: Password is required');
     await expect(page).toHaveURL('https://www.saucedemo.com/');
-    await expect(page.getByTestId('inventory-item')).toHaveCount(0);
   });
 
-  test('TC-AUTH-05 @error @negative @auth - Password obligatoire', async ({ page }) => {
-    const loginPage = new LoginPage(page);
-
-    // 1. Ne renseigner que Username puis cliquer sur Login.
-    await loginPage.fillUsername('standard_user');
-    await loginPage.submit();
-
-    await expect(loginPage.errorMessage).toHaveText('Epic sadface: Password is required');
+  // US-01
+  // AC-AUTH-05
+  // TC-AUTH-05
+  test('TC-AUTH-05 @error @regression @auth - refus du compte verrouillé', async ({ page }) => {
+    const login = new LoginPage(page);
+    await login.goto();
+    // 1. Saisir les identifiants. 2. Choisir Login.
+    await login.login(sauceDemoUsers.lockedOut.username, sauceDemoUsers.lockedOut.password);
+    await expect(login.errorMessage).toHaveText('Epic sadface: Sorry, this user has been locked out.');
     await expect(page).toHaveURL('https://www.saucedemo.com/');
-    await expect(page.getByTestId('inventory-item')).toHaveCount(0);
-  });
-
-  test('TC-AUTH-06 @error @negative @auth - Soumission du formulaire entièrement vide', async ({ page }) => {
-    const loginPage = new LoginPage(page);
-
-    // 1. Cliquer sur Login sans saisir de donnée.
-    await loginPage.submit();
-
-    await expect(loginPage.errorMessage).toHaveText('Epic sadface: Username is required');
-    await expect(page).toHaveURL('https://www.saucedemo.com/');
-    await expect(page.getByTestId('inventory-item')).toHaveCount(0);
   });
 });

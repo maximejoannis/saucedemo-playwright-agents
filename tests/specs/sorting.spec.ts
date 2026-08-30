@@ -1,88 +1,82 @@
-// spec: tests/specs/plan-tests-fonctionnels-saucedemo.md
-
+import type { Page } from '@playwright/test';
 import { test, expect } from '../fixtures/test-fixtures';
-import { InventoryPage } from '../pages/inventory.page';
 import { LoginPage } from '../pages/login.page';
+import { InventoryPage } from '../pages/inventory.page';
+import { productNames } from '../test-data/products';
+import { sauceDemoUsers, type SauceDemoUser } from '../test-data/users';
 
-const ascendingNames = [
-  'Sauce Labs Backpack',
-  'Sauce Labs Bike Light',
-  'Sauce Labs Bolt T-Shirt',
-  'Sauce Labs Fleece Jacket',
-  'Sauce Labs Onesie',
-  'Test.allTheThings() T-Shirt (Red)',
-];
+const ascendingNames = [...productNames].sort();
+const descendingNames = [...ascendingNames].reverse();
 
-test.describe('Tri des produits', () => {
-  test('TC-TRI-01 @positive @regression @catalog @sorting - Tris alphabétiques A–Z et Z–A', async ({
-    authenticatedPage,
-  }) => {
-    const inventoryPage = new InventoryPage(authenticatedPage);
+async function assertBrokenSorting(page: Page, user: SauceDemoUser) {
+  const login = new LoginPage(page);
+  const inventory = new InventoryPage(page);
+  await login.goto();
+  await login.login(user.username, user.password);
+  const initial = await inventory.getProductNames();
+  expect(initial).toEqual(ascendingNames);
+  for (const option of ['za', 'lohi', 'hilo'] as const) {
+    await inventory.selectSortOrder(option);
+    expect(await inventory.getProductNames()).toEqual(initial);
+  }
+}
 
-    // 1. Choisir Name (Z to A) dans le sélecteur de tri.
-    await inventoryPage.selectSortOrder('za');
-    await expect(inventoryPage.sortSelect).toHaveValue('za');
-
-    // 2. Relever l’ordre des produits.
-    const descendingNames = await inventoryPage.getProductNames();
-    const expectedDescendingNames = [...descendingNames].sort((a, b) => b.localeCompare(a));
-    expect(descendingNames).toEqual(expectedDescendingNames);
-
-    // 3. Choisir Name (A to Z).
-    await inventoryPage.selectSortOrder('az');
-    await expect(inventoryPage.sortSelect).toHaveValue('az');
-
-    // 4. Relever de nouveau l’ordre.
-    const ascendingNames = await inventoryPage.getProductNames();
-    const expectedAscendingNames = [...ascendingNames].sort((a, b) => a.localeCompare(b));
-    expect(ascendingNames).toEqual(expectedAscendingNames);
-    expect(ascendingNames).toEqual([...descendingNames].reverse());
+test.describe('Tri', () => {
+  // US-03
+  // AC-SORT-01
+  // TC-TRI-01
+  test('TC-TRI-01 @positive @regression @sorting - tri des noms de A à Z', async ({ authenticatedPage: page }) => {
+    const inventory = new InventoryPage(page);
+    // 1. Choisir A-Z. 2. Relever les noms de haut en bas.
+    await inventory.selectSortOrder('az');
+    expect(await inventory.getProductNames()).toEqual(ascendingNames);
   });
 
-  test('TC-TRI-02 @positive @regression @catalog @sorting - Tris de prix croissant et décroissant', async ({
-    authenticatedPage,
-  }) => {
-    const inventoryPage = new InventoryPage(authenticatedPage);
-
-    // 1. Choisir Price (low to high).
-    await inventoryPage.selectSortOrder('lohi');
-    await expect(inventoryPage.sortSelect).toHaveValue('lohi');
-
-    // 2. Relever les prix et les produits dans l’ordre affiché.
-    const ascendingPrices = (await inventoryPage.getProductPrices()).map((price) => Number(price.replace('$', '')));
-    const expectedAscendingPrices = [...ascendingPrices].sort((a, b) => a - b);
-    expect(ascendingPrices).toEqual(expectedAscendingPrices);
-
-    // 3. Choisir Price (high to low).
-    await inventoryPage.selectSortOrder('hilo');
-    await expect(inventoryPage.sortSelect).toHaveValue('hilo');
-
-    // 4. Relever les prix et les produits dans l’ordre affiché.
-    const descendingPrices = (await inventoryPage.getProductPrices()).map((price) => Number(price.replace('$', '')));
-    const expectedDescendingPrices = [...descendingPrices].sort((a, b) => b - a);
-    expect(descendingPrices).toEqual(expectedDescendingPrices);
-    expect(descendingPrices).toEqual([...ascendingPrices].reverse());
+  // US-03
+  // AC-SORT-02
+  // TC-TRI-02
+  test('TC-TRI-02 @positive @regression @sorting - tri des noms de Z à A', async ({ authenticatedPage: page }) => {
+    const inventory = new InventoryPage(page);
+    // 1. Choisir Z-A. 2. Relever les noms.
+    await inventory.selectSortOrder('za');
+    expect(await inventory.getProductNames()).toEqual(descendingNames);
   });
 
-  test('TC-TRI-03 @negative @sorting @regression - Tri Z–A sans effet avec problem_user', async ({ page }) => {
-    const loginPage = new LoginPage(page);
-    await loginPage.goto();
-    await loginPage.login('problem_user', 'secret_sauce');
-    const inventoryPage = new InventoryPage(page);
-
-    // 1. Choisir Z–A et relever l’ordre affiché.
-    await inventoryPage.selectSortOrder('za');
-    await expect(inventoryPage.productNames).toHaveText(ascendingNames);
+  // US-03
+  // AC-SORT-03
+  // TC-TRI-03
+  test('TC-TRI-03 @positive @regression @sorting - tri des prix croissants', async ({ authenticatedPage: page }) => {
+    const inventory = new InventoryPage(page);
+    // 1. Choisir le prix croissant. 2. Relever les six prix.
+    await inventory.selectSortOrder('lohi');
+    expect(await inventory.getProductPrices()).toEqual(['$7.99', '$9.99', '$15.99', '$15.99', '$29.99', '$49.99']);
   });
 
-  test('TC-TRI-04 @error @sorting @regression - Comportement dégradé du tri avec error_user', async ({ page }) => {
-    const loginPage = new LoginPage(page);
-    await loginPage.goto();
-    await loginPage.login('error_user', 'secret_sauce');
-    const inventoryPage = new InventoryPage(page);
+  // US-03
+  // AC-SORT-04
+  // TC-TRI-04
+  test('TC-TRI-04 @positive @regression @sorting - tri des prix décroissants', async ({ authenticatedPage: page }) => {
+    const inventory = new InventoryPage(page);
+    // 1. Choisir le prix décroissant. 2. Relever les six prix.
+    await inventory.selectSortOrder('hilo');
+    expect(await inventory.getProductPrices()).toEqual(['$49.99', '$29.99', '$15.99', '$15.99', '$9.99', '$7.99']);
+  });
 
-    // 1. Choisir Z–A et relever l’ordre résultant.
-    await inventoryPage.selectSortOrder('za');
-    await expect(inventoryPage.productNames).toHaveText(ascendingNames);
+  // US-03
+  // AC-SORT-05
+  // TC-TRI-05
+  test('TC-TRI-05 @error @regression @sorting - tri inopérant de problem_user', async ({ page }) => {
+    // 1. Noter l’ordre initial. 2. Choisir chaque option. 3. Relever chaque ordre.
+    await assertBrokenSorting(page, sauceDemoUsers.problem);
+    await expect(page).toHaveURL(/inventory\.html$/);
+  });
+
+  // US-03
+  // AC-SORT-06
+  // TC-TRI-06
+  test('TC-TRI-06 @error @regression @sorting - tri inopérant de error_user', async ({ page }) => {
+    // 1. Noter l’ordre initial. 2. Choisir chaque option. 3. Comparer chaque ordre.
+    await assertBrokenSorting(page, sauceDemoUsers.error);
+    await expect(page).toHaveURL(/inventory\.html$/);
   });
 });

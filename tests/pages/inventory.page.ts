@@ -12,6 +12,8 @@ export class InventoryPage {
   readonly cartBadge: Locator;
   readonly menuButton: Locator;
   readonly logoutLink: Locator;
+  readonly resetAppStateLink: Locator;
+  readonly closeMenuButton: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -25,6 +27,8 @@ export class InventoryPage {
     this.cartBadge = page.getByTestId('shopping-cart-badge');
     this.menuButton = page.getByRole('button', { name: 'Open Menu' });
     this.logoutLink = page.getByRole('link', { name: 'Logout' });
+    this.resetAppStateLink = page.getByRole('link', { name: 'Reset App State' });
+    this.closeMenuButton = page.getByRole('button', { name: 'Close Menu' });
   }
 
   productByName(name: string): Locator {
@@ -39,6 +43,10 @@ export class InventoryPage {
     return this.productPrices.allTextContents();
   }
 
+  async getProductCount(): Promise<number> {
+    return this.products.count();
+  }
+
   async selectSortOrder(value: 'az' | 'za' | 'lohi' | 'hilo'): Promise<void> {
     await this.sortSelect.selectOption(value);
   }
@@ -49,6 +57,10 @@ export class InventoryPage {
 
   productActionButton(name: string): Locator {
     return this.productByName(name).getByRole('button');
+  }
+
+  productImage(name: string): Locator {
+    return this.productByName(name).getByRole('img');
   }
 
   async addProductByName(name: string): Promise<void> {
@@ -65,9 +77,20 @@ export class InventoryPage {
 
   async openMenu(): Promise<void> {
     await this.menuButton.click();
+    await this.logoutLink.waitFor({ state: 'visible' });
   }
 
   async logout(): Promise<void> {
+    await this.openMenu();
     await this.logoutLink.click();
+  }
+
+  async resetAppState(): Promise<void> {
+    await this.openMenu();
+    await this.resetAppStateLink.click();
+  }
+
+  async closeMenu(): Promise<void> {
+    await this.closeMenuButton.click();
   }
 }

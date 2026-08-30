@@ -29,6 +29,10 @@ export class CartPage {
     return this.itemByName(name).getByTestId('item-quantity');
   }
 
+  async getProductNames(): Promise<string[]> {
+    return this.productNames.allTextContents();
+  }
+
   async removeProductByName(name: string): Promise<void> {
     await this.itemByName(name).getByRole('button', { name: 'Remove' }).click();
   }

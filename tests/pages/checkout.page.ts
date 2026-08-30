@@ -49,10 +49,18 @@ export class CheckoutPage {
     return this.items.filter({ has: this.page.getByText(name, { exact: true }) });
   }
 
+  itemPrice(name: string): Locator {
+    return this.itemByName(name).getByTestId('inventory-item-price');
+  }
+
   async fillCustomerInformation(firstName: string, lastName: string, postalCode: string): Promise<void> {
     await this.firstNameInput.fill(firstName);
     await this.lastNameInput.fill(lastName);
     await this.postalCodeInput.fill(postalCode);
+  }
+
+  async getErrorMessage(): Promise<string> {
+    return this.errorMessage.innerText();
   }
 
   async continue(): Promise<void> {

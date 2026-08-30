@@ -1,82 +1,62 @@
 import { test, expect } from '../../fixtures/test-fixtures';
-import { LoginPage } from '../../pages/login.page';
-import { InventoryPage } from '../../pages/inventory.page';
 import { CartPage } from '../../pages/cart.page';
 import { CheckoutPage } from '../../pages/checkout.page';
+import { InventoryPage } from '../../pages/inventory.page';
 
-const productName = 'Sauce Labs Backpack';
+const product = { name: 'Sauce Labs Backpack', price: '$29.99' };
+const customer = { firstName: 'Jean', lastName: 'Dupont', postalCode: '75001' };
 
-test.describe('Achat complet', () => {
-  test('E2E-01 @e2e @positive @smoke @regression - Achat complet de bout en bout', async ({ page }) => {
-    const loginPage = new LoginPage(page);
-    const inventoryPage = new InventoryPage(page);
-    const cartPage = new CartPage(page);
-    const checkoutPage = new CheckoutPage(page);
+test.describe('Parcours E2E d’achat', () => {
+  // Parcours transversal : Authentification → Catalogue → Panier → Checkout
+  test('E2E-01 @e2e @positive @smoke @regression - parcours d’achat complet', async ({ authenticatedPage: page }) => {
+    const inventory = new InventoryPage(page);
+    const cart = new CartPage(page);
+    const checkout = new CheckoutPage(page);
 
-    // 1. Ouvrir SauceDemo.
-    await loginPage.goto();
-
-    // 2. Se connecter avec `standard_user / secret_sauce`.
-    await loginPage.login('standard_user', 'secret_sauce');
-
-    // 3. Vérifier l'accès au catalogue.
+    // Vérifier la connexion et sélectionner un produit depuis le catalogue.
     await expect(page).toHaveURL(/\/inventory\.html$/);
-    await expect(inventoryPage.title).toHaveText('Products');
+    await expect(inventory.title).toHaveText('Products');
+    await expect(inventory.productByName(product.name)).toBeVisible();
+    await expect(inventory.productByName(product.name).getByTestId('inventory-item-price')).toHaveText(product.price);
+    await inventory.addProductByName(product.name);
+    await expect(inventory.cartBadge).toHaveText('1');
+    await expect(inventory.productActionButton(product.name)).toHaveText('Remove');
 
-    // 4. Ajouter `Sauce Labs Backpack`.
-    await inventoryPage.addProductByName(productName);
-
-    // 5. Vérifier le badge `1`.
-    await expect(inventoryPage.cartBadge).toHaveText('1');
-
-    // 6. Ouvrir le panier.
-    await inventoryPage.openCart();
+    // Ouvrir le panier et vérifier le produit sélectionné.
+    await inventory.openCart();
     await expect(page).toHaveURL(/\/cart\.html$/);
+    await expect(cart.itemByName(product.name)).toBeVisible();
+    await expect(cart.productPrice(product.name)).toHaveText(product.price);
+    await expect(cart.productQuantity(product.name)).toHaveText('1');
 
-    // 7. Vérifier le produit et le prix `$29.99`.
-    await expect(cartPage.itemByName(productName)).toBeVisible();
-    await expect(cartPage.productPrice(productName)).toHaveText('$29.99');
-
-    // 8. Démarrer Checkout.
-    await cartPage.checkout();
+    // Accéder au checkout et renseigner les informations client.
+    await cart.checkout();
     await expect(page).toHaveURL(/\/checkout-step-one\.html$/);
+    await checkout.fillCustomerInformation(customer.firstName, customer.lastName, customer.postalCode);
+    await checkout.continue();
 
-    // 9. Renseigner First Name `Jean`, Last Name `Dupont` et Postal Code `75001`.
-    await checkoutPage.fillCustomerInformation('Jean', 'Dupont', '75001');
-
-    // 10. Continuer vers l'overview.
-    await checkoutPage.continue();
+    // Vérifier la cohérence du produit et des montants dans l’overview.
     await expect(page).toHaveURL(/\/checkout-step-two\.html$/);
+    await expect(checkout.itemByName(product.name)).toBeVisible();
+    await expect(checkout.itemPrice(product.name)).toHaveText(product.price);
+    await expect(checkout.subtotal).toHaveText('Item total: $29.99');
+    await expect(checkout.tax).toHaveText('Tax: $2.40');
+    await expect(checkout.total).toHaveText('Total: $32.39');
 
-    // 11. Vérifier le produit, la quantité, le prix, le sous-total, la taxe et le total.
-    const overviewItem = checkoutPage.itemByName(productName);
-    await expect(overviewItem.getByTestId('inventory-item-name')).toHaveText(productName);
-    await expect(overviewItem.getByTestId('item-quantity')).toHaveText('1');
-    await expect(overviewItem.getByTestId('inventory-item-price')).toHaveText('$29.99');
-    await expect(checkoutPage.subtotal).toHaveText('Item total: $29.99');
-    await expect(checkoutPage.tax).toHaveText('Tax: $2.40');
-    await expect(checkoutPage.total).toHaveText('Total: $32.39');
-
-    // 12. Cliquer Finish.
-    await checkoutPage.finish();
-
-    // 13. Vérifier la confirmation.
+    // Finaliser la commande et vérifier la confirmation.
+    await checkout.finish();
     await expect(page).toHaveURL(/\/checkout-complete\.html$/);
-    await expect(checkoutPage.confirmationMessage).toHaveText('Thank you for your order!');
+    await expect(checkout.title).toHaveText('Checkout: Complete!');
+    await expect(checkout.confirmationMessage).toHaveText('Thank you for your order!');
+    await expect(checkout.shippingMessage).toHaveText(
+      'Your order has been dispatched, and will arrive just as fast as the pony can get there!',
+    );
 
-    // 14. Cliquer Back Home.
-    await checkoutPage.backHome();
+    // Revenir au catalogue.
+    await checkout.backHome();
     await expect(page).toHaveURL(/\/inventory\.html$/);
-
-    // 15. Vérifier que le panier est vide.
-    await expect(inventoryPage.cartBadge).toHaveCount(0);
-
-    // 16. Effectuer Logout.
-    await inventoryPage.openMenu();
-    await inventoryPage.logout();
-
-    // 17. Vérifier le retour à la page Login.
-    await expect(page).toHaveURL('https://www.saucedemo.com/');
-    await expect(loginPage.loginButton).toBeVisible();
+    await expect(inventory.title).toHaveText('Products');
+    await expect(inventory.products).toHaveCount(6);
+    await expect(inventory.cartBadge).toBeHidden();
   });
 });

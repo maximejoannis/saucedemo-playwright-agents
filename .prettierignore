@@ -5,6 +5,8 @@ allure-report/
 test-results/
 prompts/
 tests/specs/*.md
+tests/requirements/*.md
+tests/test-plan/*.md
 reports/coverage/
 reports/qa-portal/
 quality-report/
