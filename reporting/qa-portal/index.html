@@ -7,6 +7,7 @@
     <meta name="description" content="Portail QA du projet SauceDemo avec Playwright." />
     <title>QA Automation — SauceDemo</title>
     <link rel="stylesheet" href="./styles.css" />
+    <script src="./portal-data.js" defer></script>
     <script src="./app.js" defer></script>
   </head>
   <body>
@@ -42,27 +43,30 @@
             <p class="muted">Les agents Playwright/Codex accompagnent le workflow sans remplacer la démarche QA.</p>
           </div>
           <aside class="snapshot">
-            <p class="overline">Dernière validation locale connue</p>
-            <h2><span class="status pass">PASS</span> 36 / 36</h2>
+            <p class="overline" id="snapshot-title">Dernière validation locale connue</p>
+            <h2>
+              <span class="status pass" id="playwright-status">PASS</span> <span id="playwright-score">36 / 36</span>
+            </h2>
             <dl>
               <div>
                 <dt>Tests fonctionnels</dt>
-                <dd>33</dd>
+                <dd id="playwright-functional">33</dd>
               </div>
               <div>
                 <dt>Parcours E2E</dt>
-                <dd>3</dd>
+                <dd id="playwright-e2e">3</dd>
               </div>
               <div>
                 <dt>Échecs</dt>
-                <dd>0</dd>
+                <dd id="playwright-failed">0</dd>
               </div>
               <div>
                 <dt>Navigateur</dt>
                 <dd>Chromium</dd>
               </div>
             </dl>
-            <p>Instantané non dynamique tant que la CI/CD n’alimente pas le portail.</p>
+            <p id="snapshot-message">Valeurs issues de la dernière validation locale.</p>
+            <p class="ci-meta" id="ci-meta" hidden></p>
           </aside>
         </div>
       </section>
@@ -99,14 +103,14 @@
             </p>
           </div>
           <div class="kpis">
-            <article><strong>6</strong><span>Fonctionnalités</span></article>
-            <article><strong>6</strong><span>User Stories</span></article>
-            <article><strong>32</strong><span>Acceptance Criteria</span></article>
-            <article><strong>33</strong><span>TC fonctionnels</span></article>
-            <article><strong>33/33</strong><span>TC automatisés</span></article>
+            <article><strong id="coverage-features">6</strong><span>Fonctionnalités</span></article>
+            <article><strong id="coverage-stories">6</strong><span>User Stories</span></article>
+            <article><strong id="coverage-ac">32</strong><span>Acceptance Criteria</span></article>
+            <article><strong id="coverage-tc-total">33</strong><span>TC fonctionnels</span></article>
+            <article><strong id="coverage-tc">33/33</strong><span>TC automatisés</span></article>
             <article><strong>3</strong><span>E2E complémentaires</span></article>
-            <article><strong>36</strong><span>Tests Playwright</span></article>
-            <article class="accent"><strong>100 %</strong><span>Périmètre QA défini</span></article>
+            <article><strong id="coverage-playwright">36</strong><span>Tests Playwright</span></article>
+            <article class="accent"><strong id="coverage-scope">100 %</strong><span>Périmètre QA défini</span></article>
           </div>
           <div class="panels">
             <article>
@@ -138,19 +142,19 @@
           <dl>
             <div>
               <dt>Fonctionnalités</dt>
-              <dd>6/6</dd>
+              <dd id="trace-features">6/6</dd>
             </div>
             <div>
               <dt>User Stories</dt>
-              <dd>6/6</dd>
+              <dd id="trace-stories">6/6</dd>
             </div>
             <div>
               <dt>Acceptance Criteria</dt>
-              <dd>32/32</dd>
+              <dd id="trace-ac">32/32</dd>
             </div>
             <div>
               <dt>Test Cases</dt>
-              <dd>33/33</dd>
+              <dd id="trace-tc">33/33</dd>
             </div>
           </dl>
         </div>
@@ -170,7 +174,9 @@
           </div>
           <div class="reports">
             <article>
-              <div class="report-top"><b>PW</b><span class="status pass">36 PASS · 0 FAIL</span></div>
+              <div class="report-top">
+                <b>PW</b><span class="status pass" id="playwright-report-status">36 PASS · 0 FAIL</span>
+              </div>
               <h3>Playwright</h3>
               <p>Dernier rapport connu sous Chromium : 33 tests fonctionnels et 3 E2E.</p>
               <a href="./playwright/">Ouvrir Playwright Report →</a>
@@ -188,7 +194,7 @@
               <a href="./coverage/">Ouvrir Coverage Report →</a>
             </article>
             <article>
-              <div class="report-top"><b>QG</b><span class="status pass">3/3 PASS</span></div>
+              <div class="report-top"><b>QG</b><span class="status pass" id="quality-status">3/3 PASS</span></div>
               <h3>Quality</h3>
               <p>Prettier PASS, ESLint PASS et TypeScript PASS.</p>
               <a href="./quality/">Ouvrir Quality Report →</a>
@@ -238,7 +244,7 @@
     <footer>
       <div class="wrap">
         <p>Portail QA SauceDemo · Prêt pour GitHub Pages</p>
-        <p>Une future CI pourra injecter <code>portal-data.js</code>, sans backend.</p>
+        <p>Les données de la dernière exécution sont injectées par la CI, sans backend.</p>
       </div>
     </footer>
   </body>

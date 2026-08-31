@@ -9,6 +9,7 @@ export default defineConfig({
   reporter: [
     ['html', { outputFolder: 'playwright-report' }],
     ['allure-playwright', { resultsDir: 'allure-results' }],
+    ['json', { outputFile: 'test-results/results.json' }],
   ],
   use: {
     baseURL: 'https://www.saucedemo.com/',

@@ -22,8 +22,67 @@
     localStorage.setItem(key, next);
     apply(next);
   });
-  // Point d’extension minimal pour une future injection par la CI.
-  if (window.portalData?.generatedAt) {
-    document.body.dataset.portalGeneratedAt = String(window.portalData.generatedAt);
+  const data = window.__QA_PORTAL_DATA__;
+  if (!data) return;
+
+  const setText = (id, value) => {
+    const element = document.getElementById(id);
+    if (element && value !== undefined && value !== null) element.textContent = String(value);
+  };
+  const ratio = (value, firstKey) => `${value[firstKey]}/${value.total}`;
+  const playwright = data.playwright;
+  const quality = data.qualityGate;
+  const coverage = data.coverage;
+
+  document.body.dataset.portalGeneratedAt = String(data.generatedAt);
+  setText('snapshot-title', 'Dernière exécution CI/CD');
+  setText('snapshot-message', 'Dernière exécution CI/CD publiée automatiquement.');
+
+  if (playwright) {
+    setText('playwright-status', playwright.status);
+    setText('playwright-score', `${playwright.passed} / ${playwright.total}`);
+    setText('playwright-failed', playwright.failed);
+    setText('playwright-report-status', `${playwright.passed} PASS · ${playwright.failed} FAIL`);
+    setText('coverage-playwright', playwright.total);
+    for (const id of ['playwright-status', 'playwright-report-status']) {
+      const status = document.getElementById(id);
+      status?.classList.toggle('pass', playwright.status === 'PASS');
+      status?.classList.toggle('fail', playwright.status !== 'PASS');
+    }
+  }
+
+  if (quality) {
+    setText('quality-status', `${quality.passed}/${quality.total} ${quality.status}`);
+    const status = document.getElementById('quality-status');
+    status?.classList.toggle('pass', quality.status === 'PASS');
+    status?.classList.toggle('fail', quality.status !== 'PASS');
+  }
+
+  if (coverage) {
+    setText('coverage-features', coverage.features.total);
+    setText('coverage-stories', coverage.userStories.total);
+    setText('coverage-ac', coverage.acceptanceCriteria.total);
+    setText('coverage-tc-total', coverage.testCases.total);
+    setText('coverage-tc', ratio(coverage.testCases, 'automated'));
+    setText('coverage-scope', `${coverage.qaScopeCoverage} %`);
+    setText('trace-features', ratio(coverage.features, 'covered'));
+    setText('trace-stories', ratio(coverage.userStories, 'covered'));
+    setText('trace-ac', ratio(coverage.acceptanceCriteria, 'covered'));
+    setText('trace-tc', ratio(coverage.testCases, 'automated'));
+    if (playwright) {
+      setText('playwright-functional', coverage.testCases.total);
+      setText('playwright-e2e', Math.max(0, playwright.total - coverage.testCases.total));
+    }
+  }
+
+  const metadata = document.getElementById('ci-meta');
+  const generatedAt = new Date(data.generatedAt);
+  if (metadata && !Number.isNaN(generatedAt.valueOf())) {
+    const shortCommit = String(data.commitSha ?? '').slice(0, 7);
+    metadata.textContent = `${data.branch} · ${shortCommit} · ${new Intl.DateTimeFormat('fr-FR', {
+      dateStyle: 'short',
+      timeStyle: 'short',
+    }).format(generatedAt)}`;
+    metadata.hidden = false;
   }
 })();

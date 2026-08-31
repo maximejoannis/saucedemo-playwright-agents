@@ -76,6 +76,9 @@ jobs:
           cp -R quality-report/. site/quality/
           touch site/.nojekyll
 
+      - name: Generate CI data for QA portal
+        run: npm run portal:data
+
       - name: Validate assembled QA portal
         run: |
           test -f site/index.html
@@ -83,6 +86,7 @@ jobs:
           test -f site/allure/index.html
           test -f site/coverage/index.html
           test -f site/quality/index.html
+          test -f site/portal-data.js
 
       - name: Upload QA diagnostic artifacts
         if: ${{ always() }}

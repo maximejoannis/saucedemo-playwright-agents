@@ -9,5 +9,6 @@ node_modules/
 /quality-report/
 /coverage-report/
 /blob-report/
+/site/
 /playwright/.cache/
 /playwright/.auth/
