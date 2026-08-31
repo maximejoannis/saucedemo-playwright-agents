@@ -1,593 +1,317 @@
 # Sprint Review — SauceDemo Playwright Agents
 
-## 1. Présentation du projet
+## 1. Synthèse de la réalisation
 
-**SauceDemo Playwright Agents** est un projet open source d'entraînement à l'automatisation des tests d'une application web avec **Playwright et TypeScript**.
+**SauceDemo Playwright Agents** met en œuvre une démarche de QA Automation complète sur l’application publique [SauceDemo](https://www.saucedemo.com/). La réalisation relie la conception fonctionnelle à l’automatisation, puis aux mécanismes de contrôle et de publication.
 
-L'objectif est de mettre en œuvre une démarche QA complète autour de l'application publique **SauceDemo**, depuis l'identification du périmètre fonctionnel jusqu'à l'exécution automatisée des tests, leur maintenance, leur intégration continue et la publication des résultats.
+```text
+Fonctionnalité → User Story → Acceptance Criteria → Test Case → Playwright
+→ E2E → Reporting → Quality Gate → CI/CD → QA Portal
+```
 
-Le projet explore également l'utilisation d'**agents IA avec Codex CLI et Playwright** pour assister différentes activités du cycle d'automatisation :
+Cette Sprint Review complète le [README](README.md) : le README présente le projet et son utilisation, tandis que ce document détaille les décisions QA, les résultats, les difficultés et les enseignements.
 
-- planification des tests ;
-- génération des tests ;
-- maintenance et réparation des tests.
+> La couverture de 100 % désigne la couverture automatisée du **périmètre QA défini et documenté**. Elle ne représente ni l’ensemble de SauceDemo, ni une couverture exhaustive de l’application, ni une couverture du code source.
 
-> La couverture présentée dans ce projet correspond au **périmètre fonctionnel défini pour cet exercice**. Elle ne représente ni une couverture exhaustive de SauceDemo, ni une couverture du code source de l'application.
+## 2. Résultats finaux
 
----
+| Indicateur                           |    Résultat |
+| ------------------------------------ | ----------: |
+| Fonctionnalités couvertes            |         6/6 |
+| User Stories couvertes               |         6/6 |
+| Acceptance Criteria couverts         |       32/32 |
+| TC fonctionnels automatisés          |       33/33 |
+| TC passants / non passants / erreurs | 15 / 3 / 15 |
+| Priorités P0 / P1 / P2               |  5 / 26 / 2 |
+| E2E complémentaires                  |           3 |
+| Tests Playwright globaux             |          36 |
+| Couverture du périmètre QA défini    |       100 % |
+| Quality Gate                         |    3/3 PASS |
 
-# 2. Objectifs et portée
+Les 36 tests Playwright se composent de **33 TC fonctionnels** issus de la conception et de **3 E2E complémentaires**. Les E2E ne sont pas comptés comme de nouveaux TC, de nouvelles User Stories ou de nouveaux Acceptance Criteria.
 
-## Objectifs
+## 3. Périmètre fonctionnel
 
-Les principaux objectifs étaient de :
+Six domaines ont été retenus après exploration. La consultation d’une fiche produit appartient au Catalogue et les actions du menu à la Session ; aucun domaine artificiel n’a été ajouté.
 
-- construire un projet Playwright maintenable en TypeScript ;
-- identifier les fonctionnalités principales de SauceDemo ;
-- concevoir un plan de tests fonctionnels structuré ;
-- automatiser les scénarios passants, non passants et les cas d'erreur ;
-- mettre en place des parcours E2E représentatifs ;
-- structurer le code avec un Page Object Model et des fixtures ;
-- classifier les tests afin de permettre plusieurs stratégies d'exécution ;
-- expérimenter l'utilisation d'agents IA spécialisés ;
-- produire plusieurs niveaux de reporting QA ;
-- automatiser les contrôles qualité ;
-- intégrer les tests dans une pipeline CI ;
-- publier les rapports dans un portail QA accessible publiquement.
+| Fonctionnalité   | User Story | Acceptance Criteria | TC fonctionnels |
+| ---------------- | ---------- | ------------------: | --------------: |
+| Authentification | US-01      |                   5 |               5 |
+| Catalogue        | US-02      |                   4 |               4 |
+| Tri              | US-03      |                   6 |               6 |
+| Panier           | US-04      |                   5 |               6 |
+| Checkout         | US-05      |                   8 |               8 |
+| Session          | US-06      |                   4 |               4 |
+| **Total**        | **6 US**   |              **32** |          **33** |
 
----
+AC-CART-05 est volontairement vérifié par deux TC distincts afin de caractériser les deux comptes spéciaux concernés.
 
-## Périmètre fonctionnel
+```mermaid
+pie showData
+    title Répartition des 33 TC par fonctionnalité
+    "Authentification" : 5
+    "Catalogue" : 4
+    "Tri" : 6
+    "Panier" : 6
+    "Checkout" : 8
+    "Session" : 4
+```
 
-Six domaines fonctionnels principaux ont été retenus :
-
-| Domaine          | Nombre de scénarios |
-| ---------------- | ------------------: |
-| Authentification |                   6 |
-| Catalogue        |                   4 |
-| Tri              |                   4 |
-| Panier           |                   5 |
-| Checkout         |                   7 |
-| Session          |                   3 |
-| **Total**        |              **29** |
-
-Les scénarios couvrent plusieurs types de comportements :
-
-- cas passants ;
-- cas non passants ;
-- cas d'erreur ;
-- scénarios Smoke ;
-- scénarios de régression.
-
-Trois parcours E2E supplémentaires permettent de vérifier des chaînes fonctionnelles plus larges.
-
----
-
-# 3. Résultats du périmètre automatisé
-
-| Indicateur                                 |    Résultat |
-| ------------------------------------------ | ----------: |
-| Fonctionnalités couvertes                  |   **6 / 6** |
-| Scénarios fonctionnels automatisés         | **29 / 29** |
-| Matrice fonctionnelle                      | **18 / 18** |
-| Parcours E2E                               |       **3** |
-| Tests Playwright                           |      **32** |
-| Couverture du périmètre fonctionnel défini |   **100 %** |
-
-La couverture fonctionnelle de 100 % signifie que l'ensemble des fonctionnalités et scénarios retenus dans le plan de tests de ce projet disposent d'une automatisation Playwright.
-
----
-
-# 4. Méthodologie
-
-La réalisation du projet a suivi une approche progressive.
+## 4. Conception QA et traçabilité
 
 ```mermaid
 flowchart LR
-    A[Exploration de SauceDemo] --> B[Définition du périmètre]
-    B --> C[Plan de tests fonctionnels]
-    C --> D[Architecture Playwright]
-    D --> E[Automatisation]
-    E --> F[Tests E2E]
-    F --> G[Contrôles qualité]
-    G --> H[Reporting]
-    H --> I[CI/CD]
-    I --> J[Portail QA]
+    A[Exploration] --> B[Fonctionnalités]
+    B --> C[User Stories]
+    C --> D[Acceptance Criteria]
+    D --> E[Test Cases]
+    E --> F[Revue QA]
+    F --> G[Automatisation]
 ```
 
-## 4.1 Exploration fonctionnelle
+Les User Stories expriment le besoin observable. Les Acceptance Criteria définissent ce qui doit être vérifié. Les TC `TC-*` transforment ces critères en validations reproductibles et automatisables, avec préconditions, données, étapes, résultats attendus, type, priorité et tags.
 
-L'application SauceDemo a d'abord été explorée afin d'identifier ses principales fonctionnalités et ses différents comportements.
-
-Cette phase a permis d'identifier :
-
-- les parcours nominaux ;
-- les contrôles de saisie ;
-- les comportements d'erreur ;
-- les comportements spécifiques de certains utilisateurs de démonstration ;
-- les interactions entre les différentes pages.
-
----
-
-## 4.2 Construction du plan de tests
-
-Un plan fonctionnel a ensuite été construit autour des six domaines identifiés.
-
-Chaque scénario possède un identifiant `TC-*`, permettant de conserver une organisation claire entre le plan et les tests automatisés.
-
-Exemples :
+La [matrice de traçabilité](tests/requirements/traceability-matrix.md) est la source de contrôle entre les niveaux :
 
 ```text
-TC-AUTH-01
-TC-CAT-01
-TC-TRI-01
-TC-PAN-01
-TC-CHK-01
-TC-SESSION-01
+Fonctionnalité → User Story → Acceptance Criteria → Test Case → Playwright
 ```
 
-Cette organisation facilite la lecture du projet et l'identification de la couverture automatisée.
+Elle est complétée par les [User Stories](tests/requirements/user-stories.md), les [Acceptance Criteria](tests/requirements/acceptance-criteria.md) et le [plan de tests fonctionnels](tests/test-plan/plan-tests-fonctionnels-saucedemo.md).
 
----
+Le générateur Coverage échoue notamment en présence :
 
-## 4.3 Classification des tests
+- d’identifiants dupliqués pour les fonctionnalités, US, AC, TC ou tests Playwright actifs ;
+- d’une US sans fonctionnalité ou sans AC ;
+- d’une référence US/AC inexistante ou incompatible ;
+- d’un TC absent du plan, de la matrice ou de l’automatisation ;
+- d’un test actif sans identifiant `TC-*` ou `E2E-*` reconnu ;
+- d’une divergence entre références ou tags documentés et automatisés ;
+- d’un AC non couvert ou non automatisé ;
+- d’un TC placé dans la couche E2E, ou inversement ;
+- d’un E2E comptabilisé comme TC fonctionnel.
 
-Les tests utilisent des tags permettant de constituer différentes suites d'exécution.
-
-### Type de scénario
-
-```text
-@positive
-@negative
-@error
+```mermaid
+xychart-beta
+    title "Couverture automatisée du périmètre QA défini"
+    x-axis ["Fonctionnalités", "User Stories", "Acceptance Criteria", "Test Cases"]
+    y-axis "Couverture (%)" 0 --> 100
+    bar [100, 100, 100, 100]
 ```
 
-### Niveau d'exécution
+## 5. Stratégie de tests
 
-```text
-@smoke
-@regression
-@e2e
+### 5.1 Classification fonctionnelle
+
+| Nature      | Tag         | Nombre |
+| ----------- | ----------- | -----: |
+| Passant     | `@positive` |     15 |
+| Non passant | `@negative` |      3 |
+| Erreur      | `@error`    |     15 |
+| **Total**   |             | **33** |
+
+```mermaid
+pie showData
+    title Classification des 33 TC fonctionnels
+    "Passants" : 15
+    "Non passants" : 3
+    "Erreurs" : 15
 ```
 
-### Domaine fonctionnel
+Les priorités sont réparties entre **5 P0**, **26 P1** et **2 P2**. La priorité exprime la criticité QA ; l’appartenance à une campagne Smoke ou Regression définit une stratégie d’exécution. Ce sont deux dimensions distinctes.
 
-```text
-@auth
-@catalog
-@sorting
-@cart
-@checkout
-@session
+### 5.2 Smoke et Regression
+
+| Campagne   | Fonctionnel | E2E | Playwright global |
+| ---------- | ----------: | --: | ----------------: |
+| Smoke      |           5 |   1 |                 6 |
+| Regression |          33 |   3 |                36 |
+
+La Smoke fonctionnelle couvre l’accès, le catalogue, l’ajout au panier, la commande et la déconnexion. Tous les TC fonctionnels appartiennent à la Regression.
+
+### 5.3 Parcours E2E
+
+1. **E2E-01 — achat complet** : Authentification → Catalogue → Panier → Checkout ;
+2. **E2E-02 — blocage fonctionnel au checkout** : validation du nom manquant sans quitter l’étape d’informations ;
+3. **E2E-03 — protection de session** : déconnexion puis refus d’une route protégée.
+
+```mermaid
+pie showData
+    title Composition des 36 tests Playwright
+    "TC fonctionnels" : 33
+    "E2E complémentaires" : 3
 ```
 
-Cette stratégie permet par exemple d'exécuter rapidement les tests Smoke ou de lancer une campagne de régression plus complète.
+Les E2E vérifient les transitions entre domaines. Ils ne servent pas à augmenter artificiellement la couverture des TC fonctionnels.
 
----
+## 6. Tests de caractérisation
 
-## 4.4 Architecture de l'automatisation
+Sept TC documentent volontairement des comportements dégradés observés avec `problem_user` et `error_user` : `TC-CAT-04`, `TC-TRI-05`, `TC-TRI-06`, `TC-PAN-05`, `TC-PAN-06`, `TC-CHK-07` et `TC-CHK-08`.
 
-Le projet repose sur une séparation entre :
+Ils caractérisent notamment des images dégradées, des tris inopérants, des ajouts partiels et des blocages au checkout. Ils ne décrivent pas les comportements nominaux attendus d’une application e-commerce et devront être reconfirmés si la démonstration publique évolue.
 
-- spécifications ;
-- Page Objects ;
-- fixtures ;
-- scénarios E2E ;
-- reporting.
+Le refus de connexion de `locked_out_user` est traité différemment : il correspond à la règle fonctionnelle attendue pour un compte verrouillé, et non à un test de caractérisation.
+
+## 7. Architecture Playwright
 
 ```text
 tests/
 ├── fixtures/
-│   └── test-fixtures.ts
 ├── pages/
-│   ├── login.page.ts
-│   ├── inventory.page.ts
-│   ├── cart.page.ts
-│   └── checkout.page.ts
-└── specs/
-    ├── e2e/
-    ├── plan-tests-fonctionnels-saucedemo.md
-    ├── auth.spec.ts
-    ├── inventory.spec.ts
-    ├── sorting.spec.ts
-    ├── cart.spec.ts
-    ├── checkout.spec.ts
-    └── session.spec.ts
+├── requirements/
+├── specs/
+│   └── e2e/
+├── test-data/
+└── test-plan/
+
+reporting/
+├── coverage/
+├── quality/
+├── qa-portal/
+└── scripts/
+
+.github/
+└── workflows/
 ```
 
-Le **Page Object Model** centralise les interactions avec l'interface et évite de disperser les locators et les actions dans les tests.
+Le Page Object Model repose sur `LoginPage`, `InventoryPage`, `CartPage` et `CheckoutPage`. Les interactions et locators sont séparés des assertions métier. Les sélecteurs privilégient les attributs `data-test`, les rôles accessibles et le contexte d’un composant.
 
-Les **fixtures Playwright** permettent de mutualiser certains prérequis, notamment la création d'un contexte utilisateur authentifié.
+Les fixtures mutualisent la connexion nominale et les données de test centralisent utilisateurs et produits. Chaque test conserve un contexte indépendant ; l’architecture reste compatible avec `fullyParallel`, même si la CI limite actuellement l’exécution à un worker.
 
----
+## 8. Agents Playwright / Codex et MCP
 
-# 5. Utilisation des agents IA
+Les agents sont des outils intégrés au workflow QA, pas des substituts à la conception, à la revue ou aux contrôles automatisés.
 
-Une partie importante du projet consistait à expérimenter l'utilisation d'agents IA spécialisés dans un véritable workflow d'automatisation.
+- **Planner** : exploration, User Stories, Acceptance Criteria, Test Cases et revue de la conception QA ;
+- **Generator** : architecture, automatisation des 33 TC, E2E, reporting, Quality Gate, portail et CI/CD ;
+- **Healer** : revue de robustesse, analyse d’échec et correction ciblée.
 
-Trois rôles ont été utilisés.
+La revue Healer de la suite finale a notamment renforcé l’ouverture du menu dans `InventoryPage` : après le clic, le Page Object attend explicitement que l’action Logout soit visible. Cette synchronisation réduit la fragilité des parcours Session lors des exécutions en parallèle.
+
+Playwright MCP sert de support d’exploration et d’interaction navigateur pour les agents. La validation finale reste assurée par TypeScript, ESLint, Prettier, Playwright et GitHub Actions.
+
+## 9. Reporting et Quality Gate
+
+Quatre surfaces complémentaires sont centralisées dans le QA Portal :
+
+- **Playwright Report** : rapport natif de l’exécution Chromium ;
+- **Allure Report** : détail des suites, tests et résultats ;
+- **Coverage QA** : couverture des fonctionnalités, US, AC, TC et automatisation — pas du code source ;
+- **Quality Report** : résultat des contrôles Prettier, ESLint et TypeScript.
+
+```mermaid
+flowchart LR
+    P[Prettier] --> E[ESLint]
+    E --> T[TypeScript]
+    T --> Q{Quality Gate}
+    Q -->|3/3| OK[PASS]
+    Q -->|au moins un échec| KO[FAIL]
+```
+
+Le générateur exécute les trois contrôles, écrit un rapport détaillé et retourne un échec si au moins l’un d’eux échoue. **Playwright et Allure ne font pas partie des trois checks du Quality Gate** ; ils restent des validations CI distinctes.
+
+Les tests produisent `allure-results/`. Le rapport HTML Allure est officiellement généré dans GitHub Actions avec Java 17. Java n’est pas requis pour exécuter localement les tests Playwright ; il est seulement nécessaire pour produire Allure HTML en local.
+
+## 10. CI/CD et QA Portal
+
+Le workflow [QA Pipeline](.github/workflows/qa.yml) utilise `actions/checkout@v4`, `actions/setup-node@v4` avec Node.js 24, Temurin Java 17, puis Chromium Playwright.
+
+```mermaid
+flowchart LR
+    A[Checkout] --> B[Node.js 24]
+    B --> C[Java 17]
+    C --> D[npm ci]
+    D --> E[Chromium]
+    E --> F[Quality Gate]
+    F --> G[Playwright]
+    G --> H[Coverage QA]
+    H --> I[Allure]
+    I --> J[QA Portal]
+    J --> K[GitHub Pages]
+```
+
+Les déclencheurs réels sont :
+
+- Pull Request vers `main` : validation, génération des rapports et assemblage du portail, sans publication ;
+- `push` sur `main` : validation complète puis publication GitHub Pages si le job QA réussit ;
+- `workflow_dispatch` : lancement manuel de la validation, sans publication Pages puisque ce n’est pas un `push` sur `main`.
+
+Les artefacts de diagnostic sont téléversés même en cas d’échec et conservés 30 jours. Le portail publié expose :
+
+```text
+/
+├── playwright/
+├── allure/
+├── coverage/
+└── quality/
+```
+
+La CI génère `site/portal-data.js` après assemblage. Le dashboard affiche les données de la **dernière exécution CI publiée** : branche, commit, date, résultats Playwright, Quality Gate et couverture QA. Il ne s’agit pas de données en temps réel.
+
+## 11. Défis rencontrés et décisions
+
+### Concevoir avant d’automatiser
+
+Le principal changement méthodologique a consisté à formaliser fonctionnalités, US et AC avant les TC. Cela évite qu’une suite techniquement riche masque des exigences absentes ou une couverture difficile à justifier.
+
+### Établir une traçabilité vérifiable
+
+La matrice seule ne suffit pas si elle peut diverger du code. Le générateur Coverage relit les documents et les tests actifs, contrôle leurs références et échoue sur les incohérences détectées.
+
+### Distinguer exigence et observation
+
+Les comptes spéciaux exposent des comportements volontairement dégradés. Les qualifier comme tests de caractérisation permet de les surveiller sans les transformer en exigences nominales.
+
+### Stabiliser les interactions UI
+
+La centralisation des locators dans les Page Objects facilite leur revue. L’attente explicite de l’ouverture du menu dans `InventoryPage` répond à une fragilité de synchronisation visible sous parallélisation.
+
+### Encadrer les agents IA
+
+Les agents ont accéléré exploration, production et revue, mais chaque contribution a été confrontée aux sources documentaires, au typage, aux règles de qualité et à l’exécution Playwright.
+
+### Mesurer sans accès au code applicatif
+
+Sans accès au code source de SauceDemo, la métrique pertinente est la couverture du périmètre QA documenté. Elle est calculée à partir de la chaîne Fonctionnalité/US/AC/TC, jamais présentée comme couverture de code.
+
+### Industrialiser la restitution
+
+Il a fallu rendre cohérents quatre rapports, générer Allure avec Java 17 en CI, assembler un portail unique et y injecter les données de l’exécution publiée avant le déploiement GitHub Pages.
+
+## 12. Enseignements
+
+- **Concevoir avant d’automatiser** : Fonctionnalité → User Story → Acceptance Criteria → Test Case → automatisation.
+- **Rendre la traçabilité exécutable** : les contrôles automatiques détectent les divergences que la lecture seule peut laisser passer.
+- **Séparer les responsabilités** : Page Objects, fixtures, données, specs et reporting ont des rôles distincts.
+- **Cibler les E2E** : quelques parcours transverses apportent de la valeur sans dupliquer les 33 TC.
+- **Traiter le framework comme un produit** : typage, lint, formatage, robustesse et rapports participent à la qualité.
+- **Encadrer l’IA** : Planner, Generator et Healer assistent le workflow ; les preuves restent dans le dépôt et la CI.
+- **Éviter la sur-complexité** : l’architecture reste proportionnée à une application de démonstration et à son périmètre documenté.
+
+## 13. Bilan
 
 ```mermaid
 flowchart TD
-    P[Agent Planner] -->|Planifie et analyse| T[Plan de tests]
-    T --> G[Agent Generator]
-    G -->|Génère et fait évoluer| C[Tests Playwright]
-    C --> R[Exécution]
-    R -->|Échec| H[Agent Healer]
-    H -->|Analyse et corrige| C
-    R -->|Succès| OK[PASS]
+    A[Analyse fonctionnelle] --> B[User Stories]
+    B --> C[Acceptance Criteria]
+    C --> D[Test Cases]
+    D --> E[Revue QA]
+    E --> F[Automatisation Playwright]
+    F --> G[E2E ciblés]
+    G --> H[Quality Gate]
+    H --> I[Reporting]
+    I --> J[CI/CD]
+    J --> K[QA Portal]
 ```
 
-### Planner
+Le résultat final associe **6 fonctionnalités**, **6 User Stories**, **32 Acceptance Criteria**, **33/33 TC automatisés**, **3 E2E**, soit **36 tests Playwright**, une couverture de **100 % du périmètre QA défini**, un **Quality Gate 3/3 PASS**, une CI/CD GitHub Actions et un portail GitHub Pages.
 
-Utilisé pour explorer, analyser et structurer la stratégie de tests.
+## 14. Liens
 
-### Generator
-
-Utilisé pour générer ou faire évoluer les tests et certains composants du projet à partir d'instructions contrôlées.
-
-### Healer
-
-Utilisé pour analyser et réparer un test devenu défaillant.
-
-Le fonctionnement du Healer a notamment été vérifié volontairement en introduisant un locator incorrect dans un Page Object puis en lui demandant d'identifier et de corriger la régression.
-
-L'objectif n'était pas de remplacer la démarche QA par l'IA, mais d'expérimenter son utilisation comme **outil d'assistance au développement et à la maintenance des tests**.
+- [Repository GitHub](https://github.com/maximejoannis/saucedemo-playwright-agents)
+- [QA Portal](https://maximejoannis.github.io/saucedemo-playwright-agents/)
+- [SauceDemo](https://www.saucedemo.com/)
 
 ---
 
-# 6. Outils et technologies
-
-| Technologie                  | Utilisation                                  |
-| ---------------------------- | -------------------------------------------- |
-| **Playwright**               | Automatisation des tests web                 |
-| **TypeScript**               | Développement du framework de tests          |
-| **Node.js / npm**            | Environnement et gestion des dépendances     |
-| **Codex CLI**                | Assistance IA en ligne de commande           |
-| **Playwright MCP**           | Interaction des agents avec le navigateur    |
-| **Page Object Model**        | Organisation des interactions avec les pages |
-| **Fixtures Playwright**      | Mutualisation des prérequis                  |
-| **Allure**                   | Reporting détaillé des exécutions            |
-| **Playwright HTML Reporter** | Rapport natif Playwright                     |
-| **ESLint**                   | Analyse statique du code                     |
-| **Prettier**                 | Normalisation du formatage                   |
-| **Git**                      | Gestion de versions                          |
-| **GitHub**                   | Hébergement du projet                        |
-| **GitHub Actions**           | Intégration continue                         |
-| **GitHub Pages**             | Publication du portail QA                    |
-
----
-
-# 7. Stratégie de reporting
-
-Le projet ne se limite pas au résultat d'une commande Playwright.
-
-Plusieurs niveaux de reporting ont été mis en place :
-
-```mermaid
-flowchart LR
-    TESTS[Tests Playwright] --> PW[Rapport Playwright]
-    TESTS --> ALLURE[Rapport Allure]
-    PLAN[Plan fonctionnel] --> COVERAGE[Couverture fonctionnelle]
-    CODE[Code du projet] --> QUALITY[Rapport qualité]
-
-    PW --> PORTAL[Portail QA]
-    ALLURE --> PORTAL
-    COVERAGE --> PORTAL
-    QUALITY --> PORTAL
-```
-
-Le portail QA centralise :
-
-- la couverture fonctionnelle ;
-- les résultats Playwright ;
-- le rapport Allure ;
-- les contrôles qualité.
-
-Il constitue le point d'entrée principal pour consulter l'état du projet.
-
----
-
-# 8. Intégration continue
-
-Une pipeline **GitHub Actions** automatise les principales validations du projet.
-
-Elle prend notamment en charge :
-
-1. l'installation des dépendances ;
-2. les contrôles qualité ;
-3. la génération du rapport de couverture ;
-4. l'installation de Chromium ;
-5. l'exécution des tests Playwright ;
-6. la génération du rapport Allure ;
-7. la validation des rapports ;
-8. la consolidation des artefacts ;
-9. le contrôle final de la pipeline ;
-10. la publication sur GitHub Pages.
-
-```mermaid
-flowchart LR
-    A[Push / Pull Request] --> B[Installation]
-    B --> C[Qualité]
-    C --> D[Couverture]
-    D --> E[Playwright]
-    E --> F[Allure]
-    F --> G[Validation]
-    G --> H{Branche principale ?}
-    H -->|Oui| I[GitHub Pages]
-    H -->|Non| J[Fin]
-    I --> K[Portail QA]
-```
-
-Cette automatisation permet d'obtenir un retour reproductible à chaque évolution du projet.
-
----
-
-# 9. Défis rencontrés
-
-## 9.1 Structurer un projet au-delà de simples scripts
-
-### Défi
-
-Un premier risque était de produire uniquement une collection de fichiers `.spec.ts` sans architecture globale.
-
-### Solution
-
-Le projet a été structuré progressivement autour de :
-
-- Page Objects ;
-- fixtures ;
-- tags ;
-- scénarios fonctionnels ;
-- parcours E2E ;
-- reporting ;
-- CI/CD.
-
-### Enseignement
-
-L'automatisation ne se résume pas à écrire des tests qui passent. La maintenabilité et l'organisation du framework sont essentielles.
-
----
-
-## 9.2 Gérer les comportements particuliers de SauceDemo
-
-### Défi
-
-SauceDemo fournit plusieurs utilisateurs de démonstration ayant volontairement des comportements différents.
-
-Certains comportements observés ne correspondent donc pas nécessairement au fonctionnement nominal attendu d'une application e-commerce.
-
-### Solution
-
-Les comportements ont été observés avant l'automatisation et les assertions ont été construites à partir du périmètre réellement étudié.
-
-Les scénarios distinguent ainsi les parcours nominaux des comportements d'erreur ou spécifiques aux utilisateurs de démonstration.
-
-### Enseignement
-
-Un test automatisé doit vérifier un comportement compris et documenté, et non simplement reproduire une suite de clics.
-
----
-
-## 9.3 Maintenir des locators fiables
-
-### Défi
-
-Une automatisation UI dépend fortement de la stabilité des locators.
-
-### Solution
-
-Les locators ont été centralisés dans les Page Objects et les sélecteurs Playwright adaptés ont été privilégiés, notamment les rôles, attributs de test et libellés accessibles.
-
-Le Healer a également été testé sur une régression volontaire de locator.
-
-### Enseignement
-
-La centralisation des locators réduit le coût de maintenance lorsqu'une interface évolue.
-
----
-
-## 9.4 Trouver le bon niveau d'utilisation de l'IA
-
-### Défi
-
-L'utilisation d'agents IA peut rapidement conduire à générer trop de code ou à complexifier inutilement l'architecture.
-
-### Solution
-
-Les agents ont reçu des rôles précis et des instructions écrites dans des prompts versionnés.
-
-Les décisions fonctionnelles et architecturales sont restées contrôlées par le projet.
-
-### Enseignement
-
-L'IA est particulièrement utile lorsqu'elle intervient dans un cadre défini, avec un périmètre clair et des validations systématiques.
-
----
-
-## 9.5 Construire une mesure de couverture pertinente
-
-### Défi
-
-Le code source de SauceDemo n'appartient pas au projet. Une métrique classique de couverture de lignes ou de branches n'aurait donc pas représenté la qualité du périmètre automatisé.
-
-### Solution
-
-Une mesure de **couverture fonctionnelle** a été construite à partir du plan de tests et des scénarios automatisés.
-
-### Enseignement
-
-Une métrique doit toujours être accompagnée de sa définition. Dans ce projet, `100 %` signifie que **100 % du périmètre fonctionnel défini est automatisé**, et non que 100 % de l'application ou de son code source est couvert.
-
----
-
-## 9.6 Industrialiser le reporting
-
-### Défi
-
-Playwright fournit déjà un excellent rapport HTML, mais le projet avait besoin d'une vue plus globale réunissant exécution, couverture et qualité.
-
-### Solution
-
-Plusieurs rapports ont été générés puis centralisés dans un portail QA publié automatiquement.
-
-### Enseignement
-
-Le reporting est une partie importante de l'automatisation : un résultat doit pouvoir être compris rapidement par une personne qui n'a pas exécuté les tests elle-même.
-
----
-
-# 10. Preuves visuelles
-
-## 10.1 Répartition des scénarios fonctionnels
-
-```mermaid
-xychart-beta
-    title "Scénarios par domaine fonctionnel"
-    x-axis ["Auth", "Catalogue", "Tri", "Panier", "Checkout", "Session"]
-    y-axis "Scénarios" 0 --> 8
-    bar [6, 4, 4, 5, 7, 3]
-```
-
-Le Checkout représente le domaine comportant le plus de scénarios, suivi de l'authentification et du panier.
-
----
-
-## 10.2 Couverture du périmètre
-
-```mermaid
-xychart-beta
-    title "Couverture fonctionnelle"
-    x-axis ["Fonctionnalités", "Scénarios", "Matrice"]
-    y-axis "Couverture (%)" 0 --> 100
-    bar [100, 100, 100]
-```
-
-Les trois indicateurs atteignent 100 % sur le périmètre défini :
-
-- 6 fonctionnalités sur 6 ;
-- 29 scénarios sur 29 ;
-- 18 combinaisons fonction/type sur 18.
-
----
-
-## 10.3 Composition de la suite automatisée
-
-```mermaid
-pie showData
-    title Composition des scénarios automatisés
-    "Scénarios fonctionnels" : 29
-    "Parcours E2E" : 3
-```
-
-La suite contient **32 tests Playwright**, dont 29 scénarios fonctionnels et 3 parcours E2E complémentaires.
-
-Les parcours E2E sont suivis séparément et ne viennent pas augmenter artificiellement les 29 scénarios du périmètre fonctionnel.
-
----
-
-# 11. Résultats
-
-À l'issue du projet :
-
-- les **6 fonctionnalités principales identifiées** sont couvertes ;
-- les **29 scénarios fonctionnels définis** sont automatisés ;
-- la matrice Passant / Non passant / Erreur du périmètre est couverte ;
-- **3 parcours E2E** complètent la validation fonctionnelle ;
-- le framework utilise des **Page Objects et fixtures** ;
-- plusieurs stratégies d'exécution sont disponibles grâce aux tags ;
-- les contrôles **ESLint et Prettier** sont intégrés ;
-- les rapports **Playwright, Allure, Couverture et Qualité** sont disponibles ;
-- une pipeline **GitHub Actions** automatise les validations ;
-- les résultats sont publiés dans un **portail QA GitHub Pages** ;
-- des **agents IA spécialisés** ont été intégrés au workflow de développement et de maintenance.
-
----
-
-# 12. Enseignements
-
-Ce projet a permis de travailler l'automatisation comme une véritable démarche QA plutôt que comme une simple activité de scripting.
-
-Les principaux enseignements sont les suivants :
-
-### Concevoir avant d'automatiser
-
-L'identification du périmètre et la construction du plan de tests permettent de savoir précisément ce qui est couvert et pourquoi.
-
-### Séparer les responsabilités
-
-Les Page Objects, fixtures et fichiers de spécification rendent le framework plus lisible et facilitent sa maintenance.
-
-### Tester plusieurs dimensions
-
-Les scénarios nominaux seuls ne suffisent pas. Les cas non passants et les comportements d'erreur sont essentiels pour obtenir une couverture fonctionnelle pertinente.
-
-### Garder les E2E ciblés
-
-Les parcours E2E complètent les tests fonctionnels sans dupliquer inutilement tous les scénarios.
-
-### Automatiser aussi la qualité du projet de tests
-
-ESLint, Prettier et la CI permettent de contrôler le framework lui-même, et pas uniquement l'application testée.
-
-### Rendre les résultats visibles
-
-Les rapports et le portail QA permettent de transformer les résultats techniques en informations immédiatement consultables.
-
-### Utiliser l'IA comme accélérateur
-
-Les agents peuvent assister la planification, la génération et la maintenance, mais leur travail doit rester guidé par des instructions précises et validé par l'exécution des tests et les contrôles qualité.
-
-### Éviter la sur-complexité
-
-Un projet d'entraînement doit rester compréhensible. Chaque nouvelle couche doit apporter une valeur réelle à la démonstration.
-
----
-
-# 13. Bilan
-
-Le projet démontre une chaîne QA automatisée complète :
-
-```text
-Analyse fonctionnelle
-        ↓
-Plan de tests
-        ↓
-Automatisation Playwright
-        ↓
-Page Object Model / Fixtures
-        ↓
-Smoke / Régression / E2E
-        ↓
-Qualité du code
-        ↓
-Reporting
-        ↓
-CI/CD
-        ↓
-Portail QA
-```
-
-Le résultat est un projet open source reproductible permettant de démontrer à la fois des compétences en :
-
-- analyse et conception de tests ;
-- automatisation Playwright ;
-- TypeScript ;
-- architecture de framework ;
-- stratégie de tests ;
-- CI/CD ;
-- reporting QA ;
-- utilisation encadrée d'agents IA pour l'automatisation.
-
----
-
-## Liens
-
-**Dépôt GitHub :**
-https://github.com/maximejoannis/saucedemo-playwright-agents
-
-**Portail QA :**
-https://maximejoannis.github.io/saucedemo-playwright-agents/
-
-**Application testée :**
-https://www.saucedemo.com/
+Cette Sprint Review documente l’état final du périmètre QA à la date de sa réalisation. Toute évolution de SauceDemo ou de la suite doit conduire à régénérer les rapports et à réévaluer la traçabilité.
