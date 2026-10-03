@@ -96,7 +96,7 @@ La probabilité estime la vraisemblance raisonnable de la défaillance ou de sa 
 | 1–2 | Faible | Couverture ciblée ou risque accepté et surveillé. |
 | 3–4 | Moyen | Régression proportionnée et contrôle du scénario représentatif. |
 | 6 | Élevé | Couverture renforcée, négative ou de transition selon le risque. |
-| 9 | Critique | Garde-barrière P0, Smoke et régression automatisée sur le chemin nominal. |
+| 9 | Critique | Envisager une garde-barrière P0 et une couverture Smoke/régression lorsque le contrôle est stable, déterministe et pertinent. |
 
 Les scores 5, 7 et 8 ne peuvent pas résulter de l’échelle 1 à 3.
 
@@ -131,8 +131,8 @@ Les P0 existants `TC-AUTH-01`, `TC-PAN-01`, `TC-CHK-01`, `TC-SESSION-02` et `TC-
 ### Revue de cohérence et transmission au Generator
 
 - **Risques identifiés :** le catalogue de référence recense 14 risques distincts — 2 critiques, 7 élevés, 2 moyens et 3 faibles — sur les six fonctionnalités.
-- **État de couverture :** le catalogue classe 9 risques comme couverts et 5 comme partiellement couverts; aucun n’est déclaré non couvert ou accepté/hors périmètre.
-- **Risques partiellement couverts :** `RISK-CART-02`, `RISK-CHK-03`, `RISK-CHK-04`, `RISK-SESSION-01` et `RISK-SESSION-02`; leurs gaps et réponses QA recommandées sont maintenus dans `../requirements/risk-register.md`.
+- **État de couverture :** le catalogue classe 7 risques comme couverts et 7 comme partiellement couverts; aucun n’est déclaré non couvert ou accepté/hors périmètre.
+- **Risques partiellement couverts :** `RISK-CAT-02`, `RISK-CART-02`, `RISK-CHK-02`, `RISK-CHK-03`, `RISK-CHK-04`, `RISK-SESSION-01` et `RISK-SESSION-02`; leurs gaps et réponses QA recommandées sont maintenus dans `../requirements/risk-register.md`.
 - **Priorités revues :** `TC-CHK-02` et `TC-SESSION-01` sont P0 + Smoke, `TC-CHK-06` est P1, `TC-CAT-04` et `TC-TRI-05/06` sont P2 en Regression de caractérisation.
 - **Recommandations de conception au Generator :** préserver les IDs et liens US/AC/TC; utiliser des références d’état et de calcul indépendantes; concevoir un scénario multi-articles par transitions plutôt qu’une explosion combinatoire; séparer les tests métier nominaux des caractérisations `problem_user`/`error_user`; ne générer aucun nouveau test sur les gaps tant que les règles produit signalées ne sont pas clarifiées.
 
@@ -866,7 +866,7 @@ Les TC importants peuvent documenter, en plus de la traçabilité US/AC/RISK, le
 **Type :** Passant  
 **Priorité :** P0
 **Impact potentiel en cas d’échec :** montant présenté incorrect, avec conséquence financière ou réglementaire potentielle.
-**Référence attendue :** le sous-total correspond à la somme des prix des lignes du panier; le total correspond au sous-total augmenté de la taxe affichée. Les valeurs 129,94 $, 10,40 $ et 140,34 $ dérivent des six produits du scénario et de ces relations.
+**Référence attendue :** le sous-total correspond à la somme des prix des lignes du panier; le total correspond au sous-total augmenté de la taxe affichée. Les valeurs 129,94 $ et 140,34 $ dérivent des six produits du scénario et de cette relation. La taxe de 10,40 $ est une baseline observée de régression : faute de taux, de formule et de règle d’arrondi spécifiés, elle ne constitue pas une référence métier indépendante.
 
 **Justification de la priorité :** contrôle d’intégrité financière de RISK-CHK-02 élevé; un tunnel techniquement finalisable avec un montant faux ne constitue pas un Smoke acceptable.
 **Tags :** `@positive @smoke @regression @checkout`
@@ -1179,7 +1179,7 @@ La Smoke contient sept cas : TC-AUTH-01, TC-CAT-01, TC-PAN-01, TC-CHK-01, TC-CHK
 - Les 33 cas sont automatisables avec des interactions utilisateur et des observations déterministes dans Chromium; aucun ne requiert de manipulation du DOM, d’injection de script ou de comparaison visuelle subjective.
 - Les cas de caractérisation TC-CAT-04, TC-TRI-05, TC-TRI-06, TC-PAN-05, TC-PAN-06, TC-CHK-07 et TC-CHK-08 sont volontairement couplés à la version publique de la démo. Ils sont déterministes à la date de référence mais devront être reconfirmés avant implémentation si SauceDemo évolue.
 - TC-CAT-03 dépend d’une navigation directe vers une référence inexistante et reste reproductible depuis une session authentifiée.
-- TC-CHK-02 utilise des montants observés exacts; sa référence attendue compare les lignes, le sous-total, la taxe et le total, sans dépendre d’une simple observation visuelle.
+- TC-CHK-02 utilise des montants observés exacts; sa référence attendue dérive indépendamment le sous-total depuis les lignes et vérifie la relation total = sous-total + taxe affichée. La valeur exacte de taxe reste une baseline observée, sans preuve métier indépendante tant que son taux, sa formule et son arrondi ne sont pas spécifiés.
 - TC-CHK-08 doit construire l’étape 2 par le parcours normal; aucun état interne ne doit être forcé. Si ce parcours n’est plus accessible lors de la prochaine exploration, le cas devra être révisé plutôt que contourné.
 
 ### Revue de la raison d’être et des priorités

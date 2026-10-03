@@ -56,8 +56,8 @@ Cette matrice relie chaque cas au besoin, aux critères définis et aux risques 
 | Charters exploratoires (hors dénominateur des TC) | 8 |
 | Risques produit définis | 14 |
 | Risques reliés à au moins un cas automatisé | 14 |
-| Risques couverts | 9 |
-| Risques partiellement couverts | 5 |
+| Risques couverts | 7 |
+| Risques partiellement couverts | 7 |
 | Risques non couverts | 0 |
 | Risques acceptés / hors périmètre | 0 |
 | Risques critiques ou élevés couverts par la Smoke | 7 / 9 |

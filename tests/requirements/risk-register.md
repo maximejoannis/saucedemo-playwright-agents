@@ -50,12 +50,12 @@ Les campagnes Smoke et Regression, ou plusieurs tests répétant la même réfé
 | RISK-AUTH-01 | Authentification | Un utilisateur légitime ne peut pas s’authentifier. | Accès au service marchand et achat entièrement bloqués. | US-01 | AC-AUTH-01 | 3 | 3 | Critique (9) | Smoke + régression nominale; défense E2E transverse. | TC-AUTH-01 | Couvert | Un seul compte nominal exercé. |
 | RISK-AUTH-02 | Authentification | Des identifiants invalides ou un compte verrouillé obtiennent un accès. | Accès non autorisé au domaine marchand ou aux données de l’utilisateur précédent. | US-01, US-06 | AC-AUTH-02, AC-AUTH-03, AC-AUTH-04, AC-AUTH-05, AC-SESSION-03 | 2 | 3 | Élevé (6) | Tests négatifs à l’entrée et transition après logout; E2E de protection. | TC-AUTH-02, TC-AUTH-03, TC-AUTH-04, TC-AUTH-05, TC-SESSION-03 | Couvert | Session jamais authentifiée et autres routes non contrôlées. |
 | RISK-CAT-01 | Catalogue | Produit, description ou prix absent, erroné ou incohérent entre liste et fiche. | Mauvaise décision d’achat et montant attendu trompeur. | US-02 | AC-CAT-01, AC-CAT-02, AC-CAT-03 | 2 | 2 | Moyen (4) | Régression des six produits et cohérence liste/fiche. | TC-CAT-01, TC-CAT-02, TC-CAT-03 | Couvert | Contenu marketing non validé exhaustivement. |
-| RISK-CAT-02 | Catalogue | Image incorrecte ou indisponible. | Compréhension du produit dégradée sans blocage du parcours. | US-02 | AC-CAT-01, AC-CAT-04 | 2 | 1 | Faible (2) | Contrôle nominal ciblé et caractérisation séparée. | TC-CAT-01, TC-CAT-04 | Couvert | Pas de comparaison visuelle subjective ou responsive. |
+| RISK-CAT-02 | Catalogue | Image incorrecte ou indisponible. | Compréhension du produit dégradée sans blocage du parcours. | US-02 | AC-CAT-01, AC-CAT-04 | 2 | 1 | Faible (2) | Contrôle nominal ciblé, caractérisation séparée et vérification humaine de la correspondance produit/image. | TC-CAT-01, TC-CAT-04 | Partiellement couvert | Les sources absentes, dupliquées ou `sl-404` sont détectables; la justesse sémantique d’une image valide n’est pas démontrée. |
 | RISK-SORT-01 | Tri | Le catalogue n’est pas ordonné selon le nom ou le prix choisi. | Recherche moins efficace sans altération du panier ou du montant. | US-03 | AC-SORT-01, AC-SORT-02, AC-SORT-03, AC-SORT-04, AC-SORT-05, AC-SORT-06 | 2 | 1 | Faible (2) | Régression automatisée des quatre ordres; caractérisations hors Smoke. | TC-TRI-01, TC-TRI-02, TC-TRI-03, TC-TRI-04, TC-TRI-05, TC-TRI-06 | Couvert | Collation internationale et catalogues volumineux non couverts. |
 | RISK-CART-01 | Panier | Un ajout ou retrait échoue, ou un article est perdu, dupliqué ou remplacé pendant la navigation. | Commande incorrecte, abandon ou facturation potentielle d’un mauvais contenu. | US-04 | AC-CART-01, AC-CART-02, AC-CART-03, AC-CART-05 | 2 | 3 | Élevé (6) | Smoke sur l’ajout; transitions multi-articles; E2E d’achat. | TC-PAN-01, TC-PAN-02, TC-PAN-03, TC-PAN-05, TC-PAN-06 | Couvert | Volumes et modifications concurrentes non couverts. |
 | RISK-CART-02 | Panier | Le panier disparaît au rafraîchissement ou réapparaît dans une session ultérieure de façon inattendue. | Perte de sélection ou exposition d’un état d’achat résiduel. | US-04, US-06 | AC-SESSION-01 | 2 | 3 | Élevé (6) | Transition après rafraîchissement; clarification inter-session requise. | TC-SESSION-01 | Partiellement couvert | Logout/relogin, changement d’utilisateur et nouveau contexte non testés. |
 | RISK-CHK-01 | Checkout | Une commande valide ne peut pas être finalisée ou aucune confirmation n’est produite. | Conversion bloquée ou statut de commande ambigu. | US-05 | AC-CHK-01, AC-CHK-07, AC-CHK-08 | 3 | 3 | Critique (9) | Smoke + régression du parcours complet; E2E d’achat. | TC-CHK-01, TC-CHK-07, TC-CHK-08 | Couvert | Statut persistant hors page de confirmation non vérifié. |
-| RISK-CHK-02 | Checkout | Sous-total, taxe, total ou lignes du récapitulatif incorrects. | Montant annoncé ou facturé incorrect et risque financier/réglementaire. | US-05 | AC-CHK-02 | 2 | 3 | Élevé (6) | Référence arithmétique indépendante multi-articles; contrôle E2E sur un article. | TC-CHK-02 | Couvert | Règle de taxe et arrondis limites non spécifiés. |
+| RISK-CHK-02 | Checkout | Sous-total, taxe, total ou lignes du récapitulatif incorrects. | Montant annoncé ou facturé incorrect et risque financier/réglementaire. | US-05 | AC-CHK-02 | 2 | 3 | Élevé (6) | Référence arithmétique indépendante pour les lignes, le sous-total et la cohérence total = sous-total + taxe; règle de taxe à clarifier. | TC-CHK-02 | Partiellement couvert | Le taux ou la formule de taxe et les règles d’arrondi ne sont pas spécifiés; la valeur exacte de taxe n’a donc pas de référence métier indépendante. |
 | RISK-CHK-03 | Checkout | Une commande vide peut être finalisée. | Données parasites et métriques de commande faussées. | US-04, US-05 | AC-CART-04, AC-CHK-06 | 3 | 2 | Élevé (6) | Caractérisation négative; décision produit sur le blocage souhaité. | TC-PAN-04, TC-CHK-06 | Partiellement couvert | Comportement détecté mais attendu métier non arbitré. |
 | RISK-CHK-04 | Checkout | Des données de livraison obligatoires manquent mais le parcours continue, ou une saisie valide est rejetée. | Livraison impossible ou abandon d’une saisie pourtant valide. | US-05 | AC-CHK-03, AC-CHK-04, AC-CHK-05, AC-CHK-07 | 2 | 2 | Moyen (4) | Tests négatifs des champs requis et exploration des classes de saisie. | TC-CHK-03, TC-CHK-04, TC-CHK-05, TC-CHK-07 | Partiellement couvert | Formats, longueurs et validité postale non définis. |
 | RISK-SESSION-01 | Session | La session active est perdue ou son contexte est mal conservé pendant le parcours. | Interruption, perte du panier et abandon. | US-06 | AC-SESSION-01 | 2 | 3 | Élevé (6) | Smoke après rafraîchissement; exploration du cycle de vie. | TC-SESSION-01 | Partiellement couvert | Cart, Checkout, expiration et reprise non couverts. |
@@ -108,9 +108,9 @@ Les campagnes Smoke et Regression, ou plusieurs tests répétant la même réfé
 
 - **Besoin menacé :** vérifier un montant de commande exact avant confirmation (US-05).
 - **Conséquence :** montant annoncé ou facturé incorrect, perte de confiance et risque financier/réglementaire.
-- **Réponse QA :** référence arithmétique indépendante sur plusieurs articles en Smoke et régression; contrôle transverse sur un article dans E2E-01.
-- **Défenses effectives :** TC-CHK-02 compare chaque ligne, la somme, la taxe et le total; E2E-01 contrôle la cohérence financière du parcours nominal.
-- **Risque résiduel :** règle de taxe, partitions de montant et arrondis limites non spécifiés.
+- **Réponse QA :** référence arithmétique indépendante sur plusieurs articles pour les lignes, le sous-total et la relation total = sous-total + taxe; contrôle transverse sur un article dans E2E-01; clarification métier de la taxe avant toute BVA d’arrondi.
+- **Défenses effectives :** TC-CHK-02 compare chaque ligne, recalcule le sous-total et contrôle la relation entre sous-total, taxe affichée et total; E2E-01 contrôle un autre jeu de données dans le parcours nominal. La valeur de taxe observée sert de baseline de régression, pas de démonstration indépendante de sa justesse métier.
+- **État partiel :** le taux ou la formule de taxe, les règles d’arrondi et les partitions de montant ne sont pas spécifiés. Les contrôles actuels peuvent détecter une variation ou une incohérence arithmétique, mais pas prouver que la taxe calculée est correcte.
 
 ### RISK-CHK-03 — Commande vide finalisée
 
@@ -153,7 +153,7 @@ Les campagnes Smoke et Regression, ou plusieurs tests répétant la même réfé
 | RISK-CART-01 | AC-CART-01/02/03 | TC-PAN-01/02/03 | Transition multi-articles dans TC-PAN-03 | Oui | E2E-01 | Volumes hors périmètre actuel | Plusieurs défenses complémentaires. |
 | RISK-CART-02 | AC-SESSION-01 | TC-SESSION-01 | Rafraîchissement seulement | Oui | — | Clarification inter-session | Une seule défense fonctionnelle. |
 | RISK-CHK-01 | AC-CHK-01 | TC-CHK-01 | Caractérisations TC-CHK-07/08 | Oui | E2E-01 | — | Plusieurs niveaux nominaux; caractérisations non comptées comme exigence métier. |
-| RISK-CHK-02 | AC-CHK-02 | TC-CHK-02 | Référence arithmétique indépendante | Oui | E2E-01 | Règle taxe/arrondi à clarifier | Deux jeux de données et niveaux de parcours. |
+| RISK-CHK-02 | AC-CHK-02 | TC-CHK-02 | Somme des lignes et relation total = sous-total + taxe | Oui | E2E-01 | Règle taxe/arrondi à clarifier | Deux jeux de données et niveaux de parcours, mais aucune référence indépendante pour la valeur de taxe. |
 | RISK-CHK-03 | AC-CART-04, AC-CHK-06 | TC-PAN-04, TC-CHK-06 | Parcours vide | Non | — | Décision Product Owner | Une seule chaîne de défense; attendu métier non arbitré. |
 | RISK-SESSION-01 | AC-SESSION-01 | TC-SESSION-01 | Rafraîchissement seulement | Oui | — | Cycle de vie à explorer | Une seule défense, partagée avec RISK-CART-02. |
 | RISK-SESSION-02 | AC-SESSION-02/03 | TC-SESSION-02 | TC-SESSION-03 | Logout seulement | E2E-03 | Inventaire des routes | Plusieurs niveaux, périmètre de routes partiel. |
@@ -162,7 +162,9 @@ Les campagnes Smoke et Regression, ou plusieurs tests répétant la même réfé
 
 | Risque | Gap | Réponse QA recommandée | Nouveau TC dans cette étape |
 |---|---|---|---|
+| RISK-CAT-02 | Les contrôles détectent une image absente, dupliquée ou explicitement dégradée, mais pas une image valide associée au mauvais produit. | Vérification manuelle ciblée de la correspondance sémantique produit/image; envisager une référence visuelle seulement si elle devient stable et maintenable. | Non |
 | RISK-CART-02 | Persistance après logout/relogin, changement d’utilisateur et nouvelle session non spécifiée. | Clarification produit, puis test de transition d’état inter-session si la règle est confirmée. | Non |
+| RISK-CHK-02 | La formule ou le taux de taxe et les règles d’arrondi ne sont pas définis; le montant fiscal exact ne peut pas être dérivé indépendamment. | Obtenir la règle métier de taxe et d’arrondi, puis compléter la conception par partitions et valeurs limites justifiées. | Non |
 | RISK-CHK-03 | Le système confirme une commande vide, mais l’attendu souhaité n’est pas défini. | Décision Product Owner et acceptation explicite ou nouvel AC avant toute évolution de test. | Non |
 | RISK-CHK-04 | Validité des formats et classes de saisie non définie. | Test exploratoire ciblé, puis partitions fonctionnelles après clarification. | Non |
 | RISK-SESSION-01 | Rafraîchissement hors Inventory, expiration et reprise non couverts. | Exploration du cycle de vie, définition de la politique de session, puis tests de transition ciblés. | Non |
@@ -170,7 +172,7 @@ Les campagnes Smoke et Regression, ou plusieurs tests répétant la même réfé
 
 **Risques critiques ou élevés avec une seule défense indépendante :** RISK-CART-02, RISK-CHK-03 et RISK-SESSION-01.
 
-**Risques critiques ou élevés disposant de plusieurs défenses complémentaires :** RISK-AUTH-01, RISK-AUTH-02, RISK-CART-01, RISK-CHK-01, RISK-CHK-02 et RISK-SESSION-02. Ce constat n’annule pas les gaps de portée signalés pour RISK-SESSION-02.
+**Risques critiques ou élevés disposant de plusieurs défenses complémentaires :** RISK-AUTH-01, RISK-AUTH-02, RISK-CART-01, RISK-CHK-01, RISK-CHK-02 et RISK-SESSION-02. Ce constat n’annule ni l’absence de référence indépendante pour la taxe de RISK-CHK-02, ni les gaps de portée signalés pour RISK-SESSION-02.
 
 ## Risques résiduels
 
@@ -187,12 +189,12 @@ Les campagnes Smoke et Regression, ou plusieurs tests répétant la même réfé
 | Indicateur | Nombre |
 |---|---:|
 | Risques identifiés | 14 |
-| Couvert | 9 |
-| Partiellement couvert | 5 |
+| Couvert | 7 |
+| Partiellement couvert | 7 |
 | Non couvert | 0 |
 | Accepté / hors périmètre | 0 |
 | Risques critiques ou élevés avec plusieurs défenses | 6 |
-| Risques critiques ou élevés nécessitant une couverture supplémentaire | 4 |
+| Risques critiques ou élevés nécessitant une couverture supplémentaire | 5 |
 | Risques critiques ou élevés avec une seule défense indépendante | 3 |
 
-Les quatre risques critiques ou élevés nécessitant une couverture supplémentaire sont RISK-CART-02, RISK-CHK-03, RISK-SESSION-01 et RISK-SESSION-02. RISK-CHK-04 reste également partiellement couvert, mais son niveau est Moyen.
+Les cinq risques critiques ou élevés nécessitant une couverture supplémentaire sont RISK-CART-02, RISK-CHK-02, RISK-CHK-03, RISK-SESSION-01 et RISK-SESSION-02. RISK-CAT-02 et RISK-CHK-04 restent également partiellement couverts, respectivement aux niveaux Faible et Moyen.
