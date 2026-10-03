@@ -29,6 +29,7 @@ const data = {
     significantRisks: coverage.significantRisks,
     exploratoryCharters: coverage.exploratoryCharters,
     techniques: coverage.techniques,
+    automationRate: coverage.automationRate,
     qaScopeCoverage: coverage.qaScopeCoverage,
   },
 };

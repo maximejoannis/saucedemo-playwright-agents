@@ -168,21 +168,24 @@ Fonctionnalités : 6 / 6
 User Stories    : 6 / 6
 AC              : 32 / 32
 TC automatisés  : 33 / 33
+TC manuels      : 0
+TC candidats    : 0
+Charters EXP    : 8 (hors dénominateur des TC)
 ```
 
 Soit :
 
 ```text
-100 % de couverture fonctionnelle automatisée
+100 % de taux descriptif d’automatisation des TC actuellement définis
 ```
 
-> Le taux de 100 % correspond à la couverture automatisée du périmètre QA défini et documenté : 6/6 fonctionnalités, 6/6 User Stories, 32/32 Acceptance Criteria et 33/33 Test Cases. Il ne s’agit pas d’une couverture exhaustive de SauceDemo ni d’une couverture du code source.
+> Le ratio 33/33 décrit l’état actuel : chacun des TC fonctionnels définis a un mode d’exécution `Automatisé` validé et une implémentation Playwright. Ce taux n’est ni un objectif qualité à maintenir pour les futurs TC, ni une couverture exhaustive de SauceDemo ou de son code source. Un futur contrôle peut légitimement rester manuel, candidat ou exploratoire lorsque sa valeur le justifie.
 
 La couche d’investigation humaine est documentée séparément dans [`tests/exploratory/charters.md`](tests/exploratory/charters.md). Un charter `EXP-*` planifié ou exécuté ne devient pas automatiquement un TC et n’augmente jamais la couverture automatisée ci-dessus.
 
 ### Important
 
-La couverture fonctionnelle mesure la proportion du périmètre fonctionnel défini disposant de tests Playwright automatisés.
+La couverture fonctionnelle mesure les besoins et AC exercés par des contrôles définis. Le taux d’automatisation mesure séparément la proportion des TC dont le mode validé est `Automatisé`; il n’inclut jamais les charters exploratoires.
 
 Cette métrique ne représente ni une couverture exhaustive de toutes les fonctionnalités possibles de SauceDemo, ni une couverture du code source de l'application.
 
@@ -1024,12 +1027,14 @@ npm run portal:data
 6 / 6 User Stories couvertes
 32 / 32 Acceptance Criteria couverts
 33 / 33 TC fonctionnels automatisés
+0 TC manuel / 0 candidat à l’automatisation
+8 charters exploratoires hors dénominateur des TC
 15 passants / 3 non passants / 15 erreurs
 3 E2E complémentaires
 36 tests Playwright
-5 Smoke fonctionnels / 6 Smoke globaux
+7 Smoke fonctionnels / 8 Smoke globaux
 33 Regression fonctionnels / 36 Regression globaux
-100 % de couverture automatisée du périmètre QA défini
+100 % de taux descriptif d’automatisation des TC actuellement définis (pas un objectif futur)
 Quality Gate : 3 / 3 PASS
 ```
 

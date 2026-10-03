@@ -12,12 +12,14 @@ async function loadReport() {
   if (!response.ok) throw new Error(`data.json indisponible (${response.status})`);
   const data = await response.json();
   const summary = data.summary;
-  q('#score').textContent = `${summary.qaScopeCoverage} %`;
+  q('#score').textContent = `${summary.automationRate} %`;
   const cards = [
     ['Fonctionnalités', ratio(summary.features)],
     ['User Stories', ratio(summary.userStories)],
     ['Critères d’acceptation', ratio(summary.acceptanceCriteria)],
     ['Cas de test fonctionnels', ratio(summary.functionalTestCases, 'automated')],
+    ['TC manuels', summary.functionalTestCases.manual],
+    ['Candidats à l’automatisation', summary.functionalTestCases.candidates],
     ['Risques tracés', ratio(summary.risks, 'traced')],
     ['Risques couverts', summary.riskCoverage.Couvert],
     ['Risques partiellement couverts', summary.riskCoverage['Partiellement couvert']],
@@ -91,7 +93,7 @@ async function loadReport() {
       .filter((testCase) => !term || JSON.stringify(testCase).toLowerCase().includes(term))
       .map(
         (testCase) =>
-          `<tr><td><strong>${testCase.id}</strong></td><td>${escapeHtml(testCase.feature)}</td><td>${testCase.userStory}</td><td>${testCase.acceptanceCriteria.map((id) => `<code>${id}</code>`).join(' ')}</td><td>${testCase.risks.map((id) => `<code>${id}</code>`).join(' ')}</td><td>${testCase.techniques.length ? testCase.techniques.map((id) => `<code>${id}</code>`).join(' ') : '—'}</td><td>${escapeHtml(testCase.type)}</td><td>${testCase.priority}</td><td>${escapeHtml(testCase.potentialImpact ?? '—')}</td><td>${escapeHtml(testCase.expectedReference ?? '—')}</td><td>${testCase.tags.includes('@smoke') ? 'Oui' : '—'}</td><td>${testCase.tags.includes('@regression') ? 'Oui' : '—'}</td><td>${badge(testCase.automated, 'OUI', 'NON')}</td></tr>`,
+          `<tr><td><strong>${testCase.id}</strong></td><td>${escapeHtml(testCase.feature)}</td><td>${testCase.userStory}</td><td>${testCase.acceptanceCriteria.map((id) => `<code>${id}</code>`).join(' ')}</td><td>${testCase.risks.map((id) => `<code>${id}</code>`).join(' ')}</td><td>${testCase.techniques.length ? testCase.techniques.map((id) => `<code>${id}</code>`).join(' ') : '—'}</td><td>${escapeHtml(testCase.executionMode)}</td><td>${escapeHtml(testCase.type)}</td><td>${testCase.priority}</td><td>${escapeHtml(testCase.potentialImpact ?? '—')}</td><td>${escapeHtml(testCase.expectedReference ?? '—')}</td><td>${testCase.tags.includes('@smoke') ? 'Oui' : '—'}</td><td>${testCase.tags.includes('@regression') ? 'Oui' : '—'}</td><td>${badge(testCase.automated, 'OUI', 'NON')}</td></tr>`,
       )
       .join('');
   };

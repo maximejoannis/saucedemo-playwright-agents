@@ -180,13 +180,14 @@ const traceRows = sources.traceability
   .filter((line) => /^\| (Authentification|Catalogue|Tri|Panier|Checkout|Session) \|/u.test(line))
   .map(row);
 const testCases = traceRows.map(
-  ([feature, userStory, criterion, rawRisks, rawTechniques, id, type, priority, rawTags]) => ({
+  ([feature, userStory, criterion, rawRisks, rawTechniques, executionMode, id, type, priority, rawTags]) => ({
     id,
     feature,
     userStory,
     acceptanceCriteria: criterion.split(/,\s*/u),
     risks: rawRisks.split(/,\s*/u),
     techniques: rawTechniques.match(/EP|BVA|DT|ST|PW|SBT/gu) ?? [],
+    executionMode,
     type,
     priority,
     tags: rawTags.match(/@[\w-]+/gu) ?? [],
@@ -210,6 +211,8 @@ const planned = plannedMatches.map((match, index) => {
     potentialImpact: body.match(/^\*\*Impact potentiel en cas d’échec\s*:\*\*\s*(.+)$/mu)?.[1].trim(),
     expectedReference: body.match(/^\*\*Référence attendue\s*:\*\*\s*(.+)$/mu)?.[1].trim(),
     priorityJustification: body.match(/^\*\*Justification de la priorité\s*:\*\*\s*(.+)$/mu)?.[1].trim(),
+    executionMode: body.match(/^\*\*Mode d’exécution\s*:\*\*\s*(.+)$/mu)?.[1].trim(),
+    executionModeJustification: body.match(/^\*\*Justification du mode d’exécution\s*:\*\*\s*(.+)$/mu)?.[1].trim(),
     hasFixedSeverity: /^\*\*Sévérité\s*:\*\*/mu.test(body),
   };
 });
@@ -224,6 +227,7 @@ for (const testCase of testCases) {
   testCase.potentialImpact = planCase.potentialImpact;
   testCase.expectedReference = planCase.expectedReference;
   testCase.priorityJustification = planCase.priorityJustification;
+  testCase.executionModeJustification = planCase.executionModeJustification;
   if (planCase.priority !== testCase.priority)
     fail(`${testCase.id} porte une priorité différente entre le plan et la matrice`);
   if ([...planCase.tags].sort().join() !== [...testCase.tags].sort().join())
@@ -232,6 +236,15 @@ for (const testCase of testCases) {
     fail(`${testCase.id} porte des risques différents entre le plan et la matrice`);
   if ([...planCase.techniques].sort().join() !== [...testCase.techniques].sort().join())
     fail(`${testCase.id} porte des techniques différentes entre le plan et la matrice`);
+  if (planCase.executionMode !== testCase.executionMode)
+    fail(`${testCase.id} porte un mode d’exécution différent entre le plan et la matrice`);
+  if (
+    !['Automatisé', 'Candidat à l’automatisation', 'Manuel', 'Exploratoire', 'Non retenu'].includes(
+      testCase.executionMode,
+    )
+  )
+    fail(`${testCase.id} porte un mode d’exécution invalide : ${testCase.executionMode}`);
+  if (!testCase.executionModeJustification) fail(`${testCase.id} ne justifie pas son mode d’exécution`);
   if (planCase.hasFixedSeverity) fail(`${testCase.id} possède une sévérité fixe interdite`);
   if (testCase.priority === 'P0' && !testCase.potentialImpact)
     fail(`${testCase.id} est P0 mais ne documente aucun impact potentiel en cas d'échec`);
@@ -317,14 +330,21 @@ for (const automated of automatedFunctional) {
   documented.automated = true;
   documented.specFile = automated.file;
 }
-const missing = testCases.filter(({ automated }) => !automated).map(({ id }) => id);
-if (missing.length) fail(`TC sans test Playwright : ${missing.join(', ')}`);
+const missingAutomated = testCases
+  .filter(({ executionMode, automated }) => executionMode === 'Automatisé' && !automated)
+  .map(({ id }) => id);
+if (missingAutomated.length) fail(`TC déclarés automatisés sans test Playwright : ${missingAutomated.join(', ')}`);
+const unexpectedAutomated = testCases
+  .filter(({ executionMode, automated }) => executionMode !== 'Automatisé' && automated)
+  .map(({ id }) => id);
+if (unexpectedAutomated.length)
+  fail(`TC automatisés sans mode d’exécution Automatisé : ${unexpectedAutomated.join(', ')}`);
 for (const criterion of acceptanceCriteria) {
   criterion.testCases = testCases.filter((tc) => tc.acceptanceCriteria.includes(criterion.id)).map(({ id }) => id);
+  criterion.covered = criterion.testCases.length > 0;
   criterion.automated =
     criterion.testCases.length > 0 && criterion.testCases.every((id) => testCases.find((tc) => tc.id === id).automated);
   if (!criterion.testCases.length) fail(`${criterion.id} n'est couvert par aucun TC`);
-  if (!criterion.automated) fail(`${criterion.id} n'est pas automatisé`);
 }
 for (const test of e2e) {
   test.automated = true;
@@ -363,14 +383,10 @@ for (const story of userStories) {
   story.acceptanceCriteria = acceptanceCriteria.filter((ac) => ac.userStory === story.id).map(({ id }) => id);
   story.testCases = testCases.filter((tc) => tc.userStory === story.id).map(({ id }) => id);
   story.coveredAcceptanceCriteria = story.acceptanceCriteria.filter(
-    (id) => acceptanceCriteria.find((ac) => ac.id === id).automated,
+    (id) => acceptanceCriteria.find((ac) => ac.id === id).covered,
   ).length;
   story.automatedTestCases = story.testCases.filter((id) => testCases.find((tc) => tc.id === id).automated).length;
-  story.status =
-    story.coveredAcceptanceCriteria === story.acceptanceCriteria.length &&
-    story.automatedTestCases === story.testCases.length
-      ? 'PASS'
-      : 'INCOMPLET';
+  story.status = story.coveredAcceptanceCriteria === story.acceptanceCriteria.length ? 'PASS' : 'INCOMPLET';
 }
 const features = featureRows.map(([name, storyId]) => {
   const criteria = acceptanceCriteria.filter(({ userStory }) => userStory === storyId);
@@ -378,7 +394,7 @@ const features = featureRows.map(([name, storyId]) => {
   return {
     name,
     userStory: storyId,
-    acceptanceCriteria: { covered: criteria.filter(({ automated }) => automated).length, total: criteria.length },
+    acceptanceCriteria: { covered: criteria.filter(({ covered }) => covered).length, total: criteria.length },
     testCases: { automated: cases.filter(({ automated }) => automated).length, total: cases.length },
     types: Object.fromEntries(
       ['Passant', 'Non passant', 'Erreur'].map((type) => [type, cases.filter((tc) => tc.type === type).length]),
@@ -389,19 +405,23 @@ const features = featureRows.map(([name, storyId]) => {
 });
 const summary = {
   features: {
-    covered: features.filter(
-      (feature) =>
-        feature.acceptanceCriteria.covered === feature.acceptanceCriteria.total &&
-        feature.testCases.automated === feature.testCases.total,
-    ).length,
+    covered: features.filter((feature) => feature.acceptanceCriteria.covered === feature.acceptanceCriteria.total)
+      .length,
     total: features.length,
   },
   userStories: { covered: userStories.filter(({ status }) => status === 'PASS').length, total: userStories.length },
   acceptanceCriteria: {
-    covered: acceptanceCriteria.filter(({ automated }) => automated).length,
+    covered: acceptanceCriteria.filter(({ covered }) => covered).length,
     total: acceptanceCriteria.length,
   },
-  functionalTestCases: { automated: testCases.filter(({ automated }) => automated).length, total: testCases.length },
+  functionalTestCases: {
+    automated: testCases.filter(({ executionMode }) => executionMode === 'Automatisé').length,
+    manual: testCases.filter(({ executionMode }) => executionMode === 'Manuel').length,
+    candidates: testCases.filter(({ executionMode }) => executionMode === 'Candidat à l’automatisation').length,
+    exploratory: testCases.filter(({ executionMode }) => executionMode === 'Exploratoire').length,
+    notSelected: testCases.filter(({ executionMode }) => executionMode === 'Non retenu').length,
+    total: testCases.length,
+  },
   e2e: e2e.length,
   playwrightTests: playwrightTests.length,
   types: Object.fromEntries(
@@ -445,7 +465,8 @@ const summary = {
   e2eSmoke: e2e.filter(({ tags }) => tags.includes('@smoke')).length,
   e2eRegression: e2e.filter(({ tags }) => tags.includes('@regression')).length,
 };
-summary.qaScopeCoverage = rate(summary.functionalTestCases.automated, summary.functionalTestCases.total);
+summary.automationRate = rate(summary.functionalTestCases.automated, summary.functionalTestCases.total);
+summary.qaScopeCoverage = summary.automationRate;
 summary.globalSmoke = summary.functionalSmoke + summary.e2eSmoke;
 summary.globalRegression = summary.functionalRegression + summary.e2eRegression;
 
@@ -465,5 +486,5 @@ for (const asset of ['index.html', 'styles.css', 'app.js'])
   fs.copyFileSync(path.join(sourceDirectory, asset), path.join(outputDirectory, asset));
 fs.writeFileSync(path.join(outputDirectory, 'data.json'), `${JSON.stringify(data, null, 2)}\n`);
 console.log(
-  `Rapport QA généré et cohérent.\nFonctionnalités : ${summary.features.covered}/${summary.features.total}\nUser Stories : ${summary.userStories.covered}/${summary.userStories.total}\nAC : ${summary.acceptanceCriteria.covered}/${summary.acceptanceCriteria.total}\nTC : ${summary.functionalTestCases.automated}/${summary.functionalTestCases.total}\nE2E : ${summary.e2e}\nTests Playwright : ${summary.playwrightTests}\nCouverture du périmètre QA défini : ${summary.qaScopeCoverage} %`,
+  `Rapport QA généré et cohérent.\nFonctionnalités : ${summary.features.covered}/${summary.features.total}\nUser Stories : ${summary.userStories.covered}/${summary.userStories.total}\nAC : ${summary.acceptanceCriteria.covered}/${summary.acceptanceCriteria.total}\nTC automatisés : ${summary.functionalTestCases.automated}/${summary.functionalTestCases.total}\nTC manuels : ${summary.functionalTestCases.manual}\nTC candidats : ${summary.functionalTestCases.candidates}\nCharters exploratoires : ${summary.exploratoryCharters.total}\nE2E : ${summary.e2e}\nTests Playwright : ${summary.playwrightTests}\nTaux descriptif d’automatisation des TC : ${summary.automationRate} %`,
 );

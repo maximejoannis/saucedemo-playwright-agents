@@ -355,6 +355,9 @@ Les TC importants peuvent documenter, en plus de la traçabilité US/AC/RISK, le
 
 ### TC-AUTH-01 — Connexion avec un utilisateur standard
 
+**Mode d’exécution :** Automatisé  
+**Justification du mode d’exécution :** garde-barrière Smoke déterministe, fréquent et indispensable aux parcours authentifiés.
+
 **User Story :** US-01  
 **Critère(s) couvert(s) :** AC-AUTH-01  
 **Risque(s) couvert(s) :** RISK-AUTH-01
@@ -379,6 +382,9 @@ Les TC importants peuvent documenter, en plus de la traçabilité US/AC/RISK, le
 
 ### TC-AUTH-02 — Refus d’identifiants inconnus
 
+**Mode d’exécution :** Automatisé  
+**Justification du mode d’exécution :** validation négative stable et répétitive de la frontière d’accès.
+
 **User Story :** US-01  
 **Critère(s) couvert(s) :** AC-AUTH-02  
 **Risque(s) couvert(s) :** RISK-AUTH-02
@@ -400,6 +406,9 @@ Les TC importants peuvent documenter, en plus de la traçabilité US/AC/RISK, le
 **Critère de réussite :** L’utilisateur reste sur `/` sans catalogue.
 
 ### TC-AUTH-03 — Nom d’utilisateur absent
+
+**Mode d’exécution :** Automatisé  
+**Justification du mode d’exécution :** règle obligatoire déterministe avec message précis, peu coûteuse à rejouer.
 
 **User Story :** US-01  
 **Critère(s) couvert(s) :** AC-AUTH-03  
@@ -423,6 +432,9 @@ Les TC importants peuvent documenter, en plus de la traçabilité US/AC/RISK, le
 
 ### TC-AUTH-04 — Mot de passe absent
 
+**Mode d’exécution :** Automatisé  
+**Justification du mode d’exécution :** partition négative stable complétant la validation du formulaire.
+
 **User Story :** US-01  
 **Critère(s) couvert(s) :** AC-AUTH-04  
 **Risque(s) couvert(s) :** RISK-AUTH-02
@@ -444,6 +456,9 @@ Les TC importants peuvent documenter, en plus de la traçabilité US/AC/RISK, le
 **Critère de réussite :** Aucun accès au catalogue et message exact visible.
 
 ### TC-AUTH-05 — Refus du compte verrouillé
+
+**Mode d’exécution :** Automatisé  
+**Justification du mode d’exécution :** règle d’autorisation explicite, déterministe et importante en régression.
 
 **User Story :** US-01  
 **Critère(s) couvert(s) :** AC-AUTH-05  
@@ -469,6 +484,9 @@ Les TC importants peuvent documenter, en plus de la traçabilité US/AC/RISK, le
 
 ### TC-CAT-01 — Affichage du catalogue nominal
 
+**Mode d’exécution :** Automatisé  
+**Justification du mode d’exécution :** Smoke répétitif vérifiant de nombreux attributs avant panier et checkout.
+
 **User Story :** US-02  
 **Critère(s) couvert(s) :** AC-CAT-01  
 **Risque(s) couvert(s) :** RISK-CAT-01, RISK-CAT-02
@@ -489,6 +507,9 @@ Les TC importants peuvent documenter, en plus de la traçabilité US/AC/RISK, le
 
 ### TC-CAT-02 — Consultation d’une fiche et retour
 
+**Mode d’exécution :** Automatisé  
+**Justification du mode d’exécution :** scénario stable de cohérence liste/fiche et de navigation retour.
+
 **User Story :** US-02  
 **Critère(s) couvert(s) :** AC-CAT-02  
 **Risque(s) couvert(s) :** RISK-CAT-01
@@ -506,6 +527,9 @@ Les TC importants peuvent documenter, en plus de la traçabilité US/AC/RISK, le
 
 ### TC-CAT-03 — Consultation d’un produit inexistant
 
+**Mode d’exécution :** Automatisé  
+**Justification du mode d’exécution :** route négative déterministe avec signalement et récupération vérifiables.
+
 **User Story :** US-02  
 **Critère(s) couvert(s) :** AC-CAT-03  
 **Risque(s) couvert(s) :** RISK-CAT-01
@@ -522,6 +546,9 @@ Les TC importants peuvent documenter, en plus de la traçabilité US/AC/RISK, le
 **Critère de réussite :** La référence absente est explicitement signalée sans bloquer le retour.
 
 ### TC-CAT-04 — Images dégradées de problem_user
+
+**Mode d’exécution :** Automatisé  
+**Justification du mode d’exécution :** caractérisation actuellement reproductible sur six produits; rentabilité à surveiller si la démo évolue.
 
 **User Story :** US-02  
 **Critère(s) couvert(s) :** AC-CAT-04  
@@ -541,6 +568,9 @@ Les TC importants peuvent documenter, en plus de la traçabilité US/AC/RISK, le
 
 ### TC-TRI-01 — Tri des noms de A à Z
 
+**Mode d’exécution :** Automatisé  
+**Justification du mode d’exécution :** comparaison ordonnée déterministe, fréquente et plus fiable qu’un contrôle manuel répétitif.
+
 **User Story :** US-03  
 **Critère(s) couvert(s) :** AC-SORT-01  
 **Risque(s) couvert(s) :** RISK-SORT-01
@@ -556,6 +586,9 @@ Les TC importants peuvent documenter, en plus de la traçabilité US/AC/RISK, le
 **Critère de réussite :** Les six noms respectent l’ordre alphabétique croissant.
 
 ### TC-TRI-02 — Tri des noms de Z à A
+
+**Mode d’exécution :** Automatisé  
+**Justification du mode d’exécution :** règle de tri inverse stable avec résultat objectif.
 
 **User Story :** US-03  
 **Critère(s) couvert(s) :** AC-SORT-02  
@@ -573,6 +606,9 @@ Les TC importants peuvent documenter, en plus de la traçabilité US/AC/RISK, le
 
 ### TC-TRI-03 — Tri des prix croissants
 
+**Mode d’exécution :** Automatisé  
+**Justification du mode d’exécution :** vérification numérique déterministe sur l’ensemble du catalogue.
+
 **User Story :** US-03  
 **Critère(s) couvert(s) :** AC-SORT-03  
 **Risque(s) couvert(s) :** RISK-SORT-01
@@ -588,6 +624,9 @@ Les TC importants peuvent documenter, en plus de la traçabilité US/AC/RISK, le
 **Critère de réussite :** Aucun prix n’est inférieur au précédent.
 
 ### TC-TRI-04 — Tri des prix décroissants
+
+**Mode d’exécution :** Automatisé  
+**Justification du mode d’exécution :** complément de régression stable du tri numérique.
 
 **User Story :** US-03  
 **Critère(s) couvert(s) :** AC-SORT-04  
@@ -605,6 +644,9 @@ Les TC importants peuvent documenter, en plus de la traçabilité US/AC/RISK, le
 
 ### TC-TRI-05 — Tri inopérant de problem_user
 
+**Mode d’exécution :** Automatisé  
+**Justification du mode d’exécution :** caractérisation répétable multi-options; maintenance à réévaluer si le compte spécial change.
+
 **User Story :** US-03  
 **Critère(s) couvert(s) :** AC-SORT-05  
 **Risque(s) couvert(s) :** RISK-SORT-01
@@ -620,6 +662,9 @@ Les TC importants peuvent documenter, en plus de la traçabilité US/AC/RISK, le
 **Critère de réussite :** Les trois échecs de réordonnancement sont reproduits.
 
 ### TC-TRI-06 — Tri inopérant de error_user
+
+**Mode d’exécution :** Automatisé  
+**Justification du mode d’exécution :** caractérisation déterministe partagée avec la logique de tri, sous surveillance de rentabilité.
 
 **User Story :** US-03  
 **Critère(s) couvert(s) :** AC-SORT-06  
@@ -638,6 +683,9 @@ Les TC importants peuvent documenter, en plus de la traçabilité US/AC/RISK, le
 ### Panier
 
 ### TC-PAN-01 — Ajout d’un produit
+
+**Mode d’exécution :** Automatisé  
+**Justification du mode d’exécution :** Contrôle Smoke répétitif et déterministe de la cohérence entre l’action utilisateur, le badge et le contenu du panier.
 
 **User Story :** US-04  
 **Critère(s) couvert(s) :** AC-CART-01  
@@ -659,6 +707,9 @@ Les TC importants peuvent documenter, en plus de la traçabilité US/AC/RISK, le
 **Critère de réussite :** Les trois représentations de la sélection concordent.
 
 ### TC-PAN-02 — Retrait d’un produit
+
+**Mode d’exécution :** Automatisé  
+**Justification du mode d’exécution :** Transition d’état stable, fréquemment rejouée en régression et vérifiable sans jugement humain.
 
 **User Story :** US-04  
 **Critère(s) couvert(s) :** AC-CART-02  
@@ -682,6 +733,9 @@ Les TC importants peuvent documenter, en plus de la traçabilité US/AC/RISK, le
 
 ### TC-PAN-03 — Conservation du panier pendant la navigation
 
+**Mode d’exécution :** Automatisé  
+**Justification du mode d’exécution :** Forte valeur de régression sur la persistance du panier au fil de transitions déterministes.
+
 **User Story :** US-04  
 **Critère(s) couvert(s) :** AC-CART-03  
 **Risque(s) couvert(s) :** RISK-CART-01
@@ -703,6 +757,9 @@ Les TC importants peuvent documenter, en plus de la traçabilité US/AC/RISK, le
 **Critère de réussite :** Aucune navigation interne ne perd, ne duplique ni ne réintroduit un article retiré.
 
 ### TC-PAN-04 — Accès au checkout avec panier vide
+
+**Mode d’exécution :** Automatisé  
+**Justification du mode d’exécution :** Caractérisation répétable d’une transition sensible, utile pour détecter rapidement une évolution du comportement actuel.
 
 **User Story :** US-04  
 **Critère(s) couvert(s) :** AC-CART-04  
@@ -726,6 +783,9 @@ Les TC importants peuvent documenter, en plus de la traçabilité US/AC/RISK, le
 
 ### TC-PAN-05 — Ajouts partiels de problem_user
 
+**Mode d’exécution :** Automatisé  
+**Justification du mode d’exécution :** Caractérisation reproductible d’un mode dégradé spécial ; conservation sous surveillance de sa stabilité et de son coût de maintenance.
+
 **User Story :** US-04  
 **Critère(s) couvert(s) :** AC-CART-05  
 **Risque(s) couvert(s) :** RISK-CART-01
@@ -746,6 +806,9 @@ Les TC importants peuvent documenter, en plus de la traçabilité US/AC/RISK, le
 **Critère de réussite :** Les trois succès et trois échecs correspondent à l’observation.
 
 ### TC-PAN-06 — Ajouts partiels de error_user
+
+**Mode d’exécution :** Automatisé  
+**Justification du mode d’exécution :** Caractérisation reproductible d’un mode dégradé spécial ; conservation sous surveillance de sa stabilité et de son coût de maintenance.
 
 **User Story :** US-04  
 **Critère(s) couvert(s) :** AC-CART-05  
@@ -770,6 +833,9 @@ Les TC importants peuvent documenter, en plus de la traçabilité US/AC/RISK, le
 
 ### TC-CHK-01 — Finalisation d’une commande nominale
 
+**Mode d’exécution :** Automatisé  
+**Justification du mode d’exécution :** Parcours métier essentiel, stable et déterministe, apportant un signal Smoke rapide sur la capacité à commander.
+
 **User Story :** US-05  
 **Critère(s) couvert(s) :** AC-CHK-01  
 **Risque(s) couvert(s) :** RISK-CHK-01
@@ -791,6 +857,9 @@ Les TC importants peuvent documenter, en plus de la traçabilité US/AC/RISK, le
 
 ### TC-CHK-02 — Exactitude du récapitulatif financier
 
+**Mode d’exécution :** Automatisé  
+**Justification du mode d’exécution :** Règle arithmétique fiable à forte valeur métier, propice à des assertions répétables en régression.
+
 **User Story :** US-05  
 **Critère(s) couvert(s) :** AC-CHK-02  
 **Risque(s) couvert(s) :** RISK-CHK-02
@@ -810,6 +879,9 @@ Les TC importants peuvent documenter, en plus de la traçabilité US/AC/RISK, le
 **Critère de réussite :** Sous-total = somme des lignes et total = sous-total + taxe.
 
 ### TC-CHK-03 — Prénom obligatoire
+
+**Mode d’exécution :** Automatisé  
+**Justification du mode d’exécution :** Validation négative stable d’une règle obligatoire, peu coûteuse à rejouer avec un résultat déterministe.
 
 **User Story :** US-05  
 **Critère(s) couvert(s) :** AC-CHK-03  
@@ -833,6 +905,9 @@ Les TC importants peuvent documenter, en plus de la traçabilité US/AC/RISK, le
 
 ### TC-CHK-04 — Nom obligatoire
 
+**Mode d’exécution :** Automatisé  
+**Justification du mode d’exécution :** Validation négative stable d’une règle obligatoire, peu coûteuse à rejouer avec un résultat déterministe.
+
 **User Story :** US-05  
 **Critère(s) couvert(s) :** AC-CHK-04  
 **Risque(s) couvert(s) :** RISK-CHK-04
@@ -854,6 +929,9 @@ Les TC importants peuvent documenter, en plus de la traçabilité US/AC/RISK, le
 **Critère de réussite :** La validation cible le premier champ manquant suivant.
 
 ### TC-CHK-05 — Code postal obligatoire
+
+**Mode d’exécution :** Automatisé  
+**Justification du mode d’exécution :** Validation négative stable d’une règle obligatoire, peu coûteuse à rejouer avec un résultat déterministe.
 
 **User Story :** US-05  
 **Critère(s) couvert(s) :** AC-CHK-05  
@@ -877,6 +955,9 @@ Les TC importants peuvent documenter, en plus de la traçabilité US/AC/RISK, le
 
 ### TC-CHK-06 — Commande finalisée avec panier vide
 
+**Mode d’exécution :** Automatisé  
+**Justification du mode d’exécution :** Caractérisation déterministe d’un chemin limite du checkout, maintenue pour signaler toute modification de ce comportement non nominal.
+
 **User Story :** US-05  
 **Critère(s) couvert(s) :** AC-CHK-06  
 **Risque(s) couvert(s) :** RISK-CHK-03
@@ -899,6 +980,9 @@ Les TC importants peuvent documenter, en plus de la traçabilité US/AC/RISK, le
 
 ### TC-CHK-07 — Nom impossible à renseigner pour problem_user
 
+**Mode d’exécution :** Automatisé  
+**Justification du mode d’exécution :** Mode dégradé spécial reproductible et utile au diagnostic ; automatisation conservée sous surveillance de rentabilité.
+
 **User Story :** US-05  
 **Critère(s) couvert(s) :** AC-CHK-07  
 **Risque(s) couvert(s) :** RISK-CHK-01, RISK-CHK-04
@@ -919,6 +1003,9 @@ Les TC importants peuvent documenter, en plus de la traçabilité US/AC/RISK, le
 **Critère de réussite :** Le défaut est visible sans forcer ni contourner le champ.
 
 ### TC-CHK-08 — Finish inopérant pour error_user
+
+**Mode d’exécution :** Automatisé  
+**Justification du mode d’exécution :** Mode dégradé spécial reproductible sur une transition critique ; automatisation conservée sous surveillance de rentabilité.
 
 **User Story :** US-05  
 **Critère(s) couvert(s) :** AC-CHK-08  
@@ -944,6 +1031,9 @@ Les TC importants peuvent documenter, en plus de la traçabilité US/AC/RISK, le
 
 ### TC-SESSION-01 — Conservation après rafraîchissement
 
+**Mode d’exécution :** Automatisé  
+**Justification du mode d’exécution :** Contrôle Smoke répétitif de persistance, stable et déterministe, avec un fort besoin de feedback rapide.
+
 **User Story :** US-06  
 **Critère(s) couvert(s) :** AC-SESSION-01  
 **Risque(s) couvert(s) :** RISK-CART-02, RISK-SESSION-01
@@ -964,6 +1054,9 @@ Les TC importants peuvent documenter, en plus de la traçabilité US/AC/RISK, le
 **Critère de réussite :** Session et état panier survivent au rafraîchissement.
 
 ### TC-SESSION-02 — Déconnexion explicite
+
+**Mode d’exécution :** Automatisé  
+**Justification du mode d’exécution :** Contrôle Smoke de session essentiel, fréquent et vérifiable de manière fiable sans interprétation humaine.
 
 **User Story :** US-06  
 **Critère(s) couvert(s) :** AC-SESSION-02  
@@ -986,6 +1079,9 @@ Les TC importants peuvent documenter, en plus de la traçabilité US/AC/RISK, le
 
 ### TC-SESSION-03 — Refus d’une route protégée après logout
 
+**Mode d’exécution :** Automatisé  
+**Justification du mode d’exécution :** Test négatif stable protégeant une frontière d’autorisation à fort impact et nécessitant une régression fréquente.
+
 **User Story :** US-06  
 **Critère(s) couvert(s) :** AC-SESSION-03  
 **Risque(s) couvert(s) :** RISK-AUTH-02, RISK-SESSION-02
@@ -1006,6 +1102,9 @@ Les TC importants peuvent documenter, en plus de la traçabilité US/AC/RISK, le
 **Critère de réussite :** Aucun contenu du panier protégé n’est accessible.
 
 ### TC-SESSION-04 — Réinitialisation de l’état applicatif
+
+**Mode d’exécution :** Automatisé  
+**Justification du mode d’exécution :** Transition d’état déterministe et répétitive, utile pour prévenir les incohérences de panier et de session.
 
 **User Story :** US-06  
 **Critère(s) couvert(s) :** AC-SESSION-04  
@@ -1091,6 +1190,175 @@ La Smoke contient sept cas : TC-AUTH-01, TC-CAT-01, TC-PAN-01, TC-CHK-01, TC-CHK
 - **Références à clarifier :** TC-PAN-04 et TC-CHK-06 décrivent l’acceptation observée d’un panier vide; aucune règle produit ne dit encore si le parcours doit être bloqué.
 - **Priorités confirmées :** les huit P0 restent des garde-barrières d’accès, catalogue, panier, commande, calcul et session. Les validations et transitions approfondies restent P1; les caractérisations de faible impact restent P2.
 - **Priorité à revoir avec le Planner :** TC-PAN-05 et TC-PAN-06 sont P1 alors que d’autres caractérisations de comptes spéciaux comparables sont P2. RISK-CART-01 est élevé, ce qui peut justifier P1, mais l’existence de défenses nominales fortes rend une proposition P2 également défendable. Aucune modification n’est appliquée sans arbitrage.
+
+# Stratégie d’automatisation
+
+## Objectif
+
+L’automatisation fournit un contrôle répétable et un feedback rapide lorsque sa valeur de régression dépasse durablement son coût de création et de maintenance. Elle n’est ni une finalité, ni une preuve de qualité, ni une obligation applicable à toute future idée de test. Cette stratégie décide du mode d’exécution à partir du besoin, du risque, de la référence attendue, de la répétabilité et du besoin de jugement humain.
+
+## Principes
+
+- Décider à partir de plusieurs critères convergents; aucune règle telle que `P0 = automatisé`, `risque élevé = E2E` ou `TC existant = automatisation obligatoire` n’est suffisante.
+- Automatiser le contrôle le plus petit capable de donner un signal fiable, en respectant la pyramide et sans dupliquer inutilement un même chemin.
+- Conserver un scénario manuel ou exploratoire lorsque l’interprétation humaine produit davantage d’information qu’une assertion déterministe.
+- Exiger une référence attendue claire avant de transformer une découverte en contrôle automatisé normatif.
+- Évaluer le coût de maintenance, la stabilité des données et l’environnement aussi bien que le coût d’exécution manuelle.
+- Réexaminer les automatisations couplées à un comportement de démonstration lorsque SauceDemo évolue, sans modifier leur résultat attendu uniquement pour les maintenir vertes.
+- Maintenir séparées les notions de risque, priorité, sévérité, technique de conception et mode d’exécution.
+
+## Modes d’exécution
+
+| Mode | Utilisation |
+|---|---|
+| Automatisé | Contrôle de régression répétitif, stable et déterministe, disposant d’une référence attendue exploitable et d’un bénéfice supérieur à sa maintenance. |
+| Candidat à l’automatisation | Valeur probable identifiée, mais règle, stabilité, données, niveau de contrôle ou coût encore à confirmer. |
+| Manuel | Vérification guidée dont la fréquence, la subjectivité ou le besoin de jugement humain rendent l’automatisation peu rentable. |
+| Exploratoire | Investigation destinée à apprendre, varier et découvrir; la liberté de la session serait appauvrie par un script prématuré. |
+| Non retenu | Proposition dont le signal attendu est redondant, ponctuel ou trop faible pour justifier un contrôle régulier. La décision et sa raison doivent rester traçables. |
+
+Le mode décrit comment le contrôle est exécuté. Il ne change ni la priorité du besoin, ni le niveau du risque, ni la sévérité d’un défaut éventuellement découvert.
+
+## Critères favorables
+
+Une automatisation présente une forte valeur lorsque plusieurs éléments suivants sont réunis :
+
+- exécution fréquente en Smoke ou Regression;
+- contrôle répétitif et coûteux manuellement;
+- comportement déterministe et données contrôlables;
+- référence attendue claire et assertions métier fiables;
+- fonctionnalité suffisamment stable;
+- risque produit significatif ou rôle dans un parcours essentiel;
+- besoin de feedback rapide;
+- nombreuses données ou relations à comparer, notamment prix, lignes, badge et états;
+- calcul ou règle de décision pouvant être exprimé sans constante opaque;
+- faible besoin d’interprétation humaine;
+- maintenance raisonnable et niveau de test adapté.
+
+La présence d’un seul facteur favorable ne suffit pas. Un P0 subjectif ou instable peut rester manuel; un P2 déterministe et très peu coûteux peut rester automatisé s’il protège utilement la régression.
+
+## Critères défavorables
+
+La valeur d’automatisation devient conditionnelle ou faible lorsque plusieurs éléments suivants sont présents :
+
+- comportement non spécifié ou référence attendue à clarifier;
+- objectif d’investigation exploratoire;
+- résultat visuel, qualitatif ou subjectif nécessitant un jugement humain;
+- contrôle ponctuel ou faible probabilité de réexécution;
+- environnement ou données difficilement contrôlables;
+- forte instabilité sans impact métier proportionné;
+- coût de maintenance supérieur au bénéfice attendu;
+- résultat dépendant d’une version publique volontairement dégradée;
+- besoin important de comparer, interpréter ou reformuler pendant la session;
+- couverture déjà fournie par un contrôle plus petit et plus fiable.
+
+Ces critères ne rendent pas un scénario « inférieur ». Ils orientent vers Manuel, Exploratoire, Candidat ou Non retenu selon la valeur recherchée.
+
+## Grille de décision
+
+| Critère | Favorable | Défavorable |
+|---|---|---|
+| Fréquence | Smoke, régression régulière ou exécution à chaque changement | Vérification ponctuelle ou rare |
+| Résultat | Déterministe et observable | Subjectif, ambigu ou non spécifié |
+| Référence attendue | Règle, AC, calcul ou état clairement défini | Référence à clarifier ou simple comportement observé |
+| Stabilité | Fonction, données et sélecteurs stables | Variations fréquentes sans valeur métier proportionnée |
+| Valeur de régression | Détecte rapidement une régression significative | Signal redondant ou faible |
+| Risque couvert | Menace un besoin ou un parcours important | Conséquence faible déjà suffisamment défendue |
+| Coût manuel | Élevé, répétitif ou source d’erreur humaine | Faible et occasionnel |
+| Jugement humain | Faible; comparaison objective | Important; interprétation ou appréciation nécessaire |
+| Maintenance automatisée | Simple, localisée et prévisible | Disproportionnée ou dépendante d’un environnement incontrôlable |
+| Données / combinaisons | Nombreuses vérifications stables | Données rares, non maîtrisées ou règles absentes |
+
+### Décision argumentée
+
+- **Forte valeur d’automatisation :** plusieurs critères favorables, référence claire, exécution régulière et maintenance proportionnée.
+- **Valeur conditionnelle :** bénéfice plausible, mais clarification, exploration, stabilisation ou choix du niveau de test encore nécessaire.
+- **Faible valeur d’automatisation :** jugement humain dominant, faible réexécution, redondance ou coût disproportionné; privilégier Manuel, Exploratoire ou Non retenu.
+
+Aucun score numérique n’est calculé : les informations disponibles ne justifient pas une précision mathématique et les compromis doivent rester lisibles.
+
+## Gouvernance des nouveaux tests
+
+Toute nouvelle proposition de TC doit contenir :
+
+- **Mode d’exécution :** Automatisé, Candidat à l’automatisation, Manuel, Exploratoire ou Non retenu;
+- **Justification du mode d’exécution :** décision fondée sur la grille, le risque, la fréquence, la référence attendue et le besoin de jugement humain.
+
+Le flux de gouvernance est le suivant :
+
+```text
+Besoin / observation
+    ↓
+Risque et référence attendue
+    ↓
+Technique et conditions de test
+    ↓
+Décision du mode d’exécution
+    ↓
+TC formel si pertinent
+    ↓
+Automatisation seulement si sa valeur est confirmée
+```
+
+Une découverte exploratoire ne devient candidate qu’après reproductibilité, clarification de la référence, conséquence pertinente et besoin de régression. Un TC manuel n’est pas une dette par nature. Un scénario Non retenu peut être réévalué si son risque, sa fréquence ou son contexte change.
+
+## Mesures et limites
+
+Les trois mesures suivantes répondent à des questions différentes :
+
+- **Couverture fonctionnelle :** quelles fonctionnalités, US et AC du périmètre défini possèdent un contrôle ?
+- **Couverture des risques :** quels modes de défaillance sont suffisamment défendus, partiellement couverts ou résiduels ?
+- **Taux d’automatisation :** quelle part des TC scriptés définis possède une implémentation automatisée ?
+
+Formule retenue :
+
+```text
+Taux d’automatisation = TC automatisés / TC scriptés définis
+```
+
+Cette métrique décrit l’état du portefeuille; elle ne mesure ni la qualité des assertions, ni la maîtrise des risques, ni la couverture des charters, ni le ROI. Un futur TC Manuel fera légitimement diminuer le taux sans dégrader automatiquement la stratégie. Les charters `EXP-*`, qui ne sont pas des TC, restent exclus du numérateur et du dénominateur.
+
+## État actuel
+
+| Indicateur | État |
+|---|---:|
+| TC scriptés définis | 33 |
+| TC automatisés | 33 |
+| Taux descriptif actuel | 100 % |
+| Charters exploratoires | 8 |
+| Sessions exploratoires terminées | 0 |
+| TC manuels définis | 0 |
+| Candidats à l’automatisation définis | 0 |
+| Scénarios Non retenus formalisés | 0 |
+
+Les 33 automatisations actuelles sont confirmées : elles sont courtes, déterministes à la date de référence, utiles en régression et maintenues dans un Page Object Model commun. Cela ne crée aucune cible de 100 % pour les futurs tests.
+
+### Automatisations à revoir
+
+Le statut `À revoir` est un signal de gouvernance et ne change pas le mode d’exécution validé. Il impose de réévaluer la valeur lors d’une évolution de SauceDemo, d’une instabilité ou d’une hausse du coût de maintenance; il ne déclenche ni suppression ni affaiblissement des assertions.
+
+| Tests | Statut | Justification de la revue |
+|---|---|---|
+| TC-CAT-04 | À revoir | Caractérisation visuelle de `problem_user`, couplée au motif technique `sl-404`; signal déterministe, mais valeur de régression plus faible et dépendante de la démo. |
+| TC-TRI-05, TC-TRI-06 | À revoir | Même mode dégradé de tri exercé avec deux comptes spéciaux; utile pour distinguer les profils, mais rendement à reconfirmer si leurs comportements convergent durablement. |
+| TC-PAN-05, TC-PAN-06 | À revoir | Même sous-ensemble d’ajouts partiels attendu pour deux comptes spéciaux; assertions diagnostiques précises, avec risque de redondance si les profils restent identiques. |
+| TC-CHK-07, TC-CHK-08 | À revoir | Défaillances spéciales reproductibles sur le checkout; valeur de caractérisation réelle, mais elles ne constituent pas des exigences métier souhaitées. |
+| E2E-02 | À revoir | Recouvre largement la règle de nom obligatoire déjà contrôlée par TC-CHK-04; son apport transversal panier → checkout doit rester supérieur à son coût d’exécution et de maintenance. |
+
+Lors de l’audit de robustesse du 4 octobre 2026, deux exécutions consécutives de la suite Chromium ont donné 72/72 succès sans retry local, attente arbitraire ni instabilité observée. Cette mesure confirme la stabilité à cet instant; elle ne dispense pas de la revue de rentabilité ci-dessus.
+
+Les huit charters `EXP-AUTH-01`, `EXP-CAT-01`, `EXP-SORT-01`, `EXP-CART-01`, `EXP-CHK-01`, `EXP-CHK-02`, `EXP-CHK-03` et `EXP-SESSION-01` restent Exploratoires. Leur existence ne constitue pas une file de tests à automatiser.
+
+Les futurs scénarios suivants restent à décision différée : persistance inter-session, routes protégées supplémentaires, reprise du checkout, données de livraison inhabituelles, règle de commande vide, règle de taxe/arrondi et correspondance exhaustive produit/image. Leur mode sera décidé après clarification ou session exploratoire; aucun n’est automatiquement classé Candidat.
+
+### Recommandations au Generator
+
+- Exiger `Mode d’exécution` et `Justification du mode d’exécution` pour tout nouveau TC proposé.
+- Ne pas générer de `.spec.ts` pour Manuel, Exploratoire ou Non retenu.
+- Ne générer un candidat qu’après validation explicite de son passage à Automatisé.
+- Préserver les 33 tests actuels et signaler les sept caractérisations lors d’un changement applicatif plutôt que d’adapter silencieusement les résultats attendus.
+- Maintenir séparés les compteurs TC, Playwright, risques et charters dans le reporting.
+- Réévaluer le niveau de test et les duplications avant d’ajouter un nouvel E2E.
 
 ## Synthèse chiffrée
 
