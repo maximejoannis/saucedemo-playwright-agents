@@ -1,6 +1,6 @@
 # Matrice de traçabilité — SauceDemo
 
-Cette matrice relie chaque cas au besoin, aux critères définis et aux risques produit validés. Le comptage de couverture fonctionnelle porte sur les critères; la couverture des risques est suivie séparément et ne constitue pas un objectif artificiel de 100 % d’automatisation.
+Cette matrice relie chaque cas au besoin, aux critères définis et aux risques produit validés. Le [catalogue des risques](risk-register.md) est la source de référence pour leur définition et leur état de couverture. Le comptage de couverture fonctionnelle porte sur les critères; la couverture des risques est suivie séparément et ne constitue pas un objectif artificiel de 100 % d’automatisation.
 
 | Fonctionnalité | User Story | Critère d’acceptation | Risque(s) produit | Cas de test | Type | Priorité | Tags |
 |---|---|---|---|---|---|---|---|
@@ -50,6 +50,13 @@ Cette matrice relie chaque cas au besoin, aux critères définis et aux risques 
 | Cas Regression | 33 |
 | Risques produit définis | 14 |
 | Risques reliés à au moins un cas automatisé | 14 |
+| Risques couverts | 9 |
+| Risques partiellement couverts | 5 |
+| Risques non couverts | 0 |
+| Risques acceptés / hors périmètre | 0 |
+| Risques critiques ou élevés couverts par la Smoke | 7 / 9 |
+| Risques critiques ou élevés avec plusieurs défenses indépendantes | 6 / 9 |
+| Risques critiques ou élevés avec une seule défense indépendante | 3 / 9 |
 
 **Critères non couverts :** aucun.
 
@@ -59,5 +66,6 @@ Cette matrice relie chaque cas au besoin, aux critères définis et aux risques 
 - 6 User Stories possèdent chacune de 4 à 8 critères.
 - 32 critères uniques sont tous couverts; AC-CART-05 est volontairement couvert par deux comptes spéciaux.
 - 33 cas uniques référencent tous une User Story, au moins un critère, au moins un risque validé, un type, une priorité et des tags.
-- Les 14 risques du plan sont reliés à au moins un TC; cela mesure la traçabilité, pas la suffisance de leur couverture ni l’automatisation de leurs gaps résiduels.
+- Les 14 risques du registre sont reliés à au moins un TC; cela mesure la traçabilité, pas la suffisance de leur couverture ni l’automatisation de leurs gaps résiduels.
+- Les métriques de risque sont distinctes du taux de couverture fonctionnelle : 32/32 AC couverts ne signifie pas que les 14 risques sont entièrement maîtrisés.
 - Aucun ID dupliqué, aucune référence orpheline et aucun cas absent de la matrice.

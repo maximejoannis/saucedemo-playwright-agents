@@ -9,6 +9,7 @@ const sources = {
   stories: read('tests', 'requirements', 'user-stories.md'),
   criteria: read('tests', 'requirements', 'acceptance-criteria.md'),
   traceability: read('tests', 'requirements', 'traceability-matrix.md'),
+  riskRegister: read('tests', 'requirements', 'risk-register.md'),
   plan: read('tests', 'test-plan', 'plan-tests-fonctionnels-saucedemo.md'),
 };
 
@@ -76,20 +77,41 @@ for (const story of userStories) {
   if (!acceptanceCriteria.some(({ userStory }) => userStory === story.id)) fail(`${story.id} ne possède aucun AC`);
 }
 
-const risks = sources.plan
+const risks = sources.riskRegister
   .split(/\r?\n/u)
   .map(row)
-  .filter((cells) => cells.length === 8 && /^RISK-[A-Z]+-\d+$/u.test(cells[0]))
-  .map(([id, feature, scenario, consequence, probability, impact, level, response]) => ({
-    id,
-    feature,
-    scenario,
-    consequence,
-    probability: Number(probability),
-    impact: Number(impact),
-    level,
-    response,
-  }));
+  .filter((cells) => cells.length === 13 && /^RISK-[A-Z]+-\d+$/u.test(cells[0]))
+  .map(
+    ([
+      id,
+      feature,
+      scenario,
+      consequence,
+      rawStories,
+      rawCriteria,
+      probability,
+      impact,
+      level,
+      response,
+      rawCases,
+      coverageStatus,
+      residualRisk,
+    ]) => ({
+      id,
+      feature,
+      scenario,
+      consequence,
+      userStories: rawStories.match(/US-\d+/gu) ?? [],
+      acceptanceCriteria: rawCriteria.match(/AC-[A-Z]+-\d+/gu) ?? [],
+      probability: Number(probability),
+      impact: Number(impact),
+      level,
+      response,
+      declaredTestCases: rawCases.match(/TC-[A-Z]+-\d+/gu) ?? [],
+      coverageStatus,
+      residualRisk,
+    }),
+  );
 assertUnique(
   risks.map(({ id }) => id),
   'Risque produit',
@@ -122,6 +144,7 @@ const planned = plannedMatches.map((match, index) => {
     title: match[2].trim(),
     priority: body.match(/^\*\*Priorité\s*:\*\*\s*(P[0-2])\s*$/mu)?.[1],
     tags: body.match(/^\*\*Tags\s*:\*\*\s*(.+)$/mu)?.[1].match(/@[\w-]+/gu) ?? [],
+    risks: body.match(/^\*\*Risque\(s\) couvert\(s\)\s*:\*\*\s*(.+)$/mu)?.[1].match(/RISK-[A-Z]+-\d+/gu) ?? [],
     potentialImpact: body.match(/^\*\*Impact potentiel en cas d’échec\s*:\*\*\s*(.+)$/mu)?.[1].trim(),
     hasFixedSeverity: /^\*\*Sévérité\s*:\*\*/mu.test(body),
   };
@@ -139,6 +162,8 @@ for (const testCase of testCases) {
     fail(`${testCase.id} porte une priorité différente entre le plan et la matrice`);
   if ([...planCase.tags].sort().join() !== [...testCase.tags].sort().join())
     fail(`${testCase.id} porte des tags différents entre le plan et la matrice`);
+  if ([...planCase.risks].sort().join() !== [...testCase.risks].sort().join())
+    fail(`${testCase.id} porte des risques différents entre le plan et la matrice`);
   if (planCase.hasFixedSeverity) fail(`${testCase.id} possède une sévérité fixe interdite`);
   if (testCase.priority === 'P0' && !testCase.potentialImpact)
     fail(`${testCase.id} est P0 mais ne documente aucun impact potentiel en cas d'échec`);
@@ -228,14 +253,33 @@ for (const test of e2e) {
   test.automated = true;
   test.domains = test.transversalPath?.split(/\s*→\s*/u) ?? [];
   if (testCases.some(({ id }) => id === test.id)) fail(`${test.id} est comptabilisé comme TC`);
+  for (const id of test.referencedRisks ?? [])
+    if (!risks.some((risk) => risk.id === id)) fail(`${test.id} référence un risque inexistant : ${id}`);
 }
 
 for (const risk of risks) {
   risk.testCases = testCases.filter((testCase) => testCase.risks.includes(risk.id)).map(({ id }) => id);
+  if ([...risk.declaredTestCases].sort().join() !== [...risk.testCases].sort().join())
+    fail(`${risk.id} porte des TC différents entre le registre et la matrice`);
+  for (const id of risk.userStories)
+    if (!userStories.some((story) => story.id === id)) fail(`${risk.id} référence une US inexistante : ${id}`);
+  for (const id of risk.acceptanceCriteria)
+    if (!acceptanceCriteria.some((criterion) => criterion.id === id))
+      fail(`${risk.id} référence un AC inexistant : ${id}`);
+  if (!risk.userStories.length) fail(`${risk.id} ne référence aucune US`);
+  if (!risk.acceptanceCriteria.length) fail(`${risk.id} ne référence aucun AC`);
+  if (!['Couvert', 'Partiellement couvert', 'Non couvert', 'Accepté / hors périmètre'].includes(risk.coverageStatus))
+    fail(`${risk.id} porte un état de couverture invalide : ${risk.coverageStatus}`);
   risk.automatedTestCases = risk.testCases.filter((id) => testCases.find((testCase) => testCase.id === id).automated);
   risk.e2e = e2e.filter((test) => test.referencedRisks?.includes(risk.id)).map(({ id }) => id);
   risk.automated = risk.automatedTestCases.length > 0;
-  if (!risk.testCases.length) fail(`${risk.id} n'est relié à aucun TC`);
+  risk.significant = /^(Critique|Élevé)/u.test(risk.level);
+  risk.smoke =
+    risk.testCases.some((id) => testCases.find((testCase) => testCase.id === id).tags.includes('@smoke')) ||
+    risk.e2e.some((id) => e2e.find((test) => test.id === id).tags.includes('@smoke'));
+  risk.independentDefenses = Number(risk.testCases.length > 0) + Number(risk.e2e.length > 0);
+  if (risk.coverageStatus === 'Couvert' && !risk.testCases.length)
+    fail(`${risk.id} est déclaré couvert sans aucun TC identifiable`);
 }
 
 for (const story of userStories) {
@@ -296,6 +340,20 @@ const summary = {
   ),
   risks: { traced: risks.filter(({ testCases }) => testCases.length > 0).length, total: risks.length },
   automatedRisks: { covered: risks.filter(({ automated }) => automated).length, total: risks.length },
+  riskCoverage: Object.fromEntries(
+    ['Couvert', 'Partiellement couvert', 'Non couvert', 'Accepté / hors périmètre'].map((status) => [
+      status,
+      risks.filter((risk) => risk.coverageStatus === status).length,
+    ]),
+  ),
+  significantRisks: {
+    total: risks.filter(({ significant }) => significant).length,
+    smoke: risks.filter(({ significant, smoke }) => significant && smoke).length,
+    multipleDefenses: risks.filter(({ significant, independentDefenses }) => significant && independentDefenses > 1)
+      .length,
+    singleDefense: risks.filter(({ significant, independentDefenses }) => significant && independentDefenses === 1)
+      .length,
+  },
   e2eSmoke: e2e.filter(({ tags }) => tags.includes('@smoke')).length,
   e2eRegression: e2e.filter(({ tags }) => tags.includes('@regression')).length,
 };

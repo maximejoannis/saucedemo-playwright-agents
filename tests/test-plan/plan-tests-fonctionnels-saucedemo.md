@@ -100,50 +100,13 @@ La probabilité estime la vraisemblance raisonnable de la défaillance ou de sa 
 
 Les scores 5, 7 et 8 ne peuvent pas résulter de l’échelle 1 à 3.
 
-### Matrice des risques
+### Référentiel des risques et gouvernance
 
-| ID | Fonctionnalité | Risque métier | Conséquence | Probabilité | Impact | Niveau | Réponse QA |
-|---|---|---|---|---:|---:|---|---|
-| RISK-AUTH-01 | Authentification | Un utilisateur légitime ne peut pas s’authentifier. | Accès au catalogue et achat entièrement bloqués. | 3 | 3 | Critique (9) | Smoke + régression automatisée sur la connexion nominale (`AC-AUTH-01`, `TC-AUTH-01`). |
-| RISK-AUTH-02 | Authentification | Des identifiants invalides ou un compte verrouillé obtiennent un accès. | Accès non autorisé au domaine marchand et perte de confiance. | 2 | 3 | Élevé (6) | Tests négatifs automatisés des refus (`AC-AUTH-02`, `AC-AUTH-05`, `TC-AUTH-02`, `TC-AUTH-05`) et contrôle de route protégée avec RISK-SESSION-02. |
-| RISK-CAT-01 | Catalogue | Produit, description ou prix absent, erroné ou incohérent entre liste et fiche. | Mauvaise décision d’achat et montant attendu trompeur. | 2 | 2 | Moyen (4) | Régression automatisée des six produits et contrôle liste/fiche (`AC-CAT-01/02`, `TC-CAT-01/02`). |
-| RISK-CAT-02 | Catalogue | Image incorrecte ou indisponible. | Compréhension du produit dégradée, sans blocage du parcours. | 2 | 1 | Faible (2) | Vérification ciblée du nominal; `TC-CAT-04` reste un test de caractérisation de `problem_user`, à isoler de l’oracle métier nominal. |
-| RISK-SORT-01 | Tri | Le catalogue n’est pas ordonné selon le nom ou le prix choisi. | Recherche moins efficace; aucun article, panier ou montant n’est altéré. | 2 | 1 | Faible (2) | Régression automatisée représentative des quatre ordres; caractérisations `TC-TRI-05/06` hors Smoke. |
-| RISK-CART-01 | Panier | Un ajout/retrait échoue, un article est perdu, dupliqué ou remplacé pendant la navigation. | Commande non conforme à l’intention, abandon ou facturation potentielle d’un mauvais contenu. | 2 | 3 | Élevé (6) | Smoke sur l’ajout + régression automatisée des transitions ajout/retrait/navigation (`AC-CART-01/02/03`, `TC-PAN-01/02/03`) et test multi-articles recommandé. |
-| RISK-CART-02 | Panier | Le panier disparaît au rafraîchissement ou réapparaît dans une session ultérieure de façon inattendue. | Perte de sélection ou exposition d’un état d’achat résiduel. | 2 | 3 | Élevé (6) | Test de transition d’état et de persistance (`AC-SESSION-01`, `TC-SESSION-01`); analyse complémentaire après logout/relogin et nouvelle session. |
-| RISK-CHK-01 | Checkout | Une commande valide ne peut pas être finalisée ou aucune confirmation n’est produite. | Achat et conversion bloqués; statut de commande ambigu. | 3 | 3 | Critique (9) | Smoke + régression automatisée du parcours complet (`AC-CHK-01`, `TC-CHK-01`); `TC-CHK-08` caractérise séparément `error_user`. |
-| RISK-CHK-02 | Checkout | Sous-total, taxe ou total incorrect, ou lignes du panier incohérentes avec le récapitulatif. | Montant facturé ou annoncé incorrect et risque financier/réglementaire. | 2 | 3 | Élevé (6) | Régression automatisée avec oracle arithmétique indépendant et plusieurs articles (`AC-CHK-02`, `TC-CHK-02`); ajout recommandé à la Smoke ciblée checkout. |
-| RISK-CHK-03 | Checkout | Une commande vide peut être finalisée. | Commande sans valeur, données parasites et métriques métier faussées. | 3 | 2 | Élevé (6) | Test négatif de caractérisation (`AC-CART-04`, `AC-CHK-06`, `TC-PAN-04`, `TC-CHK-06`), clarification produit attendue sur le blocage souhaité. |
-| RISK-CHK-04 | Checkout | Des données de livraison obligatoires manquent mais le parcours continue, ou une saisie valide est rejetée. | Livraison impossible ou abandon du checkout. | 2 | 2 | Moyen (4) | Tests négatifs automatisés des trois champs (`AC-CHK-03/04/05`, `TC-CHK-03/04/05`) et exploration de classes de saisie non définies. |
-| RISK-SESSION-01 | Session | La session active est perdue ou son contexte est mal conservé pendant le parcours. | Interruption du parcours, perte du panier et abandon. | 2 | 3 | Élevé (6) | Régression automatisée après rafraîchissement (`AC-SESSION-01`, `TC-SESSION-01`) et tests de transitions/navigation prolongée à compléter. |
-| RISK-SESSION-02 | Session | Logout ne termine pas réellement la session ou une route protégée reste accessible. | Accès non autorisé aux données et actions de l’utilisateur précédent. | 2 | 3 | Élevé (6) | Smoke du logout + test négatif automatisé d’accès direct (`AC-SESSION-02/03`, `TC-SESSION-02/03`), à étendre aux autres routes sensibles. |
-| RISK-SESSION-03 | Session | Reset App State ne vide pas exactement le panier ou déconnecte l’utilisateur. | État d’achat résiduel ou interruption évitable du parcours. | 1 | 2 | Faible (2) | Test de transition d’état automatisé (`AC-SESSION-04`, `TC-SESSION-04`). |
+Le catalogue concret, ses liens US/AC/TC, ses défenses, ses états de couverture et ses risques résiduels sont centralisés dans [`../requirements/risk-register.md`](../requirements/risk-register.md). Ce registre est la source de référence; le plan ne duplique pas les fiches de risques.
 
-### Risques critiques et élevés
+La stratégie générale consiste à renforcer les risques critiques et élevés par des contrôles ciblés, négatifs ou de transition, puis par un parcours E2E lorsque celui-ci apporte une défense distincte. Un nombre élevé de tests redondants n’est pas assimilé à plusieurs défenses. Les risques faibles reçoivent une couverture proportionnée et restent hors de la boucle Smoke sauf nécessité de parcours.
 
-- **RISK-AUTH-01** et **RISK-CHK-01** sont critiques : ils encadrent l’entrée et l’aboutissement du tunnel. Une panne rend le service marchand inutilisable même si les fonctions intermédiaires restent disponibles. Leurs TC nominaux P0 doivent rester des garde-barrières Smoke et Regression.
-- **RISK-AUTH-02** et **RISK-SESSION-02** protègent la frontière d’accès. Le chemin nominal ne suffit pas : les refus, le logout et la tentative d’accès direct doivent être contrôlés comme transitions d’autorisation.
-- **RISK-CART-01**, **RISK-CART-02** et **RISK-SESSION-01** portent sur l’intégrité du contexte d’achat. Une sélection perdue, dupliquée ou résiduelle peut modifier la commande ou provoquer l’abandon; la couverture doit vérifier l’état, pas seulement la présence d’un bouton.
-- **RISK-CHK-02** exige un oracle financier indépendant : recopier une valeur affichée ne démontrerait pas l’exactitude du calcul. La somme des lignes, le sous-total, la taxe et le total doivent être comparés.
-- **RISK-CHK-03** est élevé parce que le comportement est déjà observé. Il n’est toutefois pas assimilé à l’impossibilité d’acheter : son impact porte surtout sur l’intégrité des commandes et des indicateurs métier.
-
-À l’inverse, **RISK-SORT-01** et **RISK-CAT-02** restent faibles : un tri ou une image incorrecte gêne le choix, mais ne bloque ni l’accès, ni la constitution du panier, ni la finalisation. Leur automatisation existante ne les rend pas plus critiques.
-
-### Risques résiduels et gaps de couverture
-
-La matrice de traçabilité annonce 100 % des AC couverts, mais les risques suivants ne sont pas entièrement démontrés par les AC/TC actuels :
-
-| Risque | Couverture actuelle | Gap résiduel | Réponse recommandée avant création de TC |
-|---|---|---|---|
-| RISK-AUTH-02 / RISK-SESSION-02 | Refus d’identifiants, compte verrouillé et `/cart.html` après logout. | Absence de contrôle explicite d’une route protégée depuis une session jamais authentifiée et couverture d’une seule route après logout. | Analyse complémentaire des routes sensibles, puis test négatif paramétré si la règle d’accès est confirmée. |
-| RISK-CART-01 | Ajout/retrait unitaire et conservation en navigation. | Pas de transition multi-articles combinant ajouts, retrait partiel, aller-retour détail/panier et absence de duplication. | Concevoir un test de transition d’état multi-articles; ne pas créer un cas par combinaison. |
-| RISK-CART-02 | Rafraîchissement avec un article via `TC-SESSION-01`. | État du panier après logout/relogin, changement d’utilisateur ou nouvelle session non spécifié. | Clarifier la règle produit et la confidentialité attendue avant d’écrire un AC ou un TC. |
-| RISK-CHK-02 | Six produits, somme, taxe et total dans `TC-CHK-02`. | Règle de taxe non spécifiée; peu de classes de montant et aucun arrondi limite. | Analyse des règles de calcul nécessaire; compléter les partitions seulement après définition de l’oracle métier. |
-| RISK-CHK-03 | Comportement vide observé et couvert. | Aucun AC ne dit si accepter une commande vide est souhaité ou constitue une anomalie. | Décision Product Owner requise; conserver jusque-là un test de caractérisation, sans transformer l’observation en exigence souhaitée. |
-| RISK-CHK-04 | Présence obligatoire des trois champs. | Formats, longueurs, espaces, caractères spéciaux et validité du code postal non définis. | Test exploratoire ciblé puis clarification des règles; risque accepté tant qu’aucune contrainte métier n’est fournie. |
-| RISK-SESSION-01 | Rafraîchissement d’Inventory couvert. | Navigation prolongée, rafraîchissement depuis Cart/Checkout, expiration et reprise après interruption non couverts. | Tests exploratoires de session et définition de la politique d’expiration avant extension de la régression. |
-
-Les contrôles de sécurité offensive, la concurrence de sessions, la performance, le multi-navigateur et l’accessibilité exhaustive restent hors périmètre conformément à la section 3. Ce sont des risques résiduels acceptés par le périmètre actuel, pas des preuves d’absence de risque.
+Les états Couvert, Partiellement couvert, Non couvert et Accepté / hors périmètre sont décidés dans le registre après examen de l’oracle et du périmètre réellement exercé. Un lien TC ou un test vert ne suffit pas à supprimer le risque produit.
 
 ### Lien entre risque et priorité des tests
 
@@ -167,9 +130,9 @@ Les P0 existants `TC-AUTH-01`, `TC-PAN-01`, `TC-CHK-01`, `TC-SESSION-02` et `TC-
 
 ### Revue de cohérence et transmission au Generator
 
-- **Risques identifiés :** 14 risques distincts — 2 critiques, 7 élevés, 2 moyens et 3 faibles — sur les six fonctionnalités.
-- **Risques couverts :** chaque risque possède au moins un AC/TC contribuant à sa maîtrise; la connexion, le parcours de commande, les refus d’accès, le panier nominal, les montants nominaux, le logout et le reset disposent d’observations explicites.
-- **Risques insuffisamment couverts :** accès direct sans authentification préalable, transitions panier multi-articles, persistance inter-session/inter-utilisateur, règles de taxe et d’arrondi, validation étendue des coordonnées et cycle de vie/expiration de session.
+- **Risques identifiés :** le catalogue de référence recense 14 risques distincts — 2 critiques, 7 élevés, 2 moyens et 3 faibles — sur les six fonctionnalités.
+- **État de couverture :** le catalogue classe 9 risques comme couverts et 5 comme partiellement couverts; aucun n’est déclaré non couvert ou accepté/hors périmètre.
+- **Risques partiellement couverts :** `RISK-CART-02`, `RISK-CHK-03`, `RISK-CHK-04`, `RISK-SESSION-01` et `RISK-SESSION-02`; leurs gaps et réponses QA recommandées sont maintenus dans `../requirements/risk-register.md`.
 - **Priorités revues :** `TC-CHK-02` et `TC-SESSION-01` sont P0 + Smoke, `TC-CHK-06` est P1, `TC-CAT-04` et `TC-TRI-05/06` sont P2 en Regression de caractérisation.
 - **Recommandations de conception au Generator :** préserver les IDs et liens US/AC/TC; utiliser des oracles d’état et de calcul indépendants; concevoir un scénario multi-articles par transitions plutôt qu’une explosion combinatoire; séparer les tests métier nominaux des caractérisations `problem_user`/`error_user`; ne générer aucun nouveau test sur les gaps tant que les règles produit signalées ne sont pas clarifiées.
 

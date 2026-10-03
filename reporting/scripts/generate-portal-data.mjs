@@ -25,6 +25,8 @@ const data = {
     testCases: coverage.functionalTestCases,
     risks: coverage.risks,
     automatedRisks: coverage.automatedRisks,
+    riskCoverage: coverage.riskCoverage,
+    significantRisks: coverage.significantRisks,
     qaScopeCoverage: coverage.qaScopeCoverage,
   },
 };
