@@ -9,7 +9,7 @@ Cette matrice relie chaque cas au besoin, aux critères définis et aux risques 
 | Authentification | US-01 | AC-AUTH-03 | RISK-AUTH-02 | TC-AUTH-03 | Erreur | P1 | `@error @regression @auth` |
 | Authentification | US-01 | AC-AUTH-04 | RISK-AUTH-02 | TC-AUTH-04 | Erreur | P1 | `@error @regression @auth` |
 | Authentification | US-01 | AC-AUTH-05 | RISK-AUTH-02 | TC-AUTH-05 | Erreur | P1 | `@error @regression @auth` |
-| Catalogue | US-02 | AC-CAT-01 | RISK-CAT-01, RISK-CAT-02 | TC-CAT-01 | Passant | P1 | `@positive @smoke @regression @catalog` |
+| Catalogue | US-02 | AC-CAT-01 | RISK-CAT-01, RISK-CAT-02 | TC-CAT-01 | Passant | P0 | `@positive @smoke @regression @catalog` |
 | Catalogue | US-02 | AC-CAT-02 | RISK-CAT-01 | TC-CAT-02 | Passant | P1 | `@positive @regression @catalog` |
 | Catalogue | US-02 | AC-CAT-03 | RISK-CAT-01 | TC-CAT-03 | Erreur | P2 | `@error @regression @catalog` |
 | Catalogue | US-02 | AC-CAT-04 | RISK-CAT-02 | TC-CAT-04 | Erreur | P2 | `@error @regression @catalog` |

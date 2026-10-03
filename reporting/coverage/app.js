@@ -34,6 +34,9 @@ async function loadReport() {
   q('#suites').innerHTML = [
     ['Smoke fonctionnelle', summary.functionalSmoke],
     ['Regression fonctionnelle', summary.functionalRegression],
+    ['P0 — essentiels', summary.priorities.P0],
+    ['P1 — régression', summary.priorities.P1],
+    ['P2 — priorité moindre', summary.priorities.P2],
     ['Smoke E2E', summary.e2eSmoke],
     ['Regression E2E', summary.e2eRegression],
     ['Smoke globale', summary.globalSmoke],
@@ -71,7 +74,7 @@ async function loadReport() {
       .filter((testCase) => !term || JSON.stringify(testCase).toLowerCase().includes(term))
       .map(
         (testCase) =>
-          `<tr><td><strong>${testCase.id}</strong></td><td>${escapeHtml(testCase.feature)}</td><td>${testCase.userStory}</td><td>${testCase.acceptanceCriteria.map((id) => `<code>${id}</code>`).join(' ')}</td><td>${testCase.risks.map((id) => `<code>${id}</code>`).join(' ')}</td><td>${escapeHtml(testCase.type)}</td><td>${testCase.priority}</td><td>${testCase.tags.includes('@smoke') ? 'Oui' : '—'}</td><td>${testCase.tags.includes('@regression') ? 'Oui' : '—'}</td><td>${badge(testCase.automated, 'OUI', 'NON')}</td></tr>`,
+          `<tr><td><strong>${testCase.id}</strong></td><td>${escapeHtml(testCase.feature)}</td><td>${testCase.userStory}</td><td>${testCase.acceptanceCriteria.map((id) => `<code>${id}</code>`).join(' ')}</td><td>${testCase.risks.map((id) => `<code>${id}</code>`).join(' ')}</td><td>${escapeHtml(testCase.type)}</td><td>${testCase.priority}</td><td>${escapeHtml(testCase.potentialImpact ?? '—')}</td><td>${testCase.tags.includes('@smoke') ? 'Oui' : '—'}</td><td>${testCase.tags.includes('@regression') ? 'Oui' : '—'}</td><td>${badge(testCase.automated, 'OUI', 'NON')}</td></tr>`,
       )
       .join('');
   };

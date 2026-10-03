@@ -173,7 +173,85 @@ Les P0 existants `TC-AUTH-01`, `TC-PAN-01`, `TC-CHK-01`, `TC-SESSION-02` et `TC-
 - **Priorités revues :** `TC-CHK-02` et `TC-SESSION-01` sont P0 + Smoke, `TC-CHK-06` est P1, `TC-CAT-04` et `TC-TRI-05/06` sont P2 en Regression de caractérisation.
 - **Recommandations de conception au Generator :** préserver les IDs et liens US/AC/TC; utiliser des oracles d’état et de calcul indépendants; concevoir un scénario multi-articles par transitions plutôt qu’une explosion combinatoire; séparer les tests métier nominaux des caractérisations `problem_user`/`error_user`; ne générer aucun nouveau test sur les gaps tant que les règles produit signalées ne sont pas clarifiées.
 
-## 8. Cas de test
+## 8. Priorité des tests, risque produit et sévérité des défauts
+
+### Trois notions distinctes
+
+Les trois notions répondent à des décisions différentes et ne sont jamais converties automatiquement l’une dans l’autre.
+
+| Notion | S’applique à | Moment | Question |
+|---|---|---|---|
+| Risque produit | Produit / fonctionnalité | Conception, avant ou indépendamment de l’exécution | Qu’est-ce qui pourrait mal se passer et quel serait son niveau de risque ? |
+| Priorité | Test Case | Planification / exécution | Quand et avec quelle importance devons-nous exécuter ce test ? |
+| Sévérité | Défaut constaté | Après observation et analyse | Maintenant que le défaut est constaté, quel est l’impact réel du problème ? |
+
+#### Risque produit
+
+Un risque produit est un événement potentiel susceptible d’affecter l’utilisateur ou le métier. Il existe même si aucun test n’a échoué et peut ne jamais se matérialiser. Dans ce plan, il est identifié par `RISK-*`, évalué par sa probabilité et son impact, puis classé selon le niveau Faible, Moyen, Élevé ou Critique défini en section 7.
+
+Le score du risque guide la stratégie préventive de couverture. Il ne constitue ni la priorité automatique d’un TC, ni la sévérité anticipée d’un futur défaut.
+
+#### Priorité du Test Case
+
+La priorité appartient au Test Case. Elle détermine son importance dans la campagne et son ordre d’exécution :
+
+| Priorité | Convention d’exécution |
+|---|---|
+| P0 | Test essentiel à exécuter en priorité, notamment garde-barrière d’un parcours critique ou contrôle de la Smoke. Un échec doit interrompre l’évaluation de la livraison et déclencher un diagnostic immédiat. |
+| P1 | Test important de régression fonctionnelle, exécuté après ou en complément des contrôles essentiels. |
+| P2 | Test de priorité moindre, scénario secondaire, rare ou de caractérisation, exécutable après les contrôles essentiels. |
+
+Une priorité élevée peut être motivée par la rapidité du retour, la place du test dans le tunnel, sa capacité à bloquer les tests suivants ou la fréquence d’exécution attendue. Elle ne préjuge pas de la gravité d’un éventuel bug. En particulier, `P0` ne signifie pas `S1`, `P1` ne signifie pas `S2` et `P2` ne signifie ni `S3` ni `S4`.
+
+#### Sévérité du défaut
+
+La sévérité qualifie l’impact réel d’un défaut constaté sur le produit, l’utilisateur ou le métier. Elle est attribuée seulement après reproduction, collecte des éléments de diagnostic et analyse du périmètre réellement affecté. Un TC qui réussit, qui n’a pas été exécuté ou qui ne révèle qu’un incident de test/environnement ne possède aucun défaut produit auquel attribuer une sévérité.
+
+| Sévérité | Convention SauceDemo | Exemples indicatifs |
+|---|---|---|
+| S1 — Critique | Fonction métier essentielle empêchée ou compromise, sans contournement acceptable; accès, intégrité financière ou données critiques menacés. | Utilisateur légitime incapable de se connecter; accès non autorisé à une route protégée; finalisation généralisée impossible; montant faux; perte ou corruption critique du parcours. |
+| S2 — Majeure | Fonction importante fortement dégradée, mais avec contournement possible ou périmètre limité. | Ajout impossible pour certains produits; étape importante du checkout dégradée mais contournable; perte d’état sur une navigation particulière; fonction majeure indisponible dans certaines conditions. |
+| S3 — Modérée | Défaut fonctionnel réel sur une fonction secondaire, sans blocage du parcours principal. | Tri incorrect; retour ou navigation secondaire incorrecte; incohérence fonctionnelle d’impact limité. |
+| S4 — Mineure | Défaut principalement visuel, cosmétique ou de confort, sans conséquence significative sur le parcours métier. | Image incorrecte; alignement; libellé secondaire; anomalie visuelle sans perte fonctionnelle. |
+
+Ces exemples sont des guides de calibration, pas une table de conversion. La sévérité finale dépend du comportement réellement observé, des utilisateurs touchés, de l’étendue, de la fréquence, de l’existence d’un contournement et des conséquences métier. Elle ne se déduit ni de P0/P1/P2, ni du score du risque, ni du seul intitulé du TC.
+
+### Règles d’attribution de la sévérité
+
+1. Confirmer que l’écart est un défaut produit reproductible, et non un problème de test, de données ou d’environnement.
+2. Comparer le comportement observé au résultat attendu et identifier précisément les utilisateurs, données et étapes affectés.
+3. Évaluer l’impact réel sur l’accès, le panier, la commande, les montants, la session ou une fonction secondaire.
+4. Rechercher un contournement acceptable et déterminer si l’impact est généralisé ou limité à une condition.
+5. Attribuer S1 à S4 avec une justification factuelle dans le ticket de défaut; réévaluer si le périmètre observé évolue.
+6. Conserver séparément dans le ticket les références `RISK-*`, US, AC et TC : elles donnent le contexte de détection, pas la sévérité par elles-mêmes.
+
+Les comportements documentés de `problem_user` et `error_user` ne sont pas des défauts à déclarer automatiquement. Ils restent des caractérisations spéciales de SauceDemo. Une sévérité ne serait attribuée que si un comportement équivalent constituait un écart à une exigence applicable au contexte réellement testé.
+
+### Exemples de non-équivalence dans SauceDemo
+
+| Situation | Priorité du TC | Sévérité possible après analyse | Pourquoi les valeurs diffèrent |
+|---|---|---|---|
+| `TC-TRI-02` est rejoué régulièrement et le tri Z–A devient incorrect, sans empêcher l’achat. | P1 | S3 possible | Le TC est important pour la régression; le défaut constaté touche une fonction secondaire. **P1 ≠ S3.** |
+| `TC-SESSION-03` révèle qu’un utilisateur déconnecté accède réellement au panier protégé. | P0 | S1 possible | P0 fixe l’ordre d’exécution; S1 exprime ensuite l’accès non autorisé observé. Les deux coexistent sans être équivalents. |
+| `TC-CHK-02` échoue parce que le total affiché est faux pour une commande réelle. | P0 | S1 possible | Le contrôle financier est exécuté tôt; la sévérité vient de l’impact financier constaté, pas de P0 ni du niveau de RISK-CHK-02. |
+| `TC-CAT-01` échoue uniquement parce qu’une image nominale est incorrecte, tandis que noms et prix restent justes. | P0 | S4 possible | Le test Smoke contrôle plusieurs attributs essentiels; la cause précise de l’échec reste seulement visuelle. **Un TC P0 peut donc révéler un défaut S4.** |
+| `TC-CAT-03`, exécuté en P2, révèle après analyse que toute référence valide affiche le mauvais produit et le mauvais prix. | P2 | S1 ou S2 possible selon l’étendue | La priorité du scénario initial reste faible, mais l’observation peut mettre au jour un défaut beaucoup plus large. |
+| Un test P0 échoue sur `ERR_NETWORK_ACCESS_DENIED` dans l’environnement d’exécution, sans écart reproductible dans SauceDemo. | P0 | Aucune sévérité produit | Il s’agit d’un incident d’environnement à diagnostiquer, pas d’un défaut produit automatiquement classé S1. |
+
+### Impact potentiel en cas d’échec
+
+Avant exécution, un TC peut documenter un **Impact potentiel en cas d’échec** afin d’aider au triage et au diagnostic. Cette information décrit ce que l’échec pourrait signifier si un défaut produit était confirmé. Elle n’est pas une sévérité préattribuée : le résultat peut aussi provenir du test, des données ou de l’environnement, et un même TC peut échouer pour des causes d’impacts très différents.
+
+Cette mention est réservée aux garde-barrières pour lesquels elle apporte une aide décisionnelle. Le Generator doit la conserver comme métadonnée documentaire ou de reporting, sans créer de tag `S1` à `S4` dans les tests.
+
+### Revue de cohérence et transmission au Generator
+
+- **Priorités existantes :** les P0/P1/P2 restent cohérents avec leur rôle d’exécution, à une exception près : `TC-CAT-01`, déjà dans la Smoke et nécessaire pour valider l’entrée dans le catalogue, passe de P1 à P0. Les autres priorités ne changent pas.
+- **Articulation avec le risque :** les 14 risques, leurs probabilités, impacts et niveaux restent inchangés. Ils orientent la couverture préventive; P0/P1/P2 ordonne l’exécution; S1/S2/S3/S4 qualifie seulement un défaut produit confirmé.
+- **Sévérité dans les TC :** aucune propriété fixe `Sévérité` n’est ajoutée aux 33 TC. Les exemples S1 à S4 restent des guides de triage après observation.
+- **À propager par le Generator :** conserver les priorités, les références `RISK-*` et les impacts potentiels; exposer clairement ces champs dans le reporting; permettre la référence au TC lors de la création d’un défaut; ne jamais dériver ni taguer automatiquement une sévérité à partir d’un risque, d’une priorité ou d’un résultat Playwright.
+
+## 9. Cas de test
 
 ### Authentification
 
@@ -184,6 +262,7 @@ Les P0 existants `TC-AUTH-01`, `TC-PAN-01`, `TC-CHK-01`, `TC-SESSION-02` et `TC-
 **Risque(s) couvert(s) :** RISK-AUTH-01
 **Type :** Passant  
 **Priorité :** P0  
+**Impact potentiel en cas d’échec :** accès au catalogue et parcours d’achat bloqués pour un utilisateur légitime.
 **Tags :** `@positive @smoke @regression @auth`
 
 **Préconditions :** Page de connexion ouverte dans un contexte vierge.  
@@ -268,7 +347,8 @@ Les P0 existants `TC-AUTH-01`, `TC-PAN-01`, `TC-CHK-01`, `TC-SESSION-02` et `TC-
 **Critère(s) couvert(s) :** AC-CAT-01  
 **Risque(s) couvert(s) :** RISK-CAT-01, RISK-CAT-02
 **Type :** Passant  
-**Priorité :** P1  
+**Priorité :** P0
+**Impact potentiel en cas d’échec :** catalogue indisponible ou informations produit essentielles absentes, empêchant une sélection fiable.
 **Tags :** `@positive @smoke @regression @catalog`
 
 **Préconditions :** `standard_user` connecté, Inventory ouverte.  
@@ -433,6 +513,7 @@ Les P0 existants `TC-AUTH-01`, `TC-PAN-01`, `TC-CHK-01`, `TC-SESSION-02` et `TC-
 **Risque(s) couvert(s) :** RISK-CART-01
 **Type :** Passant  
 **Priorité :** P0  
+**Impact potentiel en cas d’échec :** impossibilité de constituer correctement la commande ou contenu du panier incohérent.
 **Tags :** `@positive @smoke @regression @cart`
 
 **Préconditions :** `standard_user` connecté, panier vide.  
@@ -531,6 +612,7 @@ Les P0 existants `TC-AUTH-01`, `TC-PAN-01`, `TC-CHK-01`, `TC-SESSION-02` et `TC-
 **Risque(s) couvert(s) :** RISK-CHK-01
 **Type :** Passant  
 **Priorité :** P0  
+**Impact potentiel en cas d’échec :** achat impossible ou statut de commande ambigu après tentative de finalisation.
 **Tags :** `@positive @smoke @regression @checkout`
 
 **Préconditions :** `standard_user` connecté, Backpack au panier.  
@@ -547,6 +629,7 @@ Les P0 existants `TC-AUTH-01`, `TC-PAN-01`, `TC-CHK-01`, `TC-SESSION-02` et `TC-
 **Risque(s) couvert(s) :** RISK-CHK-02
 **Type :** Passant  
 **Priorité :** P0
+**Impact potentiel en cas d’échec :** montant présenté incorrect, avec conséquence financière ou réglementaire potentielle.
 **Tags :** `@positive @smoke @regression @checkout`
 
 **Préconditions :** Les six produits nominaux au panier.  
@@ -661,6 +744,7 @@ Les P0 existants `TC-AUTH-01`, `TC-PAN-01`, `TC-CHK-01`, `TC-SESSION-02` et `TC-
 **Risque(s) couvert(s) :** RISK-CART-02, RISK-SESSION-01
 **Type :** Passant  
 **Priorité :** P0
+**Impact potentiel en cas d’échec :** perte du contexte d’achat ou du panier pendant une session active.
 **Tags :** `@positive @smoke @regression @session`
 
 **Préconditions :** `standard_user` connecté, Backpack ajouté.  
@@ -677,6 +761,7 @@ Les P0 existants `TC-AUTH-01`, `TC-PAN-01`, `TC-CHK-01`, `TC-SESSION-02` et `TC-
 **Risque(s) couvert(s) :** RISK-SESSION-02
 **Type :** Passant  
 **Priorité :** P0  
+**Impact potentiel en cas d’échec :** session non terminée et accès possible par l’utilisateur suivant.
 **Tags :** `@positive @smoke @regression @session`
 
 **Préconditions :** `standard_user` connecté.  
@@ -693,6 +778,7 @@ Les P0 existants `TC-AUTH-01`, `TC-PAN-01`, `TC-CHK-01`, `TC-SESSION-02` et `TC-
 **Risque(s) couvert(s) :** RISK-AUTH-02, RISK-SESSION-02
 **Type :** Erreur  
 **Priorité :** P0  
+**Impact potentiel en cas d’échec :** accès non autorisé à une zone protégée après déconnexion.
 **Tags :** `@error @regression @session`
 
 **Préconditions :** Une connexion nominale vient d’être fermée par Logout.  
@@ -718,7 +804,7 @@ Les P0 existants `TC-AUTH-01`, `TC-PAN-01`, `TC-CHK-01`, `TC-SESSION-02` et `TC-
 **Résultat attendu :** Le badge disparaît et Cart est vide; la session reste sur l’espace authentifié.  
 **Critère de réussite :** L’état d’achat est remis à zéro sans logout.
 
-## 9. Matrice Passant / Non passant / Erreur
+## 10. Matrice Passant / Non passant / Erreur
 
 Un tiret signifie qu’aucun comportement « non passant » distinct et pertinent n’a été observé pour le domaine; les dégradations explicites sont classées Erreur.
 
@@ -731,17 +817,17 @@ Un tiret signifie qu’aucun comportement « non passant » distinct et pertinen
 | Checkout | TC-CHK-01, TC-CHK-02 | TC-CHK-06 | TC-CHK-03, TC-CHK-04, TC-CHK-05, TC-CHK-07, TC-CHK-08 |
 | Session | TC-SESSION-01, TC-SESSION-02, TC-SESSION-04 | — | TC-SESSION-03 |
 
-## 10. Priorisation
+## 11. Priorisation
 
 | Priorité | Définition appliquée | Nombre |
 |---|---|---:|
-| P0 | Garde-barrières d’accès, panier, commande, montant, persistance, logout et protection post-logout | 7 |
-| P1 | Comportement fonctionnel important, validation ou risque élevé hors garde-barrière | 22 |
+| P0 | Tests essentiels et garde-barrières de Smoke, d’accès, panier, commande, montant, persistance et session | 8 |
+| P1 | Tests importants de régression fonctionnelle exécutés après ou en complément des P0 | 21 |
 | P2 | Ressource inexistante ou caractérisation spéciale de faible risque | 4 |
 
-Les P0 sont : TC-AUTH-01, TC-PAN-01, TC-CHK-01, TC-CHK-02, TC-SESSION-01, TC-SESSION-02 et TC-SESSION-03.
+Les P0 sont : TC-AUTH-01, TC-CAT-01, TC-PAN-01, TC-CHK-01, TC-CHK-02, TC-SESSION-01, TC-SESSION-02 et TC-SESSION-03. Cette priorité fixe leur ordre d’exécution et ne leur attribue aucune sévérité de défaut.
 
-## 11. Tags
+## 12. Tags
 
 | Tag | Usage |
 |---|---|
@@ -756,7 +842,7 @@ Chaque cas porte exactement un tag de nature, au moins un tag de campagne et son
 
 La Smoke contient sept cas : TC-AUTH-01, TC-CAT-01, TC-PAN-01, TC-CHK-01, TC-CHK-02, TC-SESSION-01 et TC-SESSION-02. Elle vérifie l’accès, le catalogue, la sélection, la commande, l’exactitude financière, la persistance et la fermeture de session. Les refus et dégradations spéciales restent dans la Regression afin que la Smoke demeure ciblée. Les 33 cas portent `@regression`.
 
-## 12. Risques et comportements spécifiques SauceDemo
+## 13. Risques et comportements spécifiques SauceDemo
 
 - `locked_out_user` est volontairement refusé; ce n’est pas une panne de données de test.
 - `problem_user` affiche six images `sl-404`, ne réordonne pas le catalogue, n’ajoute que trois produits sur six et ne conserve pas le nom au checkout.
@@ -785,7 +871,7 @@ La Smoke contient sept cas : TC-AUTH-01, TC-CAT-01, TC-PAN-01, TC-CHK-01, TC-CHK
 | Cas passants | 15 |
 | Cas non passants | 3 |
 | Cas d’erreur | 15 |
-| P0 / P1 / P2 | 7 / 22 / 4 |
+| P0 / P1 / P2 | 8 / 21 / 4 |
 | Smoke | 7 |
 | Regression | 33 |
 | Critères couverts | 32 / 32 |

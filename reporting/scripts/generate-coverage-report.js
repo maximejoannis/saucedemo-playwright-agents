@@ -114,10 +114,18 @@ assertUnique(
   testCases.map(({ id }) => id),
   'TC dans la matrice',
 );
-const planned = [...sources.plan.matchAll(/^### (TC-[A-Z]+-\d+)\s+[—-]\s+(.+)$/gmu)].map((match) => ({
-  id: match[1],
-  title: match[2].trim(),
-}));
+const plannedMatches = [...sources.plan.matchAll(/^### (TC-[A-Z]+-\d+)\s+[—-]\s+(.+)$/gmu)];
+const planned = plannedMatches.map((match, index) => {
+  const body = sources.plan.slice(match.index, plannedMatches[index + 1]?.index ?? sources.plan.length);
+  return {
+    id: match[1],
+    title: match[2].trim(),
+    priority: body.match(/^\*\*Priorité\s*:\*\*\s*(P[0-2])\s*$/mu)?.[1],
+    tags: body.match(/^\*\*Tags\s*:\*\*\s*(.+)$/mu)?.[1].match(/@[\w-]+/gu) ?? [],
+    potentialImpact: body.match(/^\*\*Impact potentiel en cas d’échec\s*:\*\*\s*(.+)$/mu)?.[1].trim(),
+    hasFixedSeverity: /^\*\*Sévérité\s*:\*\*/mu.test(body),
+  };
+});
 assertUnique(
   planned.map(({ id }) => id),
   'TC dans le plan',
@@ -126,6 +134,16 @@ for (const testCase of testCases) {
   const planCase = planned.find(({ id }) => id === testCase.id);
   if (!planCase) fail(`${testCase.id} existe dans la matrice mais pas dans le plan`);
   testCase.title = planCase.title;
+  testCase.potentialImpact = planCase.potentialImpact;
+  if (planCase.priority !== testCase.priority)
+    fail(`${testCase.id} porte une priorité différente entre le plan et la matrice`);
+  if ([...planCase.tags].sort().join() !== [...testCase.tags].sort().join())
+    fail(`${testCase.id} porte des tags différents entre le plan et la matrice`);
+  if (planCase.hasFixedSeverity) fail(`${testCase.id} possède une sévérité fixe interdite`);
+  if (testCase.priority === 'P0' && !testCase.potentialImpact)
+    fail(`${testCase.id} est P0 mais ne documente aucun impact potentiel en cas d'échec`);
+  if (testCase.tags.includes('@smoke') && testCase.priority !== 'P0')
+    fail(`${testCase.id} appartient à la Smoke mais sa priorité n'est pas P0`);
   const story = userStories.find(({ id }) => id === testCase.userStory);
   if (!story || story.feature !== testCase.feature)
     fail(`${testCase.id} relie une fonctionnalité et une US incompatibles`);
@@ -270,6 +288,12 @@ const summary = {
   ),
   functionalSmoke: testCases.filter(({ tags }) => tags.includes('@smoke')).length,
   functionalRegression: testCases.filter(({ tags }) => tags.includes('@regression')).length,
+  priorities: Object.fromEntries(
+    ['P0', 'P1', 'P2'].map((priority) => [
+      priority,
+      testCases.filter((testCase) => testCase.priority === priority).length,
+    ]),
+  ),
   risks: { traced: risks.filter(({ testCases }) => testCases.length > 0).length, total: risks.length },
   automatedRisks: { covered: risks.filter(({ automated }) => automated).length, total: risks.length },
   e2eSmoke: e2e.filter(({ tags }) => tags.includes('@smoke')).length,
