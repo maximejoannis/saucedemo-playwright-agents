@@ -7,6 +7,7 @@ test.describe('Authentification', () => {
   // US-01
   // AC-AUTH-01
   // RISK-AUTH-01
+  // Technique: EP, ST
   // TC-AUTH-01
   test('TC-AUTH-01 @positive @smoke @regression @auth @risk-auth-01 - connexion avec un utilisateur standard', async ({
     page,
@@ -27,6 +28,7 @@ test.describe('Authentification', () => {
   // US-01
   // AC-AUTH-02
   // RISK-AUTH-02
+  // Technique: EP
   // TC-AUTH-02
   test('TC-AUTH-02 @negative @regression @auth @risk-auth-02 - refus d’identifiants inconnus', async ({ page }) => {
     const login = new LoginPage(page);
@@ -40,6 +42,7 @@ test.describe('Authentification', () => {
   // US-01
   // AC-AUTH-03
   // RISK-AUTH-02
+  // Technique: EP
   // TC-AUTH-03
   test('TC-AUTH-03 @error @regression @auth @risk-auth-02 - nom d’utilisateur absent', async ({ page }) => {
     const login = new LoginPage(page);
@@ -57,6 +60,7 @@ test.describe('Authentification', () => {
   // US-01
   // AC-AUTH-04
   // RISK-AUTH-02
+  // Technique: EP
   // TC-AUTH-04
   test('TC-AUTH-04 @error @regression @auth @risk-auth-02 - mot de passe absent', async ({ page }) => {
     const login = new LoginPage(page);
@@ -71,6 +75,7 @@ test.describe('Authentification', () => {
   // US-01
   // AC-AUTH-05
   // RISK-AUTH-02
+  // Technique: EP
   // TC-AUTH-05
   test('TC-AUTH-05 @error @regression @auth @risk-auth-02 - refus du compte verrouillé', async ({ page }) => {
     const login = new LoginPage(page);

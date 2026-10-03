@@ -27,6 +27,7 @@ test.describe('Panier', () => {
   // US-04
   // AC-CART-01
   // RISK-CART-01
+  // Technique: BVA, ST, SBT
   // TC-PAN-01
   test('TC-PAN-01 @positive @smoke @regression @cart @risk-cart-01 - ajout d’un produit', async ({
     authenticatedPage: page,
@@ -47,6 +48,7 @@ test.describe('Panier', () => {
   // US-04
   // AC-CART-02
   // RISK-CART-01
+  // Technique: ST
   // TC-PAN-02
   test('TC-PAN-02 @positive @regression @cart @risk-cart-01 - retrait d’un produit', async ({
     authenticatedPage: page,
@@ -64,6 +66,7 @@ test.describe('Panier', () => {
   // US-04
   // AC-CART-03
   // RISK-CART-01
+  // Technique: ST, SBT
   // TC-PAN-03
   test('TC-PAN-03 @positive @regression @cart @risk-cart-01 - conservation du panier pendant la navigation', async ({
     authenticatedPage: page,
@@ -95,6 +98,7 @@ test.describe('Panier', () => {
   // US-04
   // AC-CART-04
   // RISK-CHK-03
+  // Technique: BVA
   // TC-PAN-04
   test('TC-PAN-04 @negative @regression @cart @risk-chk-03 - accès au checkout avec panier vide', async ({
     authenticatedPage: page,

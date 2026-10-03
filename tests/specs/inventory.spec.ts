@@ -28,6 +28,7 @@ test.describe('Catalogue', () => {
   // US-02
   // AC-CAT-02
   // RISK-CAT-01
+  // Technique: EP, SBT
   // TC-CAT-02
   test('TC-CAT-02 @positive @regression @catalog @risk-cat-01 - consultation d’une fiche et retour', async ({
     authenticatedPage: page,
@@ -52,6 +53,7 @@ test.describe('Catalogue', () => {
   // US-02
   // AC-CAT-03
   // RISK-CAT-01
+  // Technique: EP
   // TC-CAT-03
   test('TC-CAT-03 @error @regression @catalog @risk-cat-01 - consultation d’un produit inexistant', async ({
     authenticatedPage: page,

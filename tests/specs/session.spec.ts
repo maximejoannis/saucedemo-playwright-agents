@@ -7,6 +7,7 @@ test.describe('Session', () => {
   // US-06
   // AC-SESSION-01
   // RISK-CART-02, RISK-SESSION-01
+  // Technique: ST
   // TC-SESSION-01
   test('TC-SESSION-01 @positive @smoke @regression @session @risk-cart-02 @risk-session-01 - conservation après rafraîchissement', async ({
     authenticatedPage: page,
@@ -26,6 +27,7 @@ test.describe('Session', () => {
   // US-06
   // AC-SESSION-02
   // RISK-SESSION-02
+  // Technique: ST
   // TC-SESSION-02
   test('TC-SESSION-02 @positive @smoke @regression @session @risk-session-02 - déconnexion explicite', async ({
     authenticatedPage: page,
@@ -42,6 +44,7 @@ test.describe('Session', () => {
   // US-06
   // AC-SESSION-03
   // RISK-AUTH-02, RISK-SESSION-02
+  // Technique: ST
   // TC-SESSION-03
   test('TC-SESSION-03 @error @regression @session @risk-auth-02 @risk-session-02 - refus d’une route protégée après logout', async ({
     authenticatedPage: page,
@@ -60,6 +63,7 @@ test.describe('Session', () => {
   // US-06
   // AC-SESSION-04
   // RISK-SESSION-03
+  // Technique: ST
   // TC-SESSION-04
   test('TC-SESSION-04 @positive @regression @session @risk-session-03 - réinitialisation de l’état applicatif', async ({
     authenticatedPage: page,

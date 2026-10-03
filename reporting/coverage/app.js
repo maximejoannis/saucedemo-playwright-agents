@@ -52,6 +52,9 @@ async function loadReport() {
   ]
     .map(([label, count]) => `<div class="stat"><span>${label}</span><strong>${count}</strong></div>`)
     .join('');
+  q('#techniques').innerHTML = Object.entries(summary.techniques)
+    .map(([technique, count]) => `<div class="stat"><span>${technique}</span><strong>${count}</strong></div>`)
+    .join('');
   q('#featureCards').innerHTML = data.features
     .map(
       (feature) =>
@@ -88,7 +91,7 @@ async function loadReport() {
       .filter((testCase) => !term || JSON.stringify(testCase).toLowerCase().includes(term))
       .map(
         (testCase) =>
-          `<tr><td><strong>${testCase.id}</strong></td><td>${escapeHtml(testCase.feature)}</td><td>${testCase.userStory}</td><td>${testCase.acceptanceCriteria.map((id) => `<code>${id}</code>`).join(' ')}</td><td>${testCase.risks.map((id) => `<code>${id}</code>`).join(' ')}</td><td>${escapeHtml(testCase.type)}</td><td>${testCase.priority}</td><td>${escapeHtml(testCase.potentialImpact ?? '—')}</td><td>${testCase.tags.includes('@smoke') ? 'Oui' : '—'}</td><td>${testCase.tags.includes('@regression') ? 'Oui' : '—'}</td><td>${badge(testCase.automated, 'OUI', 'NON')}</td></tr>`,
+          `<tr><td><strong>${testCase.id}</strong></td><td>${escapeHtml(testCase.feature)}</td><td>${testCase.userStory}</td><td>${testCase.acceptanceCriteria.map((id) => `<code>${id}</code>`).join(' ')}</td><td>${testCase.risks.map((id) => `<code>${id}</code>`).join(' ')}</td><td>${testCase.techniques.length ? testCase.techniques.map((id) => `<code>${id}</code>`).join(' ') : '—'}</td><td>${escapeHtml(testCase.type)}</td><td>${testCase.priority}</td><td>${escapeHtml(testCase.potentialImpact ?? '—')}</td><td>${testCase.tags.includes('@smoke') ? 'Oui' : '—'}</td><td>${testCase.tags.includes('@regression') ? 'Oui' : '—'}</td><td>${badge(testCase.automated, 'OUI', 'NON')}</td></tr>`,
       )
       .join('');
   };

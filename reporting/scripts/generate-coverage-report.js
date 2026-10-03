@@ -179,16 +179,19 @@ const traceRows = sources.traceability
   .split(/\r?\n/u)
   .filter((line) => /^\| (Authentification|Catalogue|Tri|Panier|Checkout|Session) \|/u.test(line))
   .map(row);
-const testCases = traceRows.map(([feature, userStory, criterion, rawRisks, id, type, priority, rawTags]) => ({
-  id,
-  feature,
-  userStory,
-  acceptanceCriteria: criterion.split(/,\s*/u),
-  risks: rawRisks.split(/,\s*/u),
-  type,
-  priority,
-  tags: rawTags.match(/@[\w-]+/gu) ?? [],
-}));
+const testCases = traceRows.map(
+  ([feature, userStory, criterion, rawRisks, rawTechniques, id, type, priority, rawTags]) => ({
+    id,
+    feature,
+    userStory,
+    acceptanceCriteria: criterion.split(/,\s*/u),
+    risks: rawRisks.split(/,\s*/u),
+    techniques: rawTechniques.match(/EP|BVA|DT|ST|PW|SBT/gu) ?? [],
+    type,
+    priority,
+    tags: rawTags.match(/@[\w-]+/gu) ?? [],
+  }),
+);
 assertUnique(
   testCases.map(({ id }) => id),
   'TC dans la matrice',
@@ -202,6 +205,8 @@ const planned = plannedMatches.map((match, index) => {
     priority: body.match(/^\*\*Priorité\s*:\*\*\s*(P[0-2])\s*$/mu)?.[1],
     tags: body.match(/^\*\*Tags\s*:\*\*\s*(.+)$/mu)?.[1].match(/@[\w-]+/gu) ?? [],
     risks: body.match(/^\*\*Risque\(s\) couvert\(s\)\s*:\*\*\s*(.+)$/mu)?.[1].match(/RISK-[A-Z]+-\d+/gu) ?? [],
+    techniques:
+      body.match(/^\*\*Technique\(s\) de conception\s*:\*\*\s*(.+)$/mu)?.[1].match(/EP|BVA|DT|ST|PW|SBT/gu) ?? [],
     potentialImpact: body.match(/^\*\*Impact potentiel en cas d’échec\s*:\*\*\s*(.+)$/mu)?.[1].trim(),
     hasFixedSeverity: /^\*\*Sévérité\s*:\*\*/mu.test(body),
   };
@@ -221,6 +226,8 @@ for (const testCase of testCases) {
     fail(`${testCase.id} porte des tags différents entre le plan et la matrice`);
   if ([...planCase.risks].sort().join() !== [...testCase.risks].sort().join())
     fail(`${testCase.id} porte des risques différents entre le plan et la matrice`);
+  if ([...planCase.techniques].sort().join() !== [...testCase.techniques].sort().join())
+    fail(`${testCase.id} porte des techniques différentes entre le plan et la matrice`);
   if (planCase.hasFixedSeverity) fail(`${testCase.id} possède une sévérité fixe interdite`);
   if (testCase.priority === 'P0' && !testCase.potentialImpact)
     fail(`${testCase.id} est P0 mais ne documente aucun impact potentiel en cas d'échec`);
@@ -262,6 +269,11 @@ for (const file of walk(path.join(root, 'tests', 'specs')).filter((item) => item
       referencedRisks: [...context.matchAll(/\/\/\s*((?:RISK-[A-Z]+-\d+)(?:,\s*RISK-[A-Z]+-\d+)*)/gu)]
         .at(-1)?.[1]
         .split(/,\s*/u),
+      referencedTechniques: [
+        ...context.matchAll(/\/\/\s*Technique\s*:\s*((?:EP|BVA|DT|ST|PW|SBT)(?:,\s*(?:EP|BVA|DT|ST|PW|SBT))*)/gu),
+      ]
+        .at(-1)?.[1]
+        .split(/,\s*/u),
       transversalPath: [...context.matchAll(/\/\/ Parcours transversal\s*:\s*(.+)$/gmu)].at(-1)?.[1].trim(),
     });
   }
@@ -288,6 +300,8 @@ for (const automated of automatedFunctional) {
     fail(`${automated.id} porte une référence AC invalide ou incomplète`);
   if ((automated.referencedRisks ?? []).sort().join() !== [...documented.risks].sort().join())
     fail(`${automated.id} porte une référence RISK invalide ou incomplète`);
+  if ((automated.referencedTechniques ?? []).sort().join() !== [...documented.techniques].sort().join())
+    fail(`${automated.id} porte une référence Technique invalide ou incomplète`);
   const missingRiskTags = documented.risks
     .map((id) => `@${id.toLowerCase()}`)
     .filter((tag) => !automated.tags.includes(tag));
@@ -393,6 +407,12 @@ const summary = {
     ['P0', 'P1', 'P2'].map((priority) => [
       priority,
       testCases.filter((testCase) => testCase.priority === priority).length,
+    ]),
+  ),
+  techniques: Object.fromEntries(
+    ['EP', 'BVA', 'DT', 'ST', 'SBT', 'PW'].map((technique) => [
+      technique,
+      testCases.filter((testCase) => testCase.techniques.includes(technique)).length,
     ]),
   ),
   risks: { traced: risks.filter(({ testCases }) => testCases.length > 0).length, total: risks.length },

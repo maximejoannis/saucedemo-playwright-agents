@@ -214,6 +214,137 @@ Cette mention est réservée aux garde-barrières pour lesquels elle apporte une
 - **Sévérité dans les TC :** aucune propriété fixe `Sévérité` n’est ajoutée aux 33 TC. Les exemples S1 à S4 restent des guides de triage après observation.
 - **À propager par le Generator :** conserver les priorités, les références `RISK-*` et les impacts potentiels; exposer clairement ces champs dans le reporting; permettre la référence au TC lors de la création d’un défaut; ne jamais dériver ni taguer automatiquement une sévérité à partir d’un risque, d’une priorité ou d’un résultat Playwright.
 
+## Techniques de conception des tests
+
+### Définitions, codes et règles d’utilisation
+
+| Code | Technique | Utilisation dans ce plan |
+|---|---|---|
+| EP | Partition d’équivalence | Regrouper des données ou conditions supposées produire le même comportement et choisir un représentant justifié. |
+| BVA | Analyse des valeurs limites | Exercer une frontière métier ou technique connue, avec des valeurs situées de part et d’autre. Une valeur numérique seule ne suffit pas. |
+| DT | Table de décision | Représenter plusieurs conditions dont les combinaisons conduisent à des résultats distincts. |
+| ST | Transition d’état | Vérifier un événement depuis un état source et l’état cible obtenu, y compris une transition refusée ou un état inchangé. |
+| PW | Pairwise | Réduire un espace combinatoire important de paramètres suffisamment indépendants. |
+| EXP | Test exploratoire | Guider une investigation humaine autour d’une incertitude sans prédéterminer toutes les actions ou conclusions. |
+| SBT | Test basé sur les scénarios | Représenter un parcours utilisateur cohérent traversant plusieurs interactions orientées vers un objectif métier. |
+
+Une technique n’est déclarée sur un TC que si elle explique réellement la sélection de ses données, conditions ou transitions. Elle ne détermine ni le niveau du risque, ni la priorité P0/P1/P2, ni la sévérité d’un éventuel défaut. `EXP` reste attaché aux charters et n’est pas ajouté aux TC scriptés.
+
+### Partitions d’équivalence
+
+| Domaine | Partition | Représentant | Comportement attendu | TC | Risque |
+|---|---|---|---|---|---|
+| Authentification | Identifiants valides d’un compte autorisé | `standard_user` / `secret_sauce` | Inventory accessible | TC-AUTH-01 | RISK-AUTH-01 |
+| Authentification | Combinaison inconnue | `unknown_user` / `wrong_password` | Accès refusé, message d’incompatibilité | TC-AUTH-02 | RISK-AUTH-02 |
+| Authentification | Username absent | chaîne vide, avec ou sans mot de passe | Accès refusé, username requis | TC-AUTH-03 | RISK-AUTH-02 |
+| Authentification | Password absent avec username présent | `standard_user` / vide | Accès refusé, password requis | TC-AUTH-04 | RISK-AUTH-02 |
+| Authentification | Compte reconnu mais verrouillé | `locked_out_user` / mot de passe valide | Accès refusé, compte verrouillé | TC-AUTH-05 | RISK-AUTH-02 |
+| Catalogue | Identifiant d’un produit existant | Backpack (`id=4`) | Fiche correspondant au produit sélectionné | TC-CAT-02 | RISK-CAT-01 |
+| Catalogue | Identifiant de produit absent du catalogue | `id=999` | Produit signalé introuvable | TC-CAT-03 | RISK-CAT-01 |
+| Checkout | Première donnée obligatoire absente | trois champs vides | Prénom requis | TC-CHK-03 | RISK-CHK-04 |
+| Checkout | Prénom présent, nom absent | `Jean` / vide / vide | Nom requis | TC-CHK-04 | RISK-CHK-04 |
+| Checkout | Prénom et nom présents, code postal absent | `Jean` / `Dupont` / vide | Code postal requis | TC-CHK-05 | RISK-CHK-04 |
+| Checkout | Trois données obligatoires présentes | `Jean` / `Dupont` / `75001` | Accès au récapitulatif | TC-CHK-01 | RISK-CHK-01, RISK-CHK-04 |
+
+Ces partitions portent sur la présence et le statut fonctionnel explicitement décrits. Les espaces, accents, Unicode, longueurs et formats des coordonnées restent des pistes de `EXP-CHK-03`; aucune partition normative n’est créée sans exigence ou observation qualifiée.
+
+### Valeurs limites
+
+| Domaine | Frontière | Valeurs autour de la frontière | TC | Statut |
+|---|---|---|---|---|
+| Panier / Checkout | Passage de panier vide à panier contenant un article | 0 article : TC-PAN-04 et TC-CHK-06; 1 article : TC-PAN-01 et TC-CHK-01 | TC-PAN-01/04, TC-CHK-01/06 | Frontière métier exercée; l’attendu souhaité pour la commande à 0 article reste à arbitrer. Les valeurs à plusieurs articles de TC-PAN-03 et TC-CHK-02 renforcent les parcours, mais ne constituent pas des valeurs limites. |
+| Authentification | Longueur username/password | Aucune borne minimale ou maximale connue | — | BVA non justifiable actuellement; ne pas inventer 0/1/max sans spécification. |
+| Coordonnées Checkout | Longueur et format des trois champs | Aucune borne fonctionnelle connue | — | Gap documentaire; exploration avant toute BVA formelle. |
+| Montants | Arrondi de taxe et total | Règle de taxe et précision non spécifiées | TC-CHK-02 | Oracle arithmétique existant, mais BVA d’arrondi non justifiable. |
+
+La valeur zéro d’un champ absent relève ici d’EP sur la présence, pas d’une BVA de longueur. La seule frontière actuellement démontrable est le seuil métier `0 article / au moins 1 article`, enrichi par un état à plusieurs articles.
+
+### Table de décision — validation et progression du checkout
+
+`—` signifie que la condition n’influence pas la règle parce qu’un champ obligatoire antérieur est déjà absent.
+
+| Règle | Prénom présent | Nom présent | Code postal présent | Article présent | Résultat observable | TC |
+|---|---|---|---|---|---|---|
+| R1 | Non | — | — | — | Rester à Step One; prénom requis | TC-CHK-03 |
+| R2 | Oui | Non | — | — | Rester à Step One; nom requis | TC-CHK-04 |
+| R3 | Oui | Oui | Non | — | Rester à Step One; code postal requis | TC-CHK-05 |
+| R4 | Oui | Oui | Oui | Oui | Atteindre Step Two puis permettre la finalisation nominale | TC-CHK-01 |
+| R5 | Oui | Oui | Oui | Non | Atteindre Step Two avec total nul puis observer la confirmation | TC-CHK-06 |
+
+La table démontre la sélection progressive des trois partitions manquantes et la différence aval entre panier rempli et vide. Elle ne prétend pas que la confirmation d’une commande vide est souhaitée : R5 caractérise le comportement observé et maintient le gap de RISK-CHK-03.
+
+Une table de décision d’authentification séparée n’est pas ajoutée : les classes compte valide, inconnu, verrouillé et champs absents sont suffisamment lisibles par EP, sans combinaison métier supplémentaire démontrée.
+
+### Transitions d’état
+
+| État source | Événement | État cible | Valide ? | TC / EXP | Risque |
+|---|---|---|---|---|---|
+| Déconnecté | Identifiants valides | Authentifié / Inventory | Oui | TC-AUTH-01 | RISK-AUTH-01 |
+| Inventory, panier vide | Add | Inventory, panier avec article | Oui | TC-PAN-01 | RISK-CART-01 |
+| Cart, panier avec article | Remove du dernier article | Cart, panier vide | Oui | TC-PAN-02 | RISK-CART-01 |
+| Inventory / fiche / Cart | Navigation avec plusieurs articles puis retrait partiel | Même sélection cohérente sur les écrans | Oui | TC-PAN-03 | RISK-CART-01 |
+| Authentifié, panier rempli | Refresh Inventory | Même session et même panier | Oui, auto-transition | TC-SESSION-01 | RISK-CART-02, RISK-SESSION-01 |
+| Authentifié | Logout | Déconnecté | Oui | TC-SESSION-02 | RISK-SESSION-02 |
+| Déconnecté après logout | Accès direct à Cart | Déconnecté avec refus | Non, transition protégée | TC-SESSION-03, EXP-AUTH-01 | RISK-AUTH-02, RISK-SESSION-02 |
+| Authentifié, panier rempli | Reset App State | Authentifié, panier vide | Oui | TC-SESSION-04, EXP-SESSION-01 | RISK-SESSION-03 |
+| Checkout Step One, données complètes | Continue | Checkout Step Two | Oui | TC-CHK-01 | RISK-CHK-01 |
+| Checkout Step Two | Finish | Checkout Complete | Oui | TC-CHK-01 | RISK-CHK-01 |
+| Checkout Step Two avec `error_user` | Finish | Checkout Step Two inchangé | Transition dégradée connue | TC-CHK-08 | RISK-CHK-01 |
+| Étape Checkout intermédiaire | Refresh, Back ou accès direct | À découvrir | Non spécifié | EXP-CHK-01 | RISK-CHK-01, RISK-SESSION-01 |
+| Session avec panier | Logout puis reconnexion, même/autre utilisateur | À découvrir | Non spécifié | EXP-SESSION-01 | RISK-CART-02, RISK-SESSION-01, RISK-SESSION-02 |
+
+Les transitions marquées « à découvrir » ne deviennent pas des résultats attendus. Elles expliquent pourquoi une investigation précède la formalisation éventuelle d’un AC ou TC.
+
+### Test basé sur les scénarios
+
+SBT est retenu lorsque la valeur du contrôle vient du parcours cohérent plutôt que d’une donnée isolée :
+
+- `TC-CAT-02` : ouvrir une fiche cohérente puis restaurer le catalogue;
+- `TC-PAN-01` et `TC-PAN-03` : constituer puis vérifier une sélection à travers plusieurs représentations;
+- `TC-CHK-01` : réaliser l’objectif métier complet de commande nominale;
+- `TC-CHK-06` : caractériser le parcours alternatif complet d’une commande vide.
+
+Les E2E transverses appliquent également SBT, mais restent distincts des 33 TC fonctionnels et ne modifient pas la couverture des AC.
+
+### Pairwise
+
+**Non nécessaire à ce stade.** Les paramètres potentiels — type utilisateur, état du panier, état de session, étape checkout et complétude du formulaire — ne forment pas aujourd’hui un modèle combinatoire homogène : certains comptes décrivent des comportements spéciaux, plusieurs combinaisons sont impossibles ou non spécifiées, et les règles critiques connues tiennent dans les partitions, la table de décision et les transitions ci-dessus.
+
+Pairwise pourra être réévalué si des règles stables rendent plusieurs paramètres indépendants et si l’espace exhaustif devient significatif. Il faudra alors définir leurs valeurs et contraintes avant de générer toute combinaison.
+
+### Exploration
+
+Les huit charters de [`../exploratory/charters.md`](../exploratory/charters.md) utilisent la technique `EXP` :
+
+| Charter | Axe de conception exploratoire | Risque(s) |
+|---|---|---|
+| EXP-AUTH-01 | Frontières d’accès, historique et onglets après changement d’état | RISK-AUTH-02, RISK-SESSION-02 |
+| EXP-CAT-01 | Identité produit, image et paramètres d’URL | RISK-CAT-01, RISK-CAT-02 |
+| EXP-SORT-01 | Répétition, interruption et restauration du tri | RISK-SORT-01 |
+| EXP-CART-01 | Transitions rapides et synchronisation des représentations du panier | RISK-CART-01, RISK-CART-02, RISK-SESSION-01 |
+| EXP-CHK-01 | Reprise, navigation directe, panier/récapitulatif et calculs | RISK-CART-01, RISK-CHK-01, RISK-CHK-02, RISK-CHK-03, RISK-SESSION-01 |
+| EXP-CHK-02 | Répétition de Continue/Finish et idempotence apparente | RISK-CHK-01, RISK-CHK-03 |
+| EXP-CHK-03 | Classes de saisie non spécifiées et correction après erreur | RISK-CHK-04 |
+| EXP-SESSION-01 | Persistance, reconnexion, logout et Reset multi-écrans | RISK-CART-02, RISK-SESSION-01, RISK-SESSION-02, RISK-SESSION-03 |
+
+`EXP` conserve la liberté d’investigation. Un charter n’est ni une partition validée, ni un TC, ni une couverture exécutée tant qu’une session n’a pas produit et qualifié des observations.
+
+### Gaps révélés et suites recommandées
+
+| Gap | Risque / valeur | Pertinence | Automatisabilité actuelle | Recommandation |
+|---|---|---|---|---|
+| Longueurs et formats username/password non spécifiés | Accès utilisateur; portée inconnue | Faible sans exigence | Non justifiée | Ne pas créer de BVA; réévaluer après règle ou découverte. |
+| Formats, longueurs et normalisation des coordonnées | RISK-CHK-04, livraison | Moyenne | Prématurée | Exécuter EXP-CHK-03 puis décider d’éventuelles partitions. |
+| Commande à zéro article acceptée | RISK-CHK-03 élevé | Forte | Techniquement stable, attendu métier non arbitré | Décision produit avant nouveau TC normatif. |
+| Accès direct et reprise des étapes Checkout | RISK-CHK-01 / SESSION-01 | Forte | À évaluer après exploration | Exécuter EXP-CHK-01; formaliser seulement les transitions décidées. |
+| Persistance logout/relogin ou changement d’utilisateur | RISK-CART-02 / SESSION-01 / SESSION-02 | Forte | À évaluer après règle de session | Exécuter EXP-SESSION-01 et clarifier la politique. |
+| Arrondis et règle de taxe | RISK-CHK-02 élevé | Forte | Oracle insuffisant | Obtenir la règle métier avant BVA ou nouvelles partitions de montants. |
+| Espace combinatoire multi-paramètres | Aucun besoin démontré à ce stade | Faible | Pairwise prématuré | Maintenir PW non applicable; revoir après stabilisation des règles. |
+
+**Techniques réellement utilisées :** EP, BVA sur la frontière du panier, DT, ST, SBT et EXP. **Technique non pertinente actuellement :** PW. **BVA non applicable actuellement :** longueurs des identifiants, coordonnées et arrondis sans bornes ou règles.
+
+**Transmission au Generator :** propager uniquement les champs `Technique(s) de conception` présents; ne pas inférer une technique depuis le type, le nombre d’étapes ou les tags; ne créer aucun TC pour les gaps sans arbitrage; maintenir `EXP` au niveau des charters et ne pas produire de Playwright à partir de cette section.
+
 ## 9. Cas de test
 
 ### Authentification
@@ -223,6 +354,7 @@ Cette mention est réservée aux garde-barrières pour lesquels elle apporte une
 **User Story :** US-01  
 **Critère(s) couvert(s) :** AC-AUTH-01  
 **Risque(s) couvert(s) :** RISK-AUTH-01
+**Technique(s) de conception :** EP, ST
 **Type :** Passant  
 **Priorité :** P0  
 **Impact potentiel en cas d’échec :** accès au catalogue et parcours d’achat bloqués pour un utilisateur légitime.
@@ -243,6 +375,7 @@ Cette mention est réservée aux garde-barrières pour lesquels elle apporte une
 **User Story :** US-01  
 **Critère(s) couvert(s) :** AC-AUTH-02  
 **Risque(s) couvert(s) :** RISK-AUTH-02
+**Technique(s) de conception :** EP
 **Type :** Non passant  
 **Priorité :** P1  
 **Tags :** `@negative @regression @auth`
@@ -259,6 +392,7 @@ Cette mention est réservée aux garde-barrières pour lesquels elle apporte une
 **User Story :** US-01  
 **Critère(s) couvert(s) :** AC-AUTH-03  
 **Risque(s) couvert(s) :** RISK-AUTH-02
+**Technique(s) de conception :** EP
 **Type :** Erreur  
 **Priorité :** P1  
 **Tags :** `@error @regression @auth`
@@ -275,6 +409,7 @@ Cette mention est réservée aux garde-barrières pour lesquels elle apporte une
 **User Story :** US-01  
 **Critère(s) couvert(s) :** AC-AUTH-04  
 **Risque(s) couvert(s) :** RISK-AUTH-02
+**Technique(s) de conception :** EP
 **Type :** Erreur  
 **Priorité :** P1  
 **Tags :** `@error @regression @auth`
@@ -291,6 +426,7 @@ Cette mention est réservée aux garde-barrières pour lesquels elle apporte une
 **User Story :** US-01  
 **Critère(s) couvert(s) :** AC-AUTH-05  
 **Risque(s) couvert(s) :** RISK-AUTH-02
+**Technique(s) de conception :** EP
 **Type :** Erreur  
 **Priorité :** P1  
 **Tags :** `@error @regression @auth`
@@ -326,6 +462,7 @@ Cette mention est réservée aux garde-barrières pour lesquels elle apporte une
 **User Story :** US-02  
 **Critère(s) couvert(s) :** AC-CAT-02  
 **Risque(s) couvert(s) :** RISK-CAT-01
+**Technique(s) de conception :** EP, SBT
 **Type :** Passant  
 **Priorité :** P1  
 **Tags :** `@positive @regression @catalog`
@@ -342,6 +479,7 @@ Cette mention est réservée aux garde-barrières pour lesquels elle apporte une
 **User Story :** US-02  
 **Critère(s) couvert(s) :** AC-CAT-03  
 **Risque(s) couvert(s) :** RISK-CAT-01
+**Technique(s) de conception :** EP
 **Type :** Erreur  
 **Priorité :** P2  
 **Tags :** `@error @regression @catalog`
@@ -474,6 +612,7 @@ Cette mention est réservée aux garde-barrières pour lesquels elle apporte une
 **User Story :** US-04  
 **Critère(s) couvert(s) :** AC-CART-01  
 **Risque(s) couvert(s) :** RISK-CART-01
+**Technique(s) de conception :** BVA, ST, SBT
 **Type :** Passant  
 **Priorité :** P0  
 **Impact potentiel en cas d’échec :** impossibilité de constituer correctement la commande ou contenu du panier incohérent.
@@ -491,6 +630,7 @@ Cette mention est réservée aux garde-barrières pour lesquels elle apporte une
 **User Story :** US-04  
 **Critère(s) couvert(s) :** AC-CART-02  
 **Risque(s) couvert(s) :** RISK-CART-01
+**Technique(s) de conception :** ST
 **Type :** Passant  
 **Priorité :** P1  
 **Tags :** `@positive @regression @cart`
@@ -507,6 +647,7 @@ Cette mention est réservée aux garde-barrières pour lesquels elle apporte une
 **User Story :** US-04  
 **Critère(s) couvert(s) :** AC-CART-03  
 **Risque(s) couvert(s) :** RISK-CART-01
+**Technique(s) de conception :** ST, SBT
 **Type :** Passant  
 **Priorité :** P1  
 **Tags :** `@positive @regression @cart`
@@ -523,6 +664,7 @@ Cette mention est réservée aux garde-barrières pour lesquels elle apporte une
 **User Story :** US-04  
 **Critère(s) couvert(s) :** AC-CART-04  
 **Risque(s) couvert(s) :** RISK-CHK-03
+**Technique(s) de conception :** BVA
 **Type :** Non passant  
 **Priorité :** P1  
 **Tags :** `@negative @regression @cart`
@@ -573,6 +715,7 @@ Cette mention est réservée aux garde-barrières pour lesquels elle apporte une
 **User Story :** US-05  
 **Critère(s) couvert(s) :** AC-CHK-01  
 **Risque(s) couvert(s) :** RISK-CHK-01
+**Technique(s) de conception :** EP, BVA, DT, ST, SBT
 **Type :** Passant  
 **Priorité :** P0  
 **Impact potentiel en cas d’échec :** achat impossible ou statut de commande ambigu après tentative de finalisation.
@@ -607,6 +750,7 @@ Cette mention est réservée aux garde-barrières pour lesquels elle apporte une
 **User Story :** US-05  
 **Critère(s) couvert(s) :** AC-CHK-03  
 **Risque(s) couvert(s) :** RISK-CHK-04
+**Technique(s) de conception :** EP, DT
 **Type :** Erreur  
 **Priorité :** P1  
 **Tags :** `@error @regression @checkout`
@@ -623,6 +767,7 @@ Cette mention est réservée aux garde-barrières pour lesquels elle apporte une
 **User Story :** US-05  
 **Critère(s) couvert(s) :** AC-CHK-04  
 **Risque(s) couvert(s) :** RISK-CHK-04
+**Technique(s) de conception :** EP, DT
 **Type :** Erreur  
 **Priorité :** P1  
 **Tags :** `@error @regression @checkout`
@@ -639,6 +784,7 @@ Cette mention est réservée aux garde-barrières pour lesquels elle apporte une
 **User Story :** US-05  
 **Critère(s) couvert(s) :** AC-CHK-05  
 **Risque(s) couvert(s) :** RISK-CHK-04
+**Technique(s) de conception :** EP, DT
 **Type :** Erreur  
 **Priorité :** P1  
 **Tags :** `@error @regression @checkout`
@@ -655,6 +801,7 @@ Cette mention est réservée aux garde-barrières pour lesquels elle apporte une
 **User Story :** US-05  
 **Critère(s) couvert(s) :** AC-CHK-06  
 **Risque(s) couvert(s) :** RISK-CHK-03
+**Technique(s) de conception :** BVA, DT, SBT
 **Type :** Non passant  
 **Priorité :** P1
 **Tags :** `@negative @regression @checkout`
@@ -687,6 +834,7 @@ Cette mention est réservée aux garde-barrières pour lesquels elle apporte une
 **User Story :** US-05  
 **Critère(s) couvert(s) :** AC-CHK-08  
 **Risque(s) couvert(s) :** RISK-CHK-01
+**Technique(s) de conception :** ST
 **Type :** Erreur  
 **Priorité :** P1  
 **Tags :** `@error @regression @checkout`
@@ -705,6 +853,7 @@ Cette mention est réservée aux garde-barrières pour lesquels elle apporte une
 **User Story :** US-06  
 **Critère(s) couvert(s) :** AC-SESSION-01  
 **Risque(s) couvert(s) :** RISK-CART-02, RISK-SESSION-01
+**Technique(s) de conception :** ST
 **Type :** Passant  
 **Priorité :** P0
 **Impact potentiel en cas d’échec :** perte du contexte d’achat ou du panier pendant une session active.
@@ -722,6 +871,7 @@ Cette mention est réservée aux garde-barrières pour lesquels elle apporte une
 **User Story :** US-06  
 **Critère(s) couvert(s) :** AC-SESSION-02  
 **Risque(s) couvert(s) :** RISK-SESSION-02
+**Technique(s) de conception :** ST
 **Type :** Passant  
 **Priorité :** P0  
 **Impact potentiel en cas d’échec :** session non terminée et accès possible par l’utilisateur suivant.
@@ -739,6 +889,7 @@ Cette mention est réservée aux garde-barrières pour lesquels elle apporte une
 **User Story :** US-06  
 **Critère(s) couvert(s) :** AC-SESSION-03  
 **Risque(s) couvert(s) :** RISK-AUTH-02, RISK-SESSION-02
+**Technique(s) de conception :** ST
 **Type :** Erreur  
 **Priorité :** P0  
 **Impact potentiel en cas d’échec :** accès non autorisé à une zone protégée après déconnexion.
@@ -756,6 +907,7 @@ Cette mention est réservée aux garde-barrières pour lesquels elle apporte une
 **User Story :** US-06  
 **Critère(s) couvert(s) :** AC-SESSION-04  
 **Risque(s) couvert(s) :** RISK-SESSION-03
+**Technique(s) de conception :** ST
 **Type :** Passant  
 **Priorité :** P1  
 **Tags :** `@positive @regression @session`

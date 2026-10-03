@@ -25,6 +25,7 @@ test.describe('Checkout', () => {
   // US-05
   // AC-CHK-01
   // RISK-CHK-01
+  // Technique: EP, BVA, DT, ST, SBT
   // TC-CHK-01
   test('TC-CHK-01 @positive @smoke @regression @checkout @risk-chk-01 - finalisation d’une commande nominale', async ({
     authenticatedPage: page,
@@ -72,6 +73,7 @@ test.describe('Checkout', () => {
   // US-05
   // AC-CHK-03
   // RISK-CHK-04
+  // Technique: EP, DT
   // TC-CHK-03
   test('TC-CHK-03 @error @regression @checkout @risk-chk-04 - prénom obligatoire', async ({
     authenticatedPage: page,
@@ -87,6 +89,7 @@ test.describe('Checkout', () => {
   // US-05
   // AC-CHK-04
   // RISK-CHK-04
+  // Technique: EP, DT
   // TC-CHK-04
   test('TC-CHK-04 @error @regression @checkout @risk-chk-04 - nom obligatoire', async ({ authenticatedPage: page }) => {
     const checkout = new CheckoutPage(page);
@@ -101,6 +104,7 @@ test.describe('Checkout', () => {
   // US-05
   // AC-CHK-05
   // RISK-CHK-04
+  // Technique: EP, DT
   // TC-CHK-05
   test('TC-CHK-05 @error @regression @checkout @risk-chk-04 - code postal obligatoire', async ({
     authenticatedPage: page,
@@ -118,6 +122,7 @@ test.describe('Checkout', () => {
   // US-05
   // AC-CHK-06
   // RISK-CHK-03
+  // Technique: BVA, DT, SBT
   // TC-CHK-06
   test('TC-CHK-06 @negative @regression @checkout @risk-chk-03 - commande finalisée avec panier vide', async ({
     authenticatedPage: page,
@@ -159,6 +164,7 @@ test.describe('Checkout', () => {
   // US-05
   // AC-CHK-08
   // RISK-CHK-01
+  // Technique: ST
   // TC-CHK-08
   test('TC-CHK-08 @error @regression @checkout @risk-chk-01 - Finish inopérant pour error_user', async ({ page }) => {
     const login = new LoginPage(page);
