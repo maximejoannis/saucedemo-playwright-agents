@@ -23,6 +23,8 @@ const data = {
     userStories: coverage.userStories,
     acceptanceCriteria: coverage.acceptanceCriteria,
     testCases: coverage.functionalTestCases,
+    risks: coverage.risks,
+    automatedRisks: coverage.automatedRisks,
     qaScopeCoverage: coverage.qaScopeCoverage,
   },
 };

@@ -4,7 +4,8 @@ import { LoginPage } from '../../pages/login.page';
 
 test.describe('Parcours E2E de protection de session', () => {
   // Parcours transversal : Authentification → Catalogue → Session → Route protégée
-  test('E2E-03 @e2e @negative @error @regression - protection de session après logout', async ({
+  // RISK-AUTH-02, RISK-SESSION-02
+  test('E2E-03 @e2e @negative @error @regression @risk-auth-02 @risk-session-02 - protection de session après logout', async ({
     authenticatedPage: page,
   }) => {
     const inventory = new InventoryPage(page);

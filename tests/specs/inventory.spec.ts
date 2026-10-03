@@ -7,8 +7,9 @@ import { sauceDemoUsers } from '../test-data/users';
 test.describe('Catalogue', () => {
   // US-02
   // AC-CAT-01
+  // RISK-CAT-01, RISK-CAT-02
   // TC-CAT-01
-  test('TC-CAT-01 @positive @smoke @regression @catalog - affichage du catalogue nominal', async ({
+  test('TC-CAT-01 @positive @smoke @regression @catalog @risk-cat-01 @risk-cat-02 - affichage du catalogue nominal', async ({
     authenticatedPage: page,
   }) => {
     const inventory = new InventoryPage(page);
@@ -26,8 +27,9 @@ test.describe('Catalogue', () => {
 
   // US-02
   // AC-CAT-02
+  // RISK-CAT-01
   // TC-CAT-02
-  test('TC-CAT-02 @positive @regression @catalog - consultation d’une fiche et retour', async ({
+  test('TC-CAT-02 @positive @regression @catalog @risk-cat-01 - consultation d’une fiche et retour', async ({
     authenticatedPage: page,
   }) => {
     const inventory = new InventoryPage(page);
@@ -49,8 +51,9 @@ test.describe('Catalogue', () => {
 
   // US-02
   // AC-CAT-03
+  // RISK-CAT-01
   // TC-CAT-03
-  test('TC-CAT-03 @error @regression @catalog - consultation d’un produit inexistant', async ({
+  test('TC-CAT-03 @error @regression @catalog @risk-cat-01 - consultation d’un produit inexistant', async ({
     authenticatedPage: page,
   }) => {
     // 1. Ouvrir directement l’adresse de la fiche inexistante. 2. Observer le contenu.
@@ -66,8 +69,9 @@ test.describe('Catalogue', () => {
 
   // US-02
   // AC-CAT-04
+  // RISK-CAT-02
   // TC-CAT-04
-  test('TC-CAT-04 @error @regression @catalog - images dégradées de problem_user', async ({ page }) => {
+  test('TC-CAT-04 @error @regression @catalog @risk-cat-02 - images dégradées de problem_user', async ({ page }) => {
     const login = new LoginPage(page);
     const inventory = new InventoryPage(page);
     // 1. Se connecter.

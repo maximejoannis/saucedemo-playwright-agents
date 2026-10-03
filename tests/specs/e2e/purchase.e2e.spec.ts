@@ -8,7 +8,10 @@ const customer = { firstName: 'Jean', lastName: 'Dupont', postalCode: '75001' };
 
 test.describe('Parcours E2E d’achat', () => {
   // Parcours transversal : Authentification → Catalogue → Panier → Checkout
-  test('E2E-01 @e2e @positive @smoke @regression - parcours d’achat complet', async ({ authenticatedPage: page }) => {
+  // RISK-AUTH-01, RISK-CAT-01, RISK-CART-01, RISK-CHK-01, RISK-CHK-02
+  test('E2E-01 @e2e @positive @smoke @regression @risk-auth-01 @risk-cat-01 @risk-cart-01 @risk-chk-01 @risk-chk-02 - parcours d’achat complet', async ({
+    authenticatedPage: page,
+  }) => {
     const inventory = new InventoryPage(page);
     const cart = new CartPage(page);
     const checkout = new CheckoutPage(page);

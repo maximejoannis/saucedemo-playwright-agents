@@ -63,7 +63,117 @@ Catalogue nominal observé : Backpack 29,99 $, Bike Light 9,99 $, Bolt T-Shirt 1
 | Checkout | US-05 | Valider et confirmer l’achat |
 | Session | US-06 | Préserver et terminer le contexte |
 
-## 7. Cas de test
+## 7. Analyse des risques produit
+
+### Objectif de l’approche Risk-Based Testing
+
+Cette analyse sert à concentrer l’effort QA sur les défaillances qui compromettraient le plus le besoin utilisateur ou l’activité métier. Elle complète la traçabilité Fonctionnalité → User Story → Acceptance Criterion → Test Case : un critère couvert n’implique pas à lui seul que le risque associé soit suffisamment couvert.
+
+Le risque produit décrit ce qui pourrait mal fonctionner dans le produit et ses conséquences. Il ne doit être confondu ni avec la priorité d’exécution d’un cas (P0/P1/P2), ni avec la sévérité d’un bug effectivement découvert, ni avec la difficulté d’automatisation. L’évaluation ci-dessous repose sur le parcours d’achat nominal, les contrôles d’accès et les états observés au 30 août 2026. Les comportements de `problem_user` et `error_user` restent des modes de défaillance spéciaux observés, et non des exigences métier souhaitées.
+
+### Méthode de calcul
+
+Chaque risque reçoit un score simple :
+
+`Score de risque = Probabilité × Impact`
+
+La probabilité estime la vraisemblance raisonnable de la défaillance ou de sa régression. L’impact estime la conséquence maximale crédible pour l’utilisateur ou le métier si elle survient. Le score aide à comparer les risques, mais ne remplace pas le jugement QA : la priorité d’un TC tient aussi compte de son rôle de garde-barrière, de la redondance de couverture, de la vitesse de retour attendue et du fait qu’il s’agit ou non d’un comportement spécial de démonstration.
+
+| Valeur | Probabilité | Définition |
+|---:|---|---|
+| 1 | Faible | Défaillance peu vraisemblable, chemin rare ou mécanisme stable et isolé. |
+| 2 | Moyenne | Défaillance plausible lors d’une évolution, d’une transition d’état ou d’une combinaison de données. |
+| 3 | Élevée | Défaillance fréquente, déjà observée sur le parcours concerné ou exposée à de nombreuses modifications. |
+
+| Valeur | Impact | Définition |
+|---:|---|---|
+| 1 | Faible | Gêne visuelle ou de confort, sans blocage du parcours ni altération de donnée métier. |
+| 2 | Moyen | Parcours dégradé, mauvaise décision possible ou contournement disponible, sans impossibilité générale d’acheter. |
+| 3 | Fort | Accès indu ou impossible, perte/corruption d’une sélection, montant faux, commande impossible ou état utilisateur compromis. |
+
+| Score | Niveau de risque | Règle de traitement |
+|---:|---|---|
+| 1–2 | Faible | Couverture ciblée ou risque accepté et surveillé. |
+| 3–4 | Moyen | Régression proportionnée et contrôle du scénario représentatif. |
+| 6 | Élevé | Couverture renforcée, négative ou de transition selon le risque. |
+| 9 | Critique | Garde-barrière P0, Smoke et régression automatisée sur le chemin nominal. |
+
+Les scores 5, 7 et 8 ne peuvent pas résulter de l’échelle 1 à 3.
+
+### Matrice des risques
+
+| ID | Fonctionnalité | Risque métier | Conséquence | Probabilité | Impact | Niveau | Réponse QA |
+|---|---|---|---|---:|---:|---|---|
+| RISK-AUTH-01 | Authentification | Un utilisateur légitime ne peut pas s’authentifier. | Accès au catalogue et achat entièrement bloqués. | 3 | 3 | Critique (9) | Smoke + régression automatisée sur la connexion nominale (`AC-AUTH-01`, `TC-AUTH-01`). |
+| RISK-AUTH-02 | Authentification | Des identifiants invalides ou un compte verrouillé obtiennent un accès. | Accès non autorisé au domaine marchand et perte de confiance. | 2 | 3 | Élevé (6) | Tests négatifs automatisés des refus (`AC-AUTH-02`, `AC-AUTH-05`, `TC-AUTH-02`, `TC-AUTH-05`) et contrôle de route protégée avec RISK-SESSION-02. |
+| RISK-CAT-01 | Catalogue | Produit, description ou prix absent, erroné ou incohérent entre liste et fiche. | Mauvaise décision d’achat et montant attendu trompeur. | 2 | 2 | Moyen (4) | Régression automatisée des six produits et contrôle liste/fiche (`AC-CAT-01/02`, `TC-CAT-01/02`). |
+| RISK-CAT-02 | Catalogue | Image incorrecte ou indisponible. | Compréhension du produit dégradée, sans blocage du parcours. | 2 | 1 | Faible (2) | Vérification ciblée du nominal; `TC-CAT-04` reste un test de caractérisation de `problem_user`, à isoler de l’oracle métier nominal. |
+| RISK-SORT-01 | Tri | Le catalogue n’est pas ordonné selon le nom ou le prix choisi. | Recherche moins efficace; aucun article, panier ou montant n’est altéré. | 2 | 1 | Faible (2) | Régression automatisée représentative des quatre ordres; caractérisations `TC-TRI-05/06` hors Smoke. |
+| RISK-CART-01 | Panier | Un ajout/retrait échoue, un article est perdu, dupliqué ou remplacé pendant la navigation. | Commande non conforme à l’intention, abandon ou facturation potentielle d’un mauvais contenu. | 2 | 3 | Élevé (6) | Smoke sur l’ajout + régression automatisée des transitions ajout/retrait/navigation (`AC-CART-01/02/03`, `TC-PAN-01/02/03`) et test multi-articles recommandé. |
+| RISK-CART-02 | Panier | Le panier disparaît au rafraîchissement ou réapparaît dans une session ultérieure de façon inattendue. | Perte de sélection ou exposition d’un état d’achat résiduel. | 2 | 3 | Élevé (6) | Test de transition d’état et de persistance (`AC-SESSION-01`, `TC-SESSION-01`); analyse complémentaire après logout/relogin et nouvelle session. |
+| RISK-CHK-01 | Checkout | Une commande valide ne peut pas être finalisée ou aucune confirmation n’est produite. | Achat et conversion bloqués; statut de commande ambigu. | 3 | 3 | Critique (9) | Smoke + régression automatisée du parcours complet (`AC-CHK-01`, `TC-CHK-01`); `TC-CHK-08` caractérise séparément `error_user`. |
+| RISK-CHK-02 | Checkout | Sous-total, taxe ou total incorrect, ou lignes du panier incohérentes avec le récapitulatif. | Montant facturé ou annoncé incorrect et risque financier/réglementaire. | 2 | 3 | Élevé (6) | Régression automatisée avec oracle arithmétique indépendant et plusieurs articles (`AC-CHK-02`, `TC-CHK-02`); ajout recommandé à la Smoke ciblée checkout. |
+| RISK-CHK-03 | Checkout | Une commande vide peut être finalisée. | Commande sans valeur, données parasites et métriques métier faussées. | 3 | 2 | Élevé (6) | Test négatif de caractérisation (`AC-CART-04`, `AC-CHK-06`, `TC-PAN-04`, `TC-CHK-06`), clarification produit attendue sur le blocage souhaité. |
+| RISK-CHK-04 | Checkout | Des données de livraison obligatoires manquent mais le parcours continue, ou une saisie valide est rejetée. | Livraison impossible ou abandon du checkout. | 2 | 2 | Moyen (4) | Tests négatifs automatisés des trois champs (`AC-CHK-03/04/05`, `TC-CHK-03/04/05`) et exploration de classes de saisie non définies. |
+| RISK-SESSION-01 | Session | La session active est perdue ou son contexte est mal conservé pendant le parcours. | Interruption du parcours, perte du panier et abandon. | 2 | 3 | Élevé (6) | Régression automatisée après rafraîchissement (`AC-SESSION-01`, `TC-SESSION-01`) et tests de transitions/navigation prolongée à compléter. |
+| RISK-SESSION-02 | Session | Logout ne termine pas réellement la session ou une route protégée reste accessible. | Accès non autorisé aux données et actions de l’utilisateur précédent. | 2 | 3 | Élevé (6) | Smoke du logout + test négatif automatisé d’accès direct (`AC-SESSION-02/03`, `TC-SESSION-02/03`), à étendre aux autres routes sensibles. |
+| RISK-SESSION-03 | Session | Reset App State ne vide pas exactement le panier ou déconnecte l’utilisateur. | État d’achat résiduel ou interruption évitable du parcours. | 1 | 2 | Faible (2) | Test de transition d’état automatisé (`AC-SESSION-04`, `TC-SESSION-04`). |
+
+### Risques critiques et élevés
+
+- **RISK-AUTH-01** et **RISK-CHK-01** sont critiques : ils encadrent l’entrée et l’aboutissement du tunnel. Une panne rend le service marchand inutilisable même si les fonctions intermédiaires restent disponibles. Leurs TC nominaux P0 doivent rester des garde-barrières Smoke et Regression.
+- **RISK-AUTH-02** et **RISK-SESSION-02** protègent la frontière d’accès. Le chemin nominal ne suffit pas : les refus, le logout et la tentative d’accès direct doivent être contrôlés comme transitions d’autorisation.
+- **RISK-CART-01**, **RISK-CART-02** et **RISK-SESSION-01** portent sur l’intégrité du contexte d’achat. Une sélection perdue, dupliquée ou résiduelle peut modifier la commande ou provoquer l’abandon; la couverture doit vérifier l’état, pas seulement la présence d’un bouton.
+- **RISK-CHK-02** exige un oracle financier indépendant : recopier une valeur affichée ne démontrerait pas l’exactitude du calcul. La somme des lignes, le sous-total, la taxe et le total doivent être comparés.
+- **RISK-CHK-03** est élevé parce que le comportement est déjà observé. Il n’est toutefois pas assimilé à l’impossibilité d’acheter : son impact porte surtout sur l’intégrité des commandes et des indicateurs métier.
+
+À l’inverse, **RISK-SORT-01** et **RISK-CAT-02** restent faibles : un tri ou une image incorrecte gêne le choix, mais ne bloque ni l’accès, ni la constitution du panier, ni la finalisation. Leur automatisation existante ne les rend pas plus critiques.
+
+### Risques résiduels et gaps de couverture
+
+La matrice de traçabilité annonce 100 % des AC couverts, mais les risques suivants ne sont pas entièrement démontrés par les AC/TC actuels :
+
+| Risque | Couverture actuelle | Gap résiduel | Réponse recommandée avant création de TC |
+|---|---|---|---|
+| RISK-AUTH-02 / RISK-SESSION-02 | Refus d’identifiants, compte verrouillé et `/cart.html` après logout. | Absence de contrôle explicite d’une route protégée depuis une session jamais authentifiée et couverture d’une seule route après logout. | Analyse complémentaire des routes sensibles, puis test négatif paramétré si la règle d’accès est confirmée. |
+| RISK-CART-01 | Ajout/retrait unitaire et conservation en navigation. | Pas de transition multi-articles combinant ajouts, retrait partiel, aller-retour détail/panier et absence de duplication. | Concevoir un test de transition d’état multi-articles; ne pas créer un cas par combinaison. |
+| RISK-CART-02 | Rafraîchissement avec un article via `TC-SESSION-01`. | État du panier après logout/relogin, changement d’utilisateur ou nouvelle session non spécifié. | Clarifier la règle produit et la confidentialité attendue avant d’écrire un AC ou un TC. |
+| RISK-CHK-02 | Six produits, somme, taxe et total dans `TC-CHK-02`. | Règle de taxe non spécifiée; peu de classes de montant et aucun arrondi limite. | Analyse des règles de calcul nécessaire; compléter les partitions seulement après définition de l’oracle métier. |
+| RISK-CHK-03 | Comportement vide observé et couvert. | Aucun AC ne dit si accepter une commande vide est souhaité ou constitue une anomalie. | Décision Product Owner requise; conserver jusque-là un test de caractérisation, sans transformer l’observation en exigence souhaitée. |
+| RISK-CHK-04 | Présence obligatoire des trois champs. | Formats, longueurs, espaces, caractères spéciaux et validité du code postal non définis. | Test exploratoire ciblé puis clarification des règles; risque accepté tant qu’aucune contrainte métier n’est fournie. |
+| RISK-SESSION-01 | Rafraîchissement d’Inventory couvert. | Navigation prolongée, rafraîchissement depuis Cart/Checkout, expiration et reprise après interruption non couverts. | Tests exploratoires de session et définition de la politique d’expiration avant extension de la régression. |
+
+Les contrôles de sécurité offensive, la concurrence de sessions, la performance, le multi-navigateur et l’accessibilité exhaustive restent hors périmètre conformément à la section 3. Ce sont des risques résiduels acceptés par le périmètre actuel, pas des preuves d’absence de risque.
+
+### Lien entre risque et priorité des tests
+
+La priorité traduit l’ordre et la fréquence d’exécution d’un TC, pas directement le score du risque. Les règles de décision retenues sont :
+
+- **P0** : garde-barrière rapide d’un risque critique, ou contrôle indispensable d’intégrité financière, d’état ou d’autorisation dont l’échec invalide une livraison;
+- **P1** : régression importante d’un risque moyen/élevé, test négatif, transition d’état ou complément détaillé d’un P0;
+- **P2** : comportement secondaire, rare ou faible impact, acceptable hors boucle de retour rapide.
+
+La revue initiale a produit les écarts suivants. Ils sont désormais arbitrés et propagés dans les fiches TC, la matrice et l’automatisation :
+
+| TC concerné | Priorité actuelle | Lecture par le risque | Proposition argumentée |
+|---|---:|---|---|
+| TC-CHK-02 | P1 | RISK-CHK-02 élevé (6), oracle financier central. | **Arbitré P0 + Smoke** : un parcours confirmé avec un total faux n’est pas un succès métier. |
+| TC-SESSION-01 | P1 | RISK-CART-02 et RISK-SESSION-01 élevés (6). | **Arbitré P0 + Smoke** : ce contrôle court devient un garde-barrière de persistance. |
+| TC-CHK-06 | P2 | RISK-CHK-03 élevé (6) et défaillance observée. | **Arbitré P1** tant que le produit n’a pas accepté explicitement les commandes vides; il ne justifie pas P0 car il ne bloque pas l’achat nominal. |
+| TC-CAT-04 | P1 | RISK-CAT-02 faible (2), comportement spécial de `problem_user`. | **Arbitré P2**, maintenu dans la Regression comme caractérisation dédiée. |
+| TC-TRI-05, TC-TRI-06 | P1 | RISK-SORT-01 faible (2), comportements spéciaux sans altération de commande. | **Arbitrés P2**, maintenus dans la Regression comme caractérisations dédiées. |
+
+Les P0 existants `TC-AUTH-01`, `TC-PAN-01`, `TC-CHK-01`, `TC-SESSION-02` et `TC-SESSION-03` restent justifiés. Les validations obligatoires du checkout restent P1. Les changements arbitrés ci-dessus ne modifient ni la probabilité, ni l’impact, ni le niveau des risques.
+
+### Revue de cohérence et transmission au Generator
+
+- **Risques identifiés :** 14 risques distincts — 2 critiques, 7 élevés, 2 moyens et 3 faibles — sur les six fonctionnalités.
+- **Risques couverts :** chaque risque possède au moins un AC/TC contribuant à sa maîtrise; la connexion, le parcours de commande, les refus d’accès, le panier nominal, les montants nominaux, le logout et le reset disposent d’observations explicites.
+- **Risques insuffisamment couverts :** accès direct sans authentification préalable, transitions panier multi-articles, persistance inter-session/inter-utilisateur, règles de taxe et d’arrondi, validation étendue des coordonnées et cycle de vie/expiration de session.
+- **Priorités revues :** `TC-CHK-02` et `TC-SESSION-01` sont P0 + Smoke, `TC-CHK-06` est P1, `TC-CAT-04` et `TC-TRI-05/06` sont P2 en Regression de caractérisation.
+- **Recommandations de conception au Generator :** préserver les IDs et liens US/AC/TC; utiliser des oracles d’état et de calcul indépendants; concevoir un scénario multi-articles par transitions plutôt qu’une explosion combinatoire; séparer les tests métier nominaux des caractérisations `problem_user`/`error_user`; ne générer aucun nouveau test sur les gaps tant que les règles produit signalées ne sont pas clarifiées.
+
+## 8. Cas de test
 
 ### Authentification
 
@@ -71,6 +181,7 @@ Catalogue nominal observé : Backpack 29,99 $, Bike Light 9,99 $, Bolt T-Shirt 1
 
 **User Story :** US-01  
 **Critère(s) couvert(s) :** AC-AUTH-01  
+**Risque(s) couvert(s) :** RISK-AUTH-01
 **Type :** Passant  
 **Priorité :** P0  
 **Tags :** `@positive @smoke @regression @auth`
@@ -89,6 +200,7 @@ Catalogue nominal observé : Backpack 29,99 $, Bike Light 9,99 $, Bolt T-Shirt 1
 
 **User Story :** US-01  
 **Critère(s) couvert(s) :** AC-AUTH-02  
+**Risque(s) couvert(s) :** RISK-AUTH-02
 **Type :** Non passant  
 **Priorité :** P1  
 **Tags :** `@negative @regression @auth`
@@ -104,6 +216,7 @@ Catalogue nominal observé : Backpack 29,99 $, Bike Light 9,99 $, Bolt T-Shirt 1
 
 **User Story :** US-01  
 **Critère(s) couvert(s) :** AC-AUTH-03  
+**Risque(s) couvert(s) :** RISK-AUTH-02
 **Type :** Erreur  
 **Priorité :** P1  
 **Tags :** `@error @regression @auth`
@@ -119,6 +232,7 @@ Catalogue nominal observé : Backpack 29,99 $, Bike Light 9,99 $, Bolt T-Shirt 1
 
 **User Story :** US-01  
 **Critère(s) couvert(s) :** AC-AUTH-04  
+**Risque(s) couvert(s) :** RISK-AUTH-02
 **Type :** Erreur  
 **Priorité :** P1  
 **Tags :** `@error @regression @auth`
@@ -134,6 +248,7 @@ Catalogue nominal observé : Backpack 29,99 $, Bike Light 9,99 $, Bolt T-Shirt 1
 
 **User Story :** US-01  
 **Critère(s) couvert(s) :** AC-AUTH-05  
+**Risque(s) couvert(s) :** RISK-AUTH-02
 **Type :** Erreur  
 **Priorité :** P1  
 **Tags :** `@error @regression @auth`
@@ -151,6 +266,7 @@ Catalogue nominal observé : Backpack 29,99 $, Bike Light 9,99 $, Bolt T-Shirt 1
 
 **User Story :** US-02  
 **Critère(s) couvert(s) :** AC-CAT-01  
+**Risque(s) couvert(s) :** RISK-CAT-01, RISK-CAT-02
 **Type :** Passant  
 **Priorité :** P1  
 **Tags :** `@positive @smoke @regression @catalog`
@@ -166,6 +282,7 @@ Catalogue nominal observé : Backpack 29,99 $, Bike Light 9,99 $, Bolt T-Shirt 1
 
 **User Story :** US-02  
 **Critère(s) couvert(s) :** AC-CAT-02  
+**Risque(s) couvert(s) :** RISK-CAT-01
 **Type :** Passant  
 **Priorité :** P1  
 **Tags :** `@positive @regression @catalog`
@@ -181,6 +298,7 @@ Catalogue nominal observé : Backpack 29,99 $, Bike Light 9,99 $, Bolt T-Shirt 1
 
 **User Story :** US-02  
 **Critère(s) couvert(s) :** AC-CAT-03  
+**Risque(s) couvert(s) :** RISK-CAT-01
 **Type :** Erreur  
 **Priorité :** P2  
 **Tags :** `@error @regression @catalog`
@@ -196,8 +314,9 @@ Catalogue nominal observé : Backpack 29,99 $, Bike Light 9,99 $, Bolt T-Shirt 1
 
 **User Story :** US-02  
 **Critère(s) couvert(s) :** AC-CAT-04  
+**Risque(s) couvert(s) :** RISK-CAT-02
 **Type :** Erreur  
-**Priorité :** P1  
+**Priorité :** P2
 **Tags :** `@error @regression @catalog`
 
 **Préconditions :** Session vierge.  
@@ -213,6 +332,7 @@ Catalogue nominal observé : Backpack 29,99 $, Bike Light 9,99 $, Bolt T-Shirt 1
 
 **User Story :** US-03  
 **Critère(s) couvert(s) :** AC-SORT-01  
+**Risque(s) couvert(s) :** RISK-SORT-01
 **Type :** Passant  
 **Priorité :** P1  
 **Tags :** `@positive @regression @sorting`
@@ -228,6 +348,7 @@ Catalogue nominal observé : Backpack 29,99 $, Bike Light 9,99 $, Bolt T-Shirt 1
 
 **User Story :** US-03  
 **Critère(s) couvert(s) :** AC-SORT-02  
+**Risque(s) couvert(s) :** RISK-SORT-01
 **Type :** Passant  
 **Priorité :** P1  
 **Tags :** `@positive @regression @sorting`
@@ -243,6 +364,7 @@ Catalogue nominal observé : Backpack 29,99 $, Bike Light 9,99 $, Bolt T-Shirt 1
 
 **User Story :** US-03  
 **Critère(s) couvert(s) :** AC-SORT-03  
+**Risque(s) couvert(s) :** RISK-SORT-01
 **Type :** Passant  
 **Priorité :** P1  
 **Tags :** `@positive @regression @sorting`
@@ -258,6 +380,7 @@ Catalogue nominal observé : Backpack 29,99 $, Bike Light 9,99 $, Bolt T-Shirt 1
 
 **User Story :** US-03  
 **Critère(s) couvert(s) :** AC-SORT-04  
+**Risque(s) couvert(s) :** RISK-SORT-01
 **Type :** Passant  
 **Priorité :** P1  
 **Tags :** `@positive @regression @sorting`
@@ -273,8 +396,9 @@ Catalogue nominal observé : Backpack 29,99 $, Bike Light 9,99 $, Bolt T-Shirt 1
 
 **User Story :** US-03  
 **Critère(s) couvert(s) :** AC-SORT-05  
+**Risque(s) couvert(s) :** RISK-SORT-01
 **Type :** Erreur  
-**Priorité :** P1  
+**Priorité :** P2
 **Tags :** `@error @regression @sorting`
 
 **Préconditions :** `problem_user` connecté.  
@@ -288,8 +412,9 @@ Catalogue nominal observé : Backpack 29,99 $, Bike Light 9,99 $, Bolt T-Shirt 1
 
 **User Story :** US-03  
 **Critère(s) couvert(s) :** AC-SORT-06  
+**Risque(s) couvert(s) :** RISK-SORT-01
 **Type :** Erreur  
-**Priorité :** P1  
+**Priorité :** P2
 **Tags :** `@error @regression @sorting`
 
 **Préconditions :** `error_user` connecté.  
@@ -305,6 +430,7 @@ Catalogue nominal observé : Backpack 29,99 $, Bike Light 9,99 $, Bolt T-Shirt 1
 
 **User Story :** US-04  
 **Critère(s) couvert(s) :** AC-CART-01  
+**Risque(s) couvert(s) :** RISK-CART-01
 **Type :** Passant  
 **Priorité :** P0  
 **Tags :** `@positive @smoke @regression @cart`
@@ -320,6 +446,7 @@ Catalogue nominal observé : Backpack 29,99 $, Bike Light 9,99 $, Bolt T-Shirt 1
 
 **User Story :** US-04  
 **Critère(s) couvert(s) :** AC-CART-02  
+**Risque(s) couvert(s) :** RISK-CART-01
 **Type :** Passant  
 **Priorité :** P1  
 **Tags :** `@positive @regression @cart`
@@ -335,21 +462,23 @@ Catalogue nominal observé : Backpack 29,99 $, Bike Light 9,99 $, Bolt T-Shirt 1
 
 **User Story :** US-04  
 **Critère(s) couvert(s) :** AC-CART-03  
+**Risque(s) couvert(s) :** RISK-CART-01
 **Type :** Passant  
 **Priorité :** P1  
 **Tags :** `@positive @regression @cart`
 
 **Préconditions :** `standard_user` connecté, panier vide.  
-**Données de test :** Bike Light.
+**Données de test :** Bike Light et Backpack.
 
-**Étapes :** 1. Ajouter Bike Light. 2. Ouvrir une fiche puis revenir. 3. Ouvrir Cart. 4. Revenir à Inventory.  
-**Résultat attendu :** Badge 1 et Bike Light restent présents à chaque étape pertinente.  
-**Critère de réussite :** Aucune navigation interne ne perd la sélection.
+**Étapes :** 1. Ajouter Bike Light et Backpack. 2. Ouvrir une fiche puis revenir. 3. Ouvrir Cart et retirer Backpack. 4. Revenir à Inventory puis rouvrir Cart.
+**Résultat attendu :** Les deux ajouts restent uniques pendant la navigation; après le retrait, le badge vaut 1 et seul Bike Light demeure à chaque étape pertinente.
+**Critère de réussite :** Aucune navigation interne ne perd, ne duplique ni ne réintroduit un article retiré.
 
 ### TC-PAN-04 — Accès au checkout avec panier vide
 
 **User Story :** US-04  
 **Critère(s) couvert(s) :** AC-CART-04  
+**Risque(s) couvert(s) :** RISK-CHK-03
 **Type :** Non passant  
 **Priorité :** P1  
 **Tags :** `@negative @regression @cart`
@@ -365,6 +494,7 @@ Catalogue nominal observé : Backpack 29,99 $, Bike Light 9,99 $, Bolt T-Shirt 1
 
 **User Story :** US-04  
 **Critère(s) couvert(s) :** AC-CART-05  
+**Risque(s) couvert(s) :** RISK-CART-01
 **Type :** Erreur  
 **Priorité :** P1  
 **Tags :** `@error @regression @cart`
@@ -380,6 +510,7 @@ Catalogue nominal observé : Backpack 29,99 $, Bike Light 9,99 $, Bolt T-Shirt 1
 
 **User Story :** US-04  
 **Critère(s) couvert(s) :** AC-CART-05  
+**Risque(s) couvert(s) :** RISK-CART-01
 **Type :** Erreur  
 **Priorité :** P1  
 **Tags :** `@error @regression @cart`
@@ -397,6 +528,7 @@ Catalogue nominal observé : Backpack 29,99 $, Bike Light 9,99 $, Bolt T-Shirt 1
 
 **User Story :** US-05  
 **Critère(s) couvert(s) :** AC-CHK-01  
+**Risque(s) couvert(s) :** RISK-CHK-01
 **Type :** Passant  
 **Priorité :** P0  
 **Tags :** `@positive @smoke @regression @checkout`
@@ -412,9 +544,10 @@ Catalogue nominal observé : Backpack 29,99 $, Bike Light 9,99 $, Bolt T-Shirt 1
 
 **User Story :** US-05  
 **Critère(s) couvert(s) :** AC-CHK-02  
+**Risque(s) couvert(s) :** RISK-CHK-02
 **Type :** Passant  
-**Priorité :** P1  
-**Tags :** `@positive @regression @checkout`
+**Priorité :** P0
+**Tags :** `@positive @smoke @regression @checkout`
 
 **Préconditions :** Les six produits nominaux au panier.  
 **Données de test :** Jean / Dupont / 75001; somme attendue 129,94 $.
@@ -427,6 +560,7 @@ Catalogue nominal observé : Backpack 29,99 $, Bike Light 9,99 $, Bolt T-Shirt 1
 
 **User Story :** US-05  
 **Critère(s) couvert(s) :** AC-CHK-03  
+**Risque(s) couvert(s) :** RISK-CHK-04
 **Type :** Erreur  
 **Priorité :** P1  
 **Tags :** `@error @regression @checkout`
@@ -442,6 +576,7 @@ Catalogue nominal observé : Backpack 29,99 $, Bike Light 9,99 $, Bolt T-Shirt 1
 
 **User Story :** US-05  
 **Critère(s) couvert(s) :** AC-CHK-04  
+**Risque(s) couvert(s) :** RISK-CHK-04
 **Type :** Erreur  
 **Priorité :** P1  
 **Tags :** `@error @regression @checkout`
@@ -457,6 +592,7 @@ Catalogue nominal observé : Backpack 29,99 $, Bike Light 9,99 $, Bolt T-Shirt 1
 
 **User Story :** US-05  
 **Critère(s) couvert(s) :** AC-CHK-05  
+**Risque(s) couvert(s) :** RISK-CHK-04
 **Type :** Erreur  
 **Priorité :** P1  
 **Tags :** `@error @regression @checkout`
@@ -472,8 +608,9 @@ Catalogue nominal observé : Backpack 29,99 $, Bike Light 9,99 $, Bolt T-Shirt 1
 
 **User Story :** US-05  
 **Critère(s) couvert(s) :** AC-CHK-06  
+**Risque(s) couvert(s) :** RISK-CHK-03
 **Type :** Non passant  
-**Priorité :** P2  
+**Priorité :** P1
 **Tags :** `@negative @regression @checkout`
 
 **Préconditions :** `standard_user` connecté, panier vide.  
@@ -487,6 +624,7 @@ Catalogue nominal observé : Backpack 29,99 $, Bike Light 9,99 $, Bolt T-Shirt 1
 
 **User Story :** US-05  
 **Critère(s) couvert(s) :** AC-CHK-07  
+**Risque(s) couvert(s) :** RISK-CHK-01, RISK-CHK-04
 **Type :** Erreur  
 **Priorité :** P1  
 **Tags :** `@error @regression @checkout`
@@ -502,6 +640,7 @@ Catalogue nominal observé : Backpack 29,99 $, Bike Light 9,99 $, Bolt T-Shirt 1
 
 **User Story :** US-05  
 **Critère(s) couvert(s) :** AC-CHK-08  
+**Risque(s) couvert(s) :** RISK-CHK-01
 **Type :** Erreur  
 **Priorité :** P1  
 **Tags :** `@error @regression @checkout`
@@ -519,9 +658,10 @@ Catalogue nominal observé : Backpack 29,99 $, Bike Light 9,99 $, Bolt T-Shirt 1
 
 **User Story :** US-06  
 **Critère(s) couvert(s) :** AC-SESSION-01  
+**Risque(s) couvert(s) :** RISK-CART-02, RISK-SESSION-01
 **Type :** Passant  
-**Priorité :** P1  
-**Tags :** `@positive @regression @session`
+**Priorité :** P0
+**Tags :** `@positive @smoke @regression @session`
 
 **Préconditions :** `standard_user` connecté, Backpack ajouté.  
 **Données de test :** badge 1.
@@ -534,6 +674,7 @@ Catalogue nominal observé : Backpack 29,99 $, Bike Light 9,99 $, Bolt T-Shirt 1
 
 **User Story :** US-06  
 **Critère(s) couvert(s) :** AC-SESSION-02  
+**Risque(s) couvert(s) :** RISK-SESSION-02
 **Type :** Passant  
 **Priorité :** P0  
 **Tags :** `@positive @smoke @regression @session`
@@ -549,6 +690,7 @@ Catalogue nominal observé : Backpack 29,99 $, Bike Light 9,99 $, Bolt T-Shirt 1
 
 **User Story :** US-06  
 **Critère(s) couvert(s) :** AC-SESSION-03  
+**Risque(s) couvert(s) :** RISK-AUTH-02, RISK-SESSION-02
 **Type :** Erreur  
 **Priorité :** P0  
 **Tags :** `@error @regression @session`
@@ -564,6 +706,7 @@ Catalogue nominal observé : Backpack 29,99 $, Bike Light 9,99 $, Bolt T-Shirt 1
 
 **User Story :** US-06  
 **Critère(s) couvert(s) :** AC-SESSION-04  
+**Risque(s) couvert(s) :** RISK-SESSION-03
 **Type :** Passant  
 **Priorité :** P1  
 **Tags :** `@positive @regression @session`
@@ -575,7 +718,7 @@ Catalogue nominal observé : Backpack 29,99 $, Bike Light 9,99 $, Bolt T-Shirt 1
 **Résultat attendu :** Le badge disparaît et Cart est vide; la session reste sur l’espace authentifié.  
 **Critère de réussite :** L’état d’achat est remis à zéro sans logout.
 
-## 8. Matrice Passant / Non passant / Erreur
+## 9. Matrice Passant / Non passant / Erreur
 
 Un tiret signifie qu’aucun comportement « non passant » distinct et pertinent n’a été observé pour le domaine; les dégradations explicites sont classées Erreur.
 
@@ -588,17 +731,17 @@ Un tiret signifie qu’aucun comportement « non passant » distinct et pertinen
 | Checkout | TC-CHK-01, TC-CHK-02 | TC-CHK-06 | TC-CHK-03, TC-CHK-04, TC-CHK-05, TC-CHK-07, TC-CHK-08 |
 | Session | TC-SESSION-01, TC-SESSION-02, TC-SESSION-04 | — | TC-SESSION-03 |
 
-## 9. Priorisation
+## 10. Priorisation
 
 | Priorité | Définition appliquée | Nombre |
 |---|---|---:|
-| P0 | Accès nominal, ajout, commande, logout et protection post-logout | 5 |
-| P1 | Comportement fonctionnel important ou défaut spécial à surveiller | 26 |
-| P2 | Ressource inexistante ou commande vide secondaire | 2 |
+| P0 | Garde-barrières d’accès, panier, commande, montant, persistance, logout et protection post-logout | 7 |
+| P1 | Comportement fonctionnel important, validation ou risque élevé hors garde-barrière | 22 |
+| P2 | Ressource inexistante ou caractérisation spéciale de faible risque | 4 |
 
-Les P0 sont : TC-AUTH-01, TC-PAN-01, TC-CHK-01, TC-SESSION-02 et TC-SESSION-03.
+Les P0 sont : TC-AUTH-01, TC-PAN-01, TC-CHK-01, TC-CHK-02, TC-SESSION-01, TC-SESSION-02 et TC-SESSION-03.
 
-## 10. Tags
+## 11. Tags
 
 | Tag | Usage |
 |---|---|
@@ -611,9 +754,9 @@ Les P0 sont : TC-AUTH-01, TC-PAN-01, TC-CHK-01, TC-SESSION-02 et TC-SESSION-03.
 
 Chaque cas porte exactement un tag de nature, au moins un tag de campagne et son tag de domaine.
 
-La Smoke est volontairement limitée à cinq cas : TC-AUTH-01, TC-CAT-01, TC-PAN-01, TC-CHK-01 et TC-SESSION-02. Elle vérifie l’accès, l’affichage du catalogue, la sélection, la commande et la fermeture de session. Les refus et dégradations spéciales restent dans la Regression afin que la Smoke demeure courte. Les 33 cas portent `@regression`.
+La Smoke contient sept cas : TC-AUTH-01, TC-CAT-01, TC-PAN-01, TC-CHK-01, TC-CHK-02, TC-SESSION-01 et TC-SESSION-02. Elle vérifie l’accès, le catalogue, la sélection, la commande, l’exactitude financière, la persistance et la fermeture de session. Les refus et dégradations spéciales restent dans la Regression afin que la Smoke demeure ciblée. Les 33 cas portent `@regression`.
 
-## 11. Risques et comportements spécifiques SauceDemo
+## 12. Risques et comportements spécifiques SauceDemo
 
 - `locked_out_user` est volontairement refusé; ce n’est pas une panne de données de test.
 - `problem_user` affiche six images `sl-404`, ne réordonne pas le catalogue, n’ajoute que trois produits sur six et ne conserve pas le nom au checkout.
@@ -642,8 +785,8 @@ La Smoke est volontairement limitée à cinq cas : TC-AUTH-01, TC-CAT-01, TC-PAN
 | Cas passants | 15 |
 | Cas non passants | 3 |
 | Cas d’erreur | 15 |
-| P0 / P1 / P2 | 5 / 26 / 2 |
-| Smoke | 5 |
+| P0 / P1 / P2 | 7 / 22 / 4 |
+| Smoke | 7 |
 | Regression | 33 |
 | Critères couverts | 32 / 32 |
 | Taux de couverture des critères | 100 % |

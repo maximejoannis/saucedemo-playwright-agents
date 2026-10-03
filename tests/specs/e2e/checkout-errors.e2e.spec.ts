@@ -5,7 +5,8 @@ import { InventoryPage } from '../../pages/inventory.page';
 
 test.describe('Parcours E2E de validation du checkout', () => {
   // Parcours transversal : Authentification → Catalogue → Panier → Checkout → Validation d’erreur
-  test('E2E-02 @e2e @negative @error @regression - blocage fonctionnel pendant le checkout', async ({
+  // RISK-CHK-04
+  test('E2E-02 @e2e @negative @error @regression @risk-chk-04 - blocage fonctionnel pendant le checkout', async ({
     authenticatedPage: page,
   }) => {
     const inventory = new InventoryPage(page);

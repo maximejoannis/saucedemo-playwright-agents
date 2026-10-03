@@ -24,8 +24,11 @@ async function assertBrokenSorting(page: Page, user: SauceDemoUser) {
 test.describe('Tri', () => {
   // US-03
   // AC-SORT-01
+  // RISK-SORT-01
   // TC-TRI-01
-  test('TC-TRI-01 @positive @regression @sorting - tri des noms de A à Z', async ({ authenticatedPage: page }) => {
+  test('TC-TRI-01 @positive @regression @sorting @risk-sort-01 - tri des noms de A à Z', async ({
+    authenticatedPage: page,
+  }) => {
     const inventory = new InventoryPage(page);
     // 1. Choisir A-Z. 2. Relever les noms de haut en bas.
     await inventory.selectSortOrder('az');
@@ -34,8 +37,11 @@ test.describe('Tri', () => {
 
   // US-03
   // AC-SORT-02
+  // RISK-SORT-01
   // TC-TRI-02
-  test('TC-TRI-02 @positive @regression @sorting - tri des noms de Z à A', async ({ authenticatedPage: page }) => {
+  test('TC-TRI-02 @positive @regression @sorting @risk-sort-01 - tri des noms de Z à A', async ({
+    authenticatedPage: page,
+  }) => {
     const inventory = new InventoryPage(page);
     // 1. Choisir Z-A. 2. Relever les noms.
     await inventory.selectSortOrder('za');
@@ -44,8 +50,11 @@ test.describe('Tri', () => {
 
   // US-03
   // AC-SORT-03
+  // RISK-SORT-01
   // TC-TRI-03
-  test('TC-TRI-03 @positive @regression @sorting - tri des prix croissants', async ({ authenticatedPage: page }) => {
+  test('TC-TRI-03 @positive @regression @sorting @risk-sort-01 - tri des prix croissants', async ({
+    authenticatedPage: page,
+  }) => {
     const inventory = new InventoryPage(page);
     // 1. Choisir le prix croissant. 2. Relever les six prix.
     await inventory.selectSortOrder('lohi');
@@ -54,8 +63,11 @@ test.describe('Tri', () => {
 
   // US-03
   // AC-SORT-04
+  // RISK-SORT-01
   // TC-TRI-04
-  test('TC-TRI-04 @positive @regression @sorting - tri des prix décroissants', async ({ authenticatedPage: page }) => {
+  test('TC-TRI-04 @positive @regression @sorting @risk-sort-01 - tri des prix décroissants', async ({
+    authenticatedPage: page,
+  }) => {
     const inventory = new InventoryPage(page);
     // 1. Choisir le prix décroissant. 2. Relever les six prix.
     await inventory.selectSortOrder('hilo');
@@ -64,8 +76,9 @@ test.describe('Tri', () => {
 
   // US-03
   // AC-SORT-05
+  // RISK-SORT-01
   // TC-TRI-05
-  test('TC-TRI-05 @error @regression @sorting - tri inopérant de problem_user', async ({ page }) => {
+  test('TC-TRI-05 @error @regression @sorting @risk-sort-01 - tri inopérant de problem_user', async ({ page }) => {
     // 1. Noter l’ordre initial. 2. Choisir chaque option. 3. Relever chaque ordre.
     await assertBrokenSorting(page, sauceDemoUsers.problem);
     await expect(page).toHaveURL(/inventory\.html$/);
@@ -73,8 +86,9 @@ test.describe('Tri', () => {
 
   // US-03
   // AC-SORT-06
+  // RISK-SORT-01
   // TC-TRI-06
-  test('TC-TRI-06 @error @regression @sorting - tri inopérant de error_user', async ({ page }) => {
+  test('TC-TRI-06 @error @regression @sorting @risk-sort-01 - tri inopérant de error_user', async ({ page }) => {
     // 1. Noter l’ordre initial. 2. Choisir chaque option. 3. Comparer chaque ordre.
     await assertBrokenSorting(page, sauceDemoUsers.error);
     await expect(page).toHaveURL(/inventory\.html$/);

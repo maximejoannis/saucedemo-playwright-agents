@@ -11,8 +11,8 @@ export class InventoryPage {
   readonly cartLink: Locator;
   readonly cartBadge: Locator;
   readonly menuButton: Locator;
-  readonly logoutLink: Locator;
-  readonly resetAppStateLink: Locator;
+  readonly logoutButton: Locator;
+  readonly resetAppStateButton: Locator;
   readonly closeMenuButton: Locator;
 
   constructor(page: Page) {
@@ -26,8 +26,8 @@ export class InventoryPage {
     this.cartLink = page.getByTestId('shopping-cart-link');
     this.cartBadge = page.getByTestId('shopping-cart-badge');
     this.menuButton = page.getByRole('button', { name: 'Open Menu' });
-    this.logoutLink = page.getByRole('link', { name: 'Logout' });
-    this.resetAppStateLink = page.getByRole('link', { name: 'Reset App State' });
+    this.logoutButton = page.getByRole('button', { name: 'Logout' });
+    this.resetAppStateButton = page.getByRole('button', { name: 'Reset App State' });
     this.closeMenuButton = page.getByRole('button', { name: 'Close Menu' });
   }
 
@@ -56,7 +56,7 @@ export class InventoryPage {
   }
 
   productActionButton(name: string): Locator {
-    return this.productByName(name).getByRole('button');
+    return this.productByName(name).locator('button');
   }
 
   productImage(name: string): Locator {
@@ -77,17 +77,17 @@ export class InventoryPage {
 
   async openMenu(): Promise<void> {
     await this.menuButton.click();
-    await this.logoutLink.waitFor({ state: 'visible' });
+    await this.logoutButton.waitFor({ state: 'visible' });
   }
 
   async logout(): Promise<void> {
     await this.openMenu();
-    await this.logoutLink.click();
+    await this.logoutButton.click();
   }
 
   async resetAppState(): Promise<void> {
     await this.openMenu();
-    await this.resetAppStateLink.click();
+    await this.resetAppStateButton.click();
   }
 
   async closeMenu(): Promise<void> {

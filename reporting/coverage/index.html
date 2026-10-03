@@ -22,7 +22,7 @@
           <div>
             <p class="eyebrow">REPORTING QA · PLAYWRIGHT</p>
             <h1>La traçabilité, du besoin au test.</h1>
-            <p>Fonctionnalité → User Story → Critère d’acceptation → Cas de test → Automatisation</p>
+            <p>Fonctionnalité → User Story → Critère d’acceptation → Risque → Cas de test → Automatisation</p>
             <aside>
               <strong
                 >Ce rapport mesure la couverture automatisée du périmètre fonctionnel et des critères d’acceptation
@@ -36,7 +36,7 @@
       </section>
       <nav class="tabs shell" aria-label="Sections">
         <a href="#overview">Synthèse</a><a href="#features">Fonctionnalités</a><a href="#stories">User Stories</a
-        ><a href="#criteria">AC</a><a href="#cases">Cas de test</a><a href="#e2e">E2E</a>
+        ><a href="#criteria">AC</a><a href="#risks">Risques</a><a href="#cases">Cas de test</a><a href="#e2e">E2E</a>
       </nav>
       <div class="shell content">
         <section id="overview">
@@ -83,6 +83,15 @@
           <h2>Couverture détaillée</h2>
           <div id="criterionList" class="criteria"></div>
         </section>
+        <section id="risks">
+          <p class="eyebrow">RISK-BASED TESTING</p>
+          <h2>Couverture des risques produit</h2>
+          <p>
+            Cette vue expose les relations RISK → TC automatisé. Elle ne signifie pas que les gaps exploratoires,
+            manuels ou en attente de clarification sont couverts par l’automatisation.
+          </p>
+          <div id="riskCards" class="feature-grid"></div>
+        </section>
         <section id="cases">
           <p class="eyebrow">CAS FONCTIONNELS</p>
           <h2>Traçabilité de l’automatisation</h2>
@@ -97,6 +106,7 @@
                   <th>Fonctionnalité</th>
                   <th>US</th>
                   <th>AC</th>
+                  <th>Risques</th>
                   <th>Type</th>
                   <th>Priorité</th>
                   <th>Smoke</th>

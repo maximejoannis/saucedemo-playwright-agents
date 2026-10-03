@@ -18,6 +18,7 @@ async function loadReport() {
     ['User Stories', ratio(summary.userStories)],
     ['Critères d’acceptation', ratio(summary.acceptanceCriteria)],
     ['Cas de test fonctionnels', ratio(summary.functionalTestCases, 'automated')],
+    ['Risques tracés', ratio(summary.risks, 'traced')],
     ['E2E complémentaires', summary.e2e],
     ['Tests Playwright', summary.playwrightTests],
   ];
@@ -58,13 +59,19 @@ async function loadReport() {
         `<article><div><strong>${criterion.id}</strong>${badge(criterion.automated, 'AUTOMATISÉ')}</div><h3>${escapeHtml(criterion.title)}</h3><p>${escapeHtml(criterion.description)}</p><footer><span>${criterion.userStory}</span>${criterion.testCases.map((id) => `<code>${id}</code>`).join('')}</footer></article>`,
     )
     .join('');
+  q('#riskCards').innerHTML = data.risks
+    .map(
+      (risk) =>
+        `<article class="feature"><div><p>${risk.id}</p><h3>${escapeHtml(risk.feature)}</h3></div>${badge(risk.automated, 'TC AUTOMATISÉ')}<p>${escapeHtml(risk.scenario)}</p><dl><div><dt>Niveau</dt><dd>${escapeHtml(risk.level)}</dd></div><div><dt>Score</dt><dd>${risk.probability * risk.impact}</dd></div><div><dt>TC liés</dt><dd>${risk.testCases.length}</dd></div><div><dt>E2E complémentaires</dt><dd>${risk.e2e.length}</dd></div></dl><footer>${risk.testCases.map((id) => `<code>${id}</code>`).join('')}</footer></article>`,
+    )
+    .join('');
   const renderCases = () => {
     const term = q('#filter').value.toLowerCase();
     q('#caseRows').innerHTML = data.testCases
       .filter((testCase) => !term || JSON.stringify(testCase).toLowerCase().includes(term))
       .map(
         (testCase) =>
-          `<tr><td><strong>${testCase.id}</strong></td><td>${escapeHtml(testCase.feature)}</td><td>${testCase.userStory}</td><td>${testCase.acceptanceCriteria.map((id) => `<code>${id}</code>`).join(' ')}</td><td>${escapeHtml(testCase.type)}</td><td>${testCase.priority}</td><td>${testCase.tags.includes('@smoke') ? 'Oui' : '—'}</td><td>${testCase.tags.includes('@regression') ? 'Oui' : '—'}</td><td>${badge(testCase.automated, 'OUI', 'NON')}</td></tr>`,
+          `<tr><td><strong>${testCase.id}</strong></td><td>${escapeHtml(testCase.feature)}</td><td>${testCase.userStory}</td><td>${testCase.acceptanceCriteria.map((id) => `<code>${id}</code>`).join(' ')}</td><td>${testCase.risks.map((id) => `<code>${id}</code>`).join(' ')}</td><td>${escapeHtml(testCase.type)}</td><td>${testCase.priority}</td><td>${testCase.tags.includes('@smoke') ? 'Oui' : '—'}</td><td>${testCase.tags.includes('@regression') ? 'Oui' : '—'}</td><td>${badge(testCase.automated, 'OUI', 'NON')}</td></tr>`,
       )
       .join('');
   };

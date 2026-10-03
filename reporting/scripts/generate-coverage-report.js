@@ -76,15 +76,36 @@ for (const story of userStories) {
   if (!acceptanceCriteria.some(({ userStory }) => userStory === story.id)) fail(`${story.id} ne possède aucun AC`);
 }
 
+const risks = sources.plan
+  .split(/\r?\n/u)
+  .map(row)
+  .filter((cells) => cells.length === 8 && /^RISK-[A-Z]+-\d+$/u.test(cells[0]))
+  .map(([id, feature, scenario, consequence, probability, impact, level, response]) => ({
+    id,
+    feature,
+    scenario,
+    consequence,
+    probability: Number(probability),
+    impact: Number(impact),
+    level,
+    response,
+  }));
+assertUnique(
+  risks.map(({ id }) => id),
+  'Risque produit',
+);
+if (!risks.length) fail("aucun risque produit n'est défini dans le plan");
+
 const traceRows = sources.traceability
   .split(/\r?\n/u)
   .filter((line) => /^\| (Authentification|Catalogue|Tri|Panier|Checkout|Session) \|/u.test(line))
   .map(row);
-const testCases = traceRows.map(([feature, userStory, criterion, id, type, priority, rawTags]) => ({
+const testCases = traceRows.map(([feature, userStory, criterion, rawRisks, id, type, priority, rawTags]) => ({
   id,
   feature,
   userStory,
   acceptanceCriteria: criterion.split(/,\s*/u),
+  risks: rawRisks.split(/,\s*/u),
   type,
   priority,
   tags: rawTags.match(/@[\w-]+/gu) ?? [],
@@ -113,6 +134,10 @@ for (const testCase of testCases) {
     if (!criterion || criterion.userStory !== testCase.userStory)
       fail(`${testCase.id} porte une référence AC invalide : ${id}`);
   }
+  for (const id of testCase.risks) {
+    const risk = risks.find((item) => item.id === id);
+    if (!risk) fail(`${testCase.id} porte une référence risque inexistante : ${id}`);
+  }
 }
 for (const planCase of planned)
   if (!testCases.some(({ id }) => id === planCase.id)) fail(`${planCase.id} est absent de la matrice`);
@@ -132,6 +157,9 @@ for (const file of walk(path.join(root, 'tests', 'specs')).filter((item) => item
       file: path.relative(root, file).replaceAll('\\', '/'),
       referencedStory: [...context.matchAll(/\/\/\s*(US-\d+)/gu)].at(-1)?.[1],
       referencedCriteria: [...context.matchAll(/\/\/\s*((?:AC-[A-Z]+-\d+)(?:,\s*AC-[A-Z]+-\d+)*)/gu)]
+        .at(-1)?.[1]
+        .split(/,\s*/u),
+      referencedRisks: [...context.matchAll(/\/\/\s*((?:RISK-[A-Z]+-\d+)(?:,\s*RISK-[A-Z]+-\d+)*)/gu)]
         .at(-1)?.[1]
         .split(/,\s*/u),
       transversalPath: [...context.matchAll(/\/\/ Parcours transversal\s*:\s*(.+)$/gmu)].at(-1)?.[1].trim(),
@@ -158,6 +186,12 @@ for (const automated of automatedFunctional) {
   if (automated.referencedStory !== documented.userStory) fail(`${automated.id} porte une référence US invalide`);
   if ((automated.referencedCriteria ?? []).sort().join() !== [...documented.acceptanceCriteria].sort().join())
     fail(`${automated.id} porte une référence AC invalide ou incomplète`);
+  if ((automated.referencedRisks ?? []).sort().join() !== [...documented.risks].sort().join())
+    fail(`${automated.id} porte une référence RISK invalide ou incomplète`);
+  const missingRiskTags = documented.risks
+    .map((id) => `@${id.toLowerCase()}`)
+    .filter((tag) => !automated.tags.includes(tag));
+  if (missingRiskTags.length) fail(`${automated.id} ne porte pas : ${missingRiskTags.join(', ')}`);
   const missingTags = documented.tags.filter((tag) => !automated.tags.includes(tag));
   if (missingTags.length) fail(`${automated.id} ne porte pas : ${missingTags.join(', ')}`);
   documented.automated = true;
@@ -176,6 +210,14 @@ for (const test of e2e) {
   test.automated = true;
   test.domains = test.transversalPath?.split(/\s*→\s*/u) ?? [];
   if (testCases.some(({ id }) => id === test.id)) fail(`${test.id} est comptabilisé comme TC`);
+}
+
+for (const risk of risks) {
+  risk.testCases = testCases.filter((testCase) => testCase.risks.includes(risk.id)).map(({ id }) => id);
+  risk.automatedTestCases = risk.testCases.filter((id) => testCases.find((testCase) => testCase.id === id).automated);
+  risk.e2e = e2e.filter((test) => test.referencedRisks?.includes(risk.id)).map(({ id }) => id);
+  risk.automated = risk.automatedTestCases.length > 0;
+  if (!risk.testCases.length) fail(`${risk.id} n'est relié à aucun TC`);
 }
 
 for (const story of userStories) {
@@ -228,6 +270,8 @@ const summary = {
   ),
   functionalSmoke: testCases.filter(({ tags }) => tags.includes('@smoke')).length,
   functionalRegression: testCases.filter(({ tags }) => tags.includes('@regression')).length,
+  risks: { traced: risks.filter(({ testCases }) => testCases.length > 0).length, total: risks.length },
+  automatedRisks: { covered: risks.filter(({ automated }) => automated).length, total: risks.length },
   e2eSmoke: e2e.filter(({ tags }) => tags.includes('@smoke')).length,
   e2eRegression: e2e.filter(({ tags }) => tags.includes('@regression')).length,
 };
@@ -241,6 +285,7 @@ const data = {
   features,
   userStories,
   acceptanceCriteria,
+  risks,
   testCases,
   e2e,
 };
