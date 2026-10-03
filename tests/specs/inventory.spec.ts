@@ -15,14 +15,19 @@ test.describe('Catalogue', () => {
     const inventory = new InventoryPage(page);
     // 1. Parcourir les six cartes. 2. Contrôler chaque attribut attendu.
     await expect(inventory.products).toHaveCount(6);
+    const imageSources: string[] = [];
     for (const product of products) {
       const card = inventory.productByName(product.name);
       await expect(card).toBeVisible();
       await expect(card.getByTestId('inventory-item-desc')).not.toBeEmpty();
       await expect(card.getByTestId('inventory-item-price')).toHaveText(product.price);
-      await expect(inventory.productImage(product.name)).toBeVisible();
+      const image = inventory.productImage(product.name);
+      await expect(image).toBeVisible();
+      await expect(image).toHaveAttribute('src', /^(?!.*sl-404).+/);
+      imageSources.push(await image.evaluate((element) => element.getAttribute('src')!));
       await expect(inventory.productActionButton(product.name)).toHaveText('Add to cart');
     }
+    expect(new Set(imageSources).size).toBe(products.length);
   });
 
   // US-02

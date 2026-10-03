@@ -208,6 +208,8 @@ const planned = plannedMatches.map((match, index) => {
     techniques:
       body.match(/^\*\*Technique\(s\) de conception\s*:\*\*\s*(.+)$/mu)?.[1].match(/EP|BVA|DT|ST|PW|SBT/gu) ?? [],
     potentialImpact: body.match(/^\*\*Impact potentiel en cas d’échec\s*:\*\*\s*(.+)$/mu)?.[1].trim(),
+    expectedReference: body.match(/^\*\*Référence attendue\s*:\*\*\s*(.+)$/mu)?.[1].trim(),
+    priorityJustification: body.match(/^\*\*Justification de la priorité\s*:\*\*\s*(.+)$/mu)?.[1].trim(),
     hasFixedSeverity: /^\*\*Sévérité\s*:\*\*/mu.test(body),
   };
 });
@@ -220,6 +222,8 @@ for (const testCase of testCases) {
   if (!planCase) fail(`${testCase.id} existe dans la matrice mais pas dans le plan`);
   testCase.title = planCase.title;
   testCase.potentialImpact = planCase.potentialImpact;
+  testCase.expectedReference = planCase.expectedReference;
+  testCase.priorityJustification = planCase.priorityJustification;
   if (planCase.priority !== testCase.priority)
     fail(`${testCase.id} porte une priorité différente entre le plan et la matrice`);
   if ([...planCase.tags].sort().join() !== [...testCase.tags].sort().join())
@@ -231,6 +235,8 @@ for (const testCase of testCases) {
   if (planCase.hasFixedSeverity) fail(`${testCase.id} possède une sévérité fixe interdite`);
   if (testCase.priority === 'P0' && !testCase.potentialImpact)
     fail(`${testCase.id} est P0 mais ne documente aucun impact potentiel en cas d'échec`);
+  if (testCase.priority === 'P0' && (!testCase.expectedReference || !testCase.priorityJustification))
+    fail(`${testCase.id} est P0 mais ne documente pas sa référence attendue ou sa justification de priorité`);
   if (testCase.tags.includes('@smoke') && testCase.priority !== 'P0')
     fail(`${testCase.id} appartient à la Smoke mais sa priorité n'est pas P0`);
   const story = userStories.find(({ id }) => id === testCase.userStory);

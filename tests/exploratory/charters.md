@@ -51,7 +51,7 @@ Un charter peut évoluer entre ces statuts. `Candidat bug` n’est ni un défaut
 
 - **Domaine :** Catalogue
 - **Objectif :** Examiner la cohérence d’identité d’un produit face aux identifiants et paramètres inhabituels, et déterminer si une image visible représente réellement le bon produit.
-- **Zone d’incertitude :** traitement des paramètres non spécifiés et absence d’oracle exhaustif reliant chaque image nominale au bon produit.
+- **Zone d’incertitude :** traitement des paramètres non spécifiés et absence de référence exhaustive reliant chaque image nominale au bon produit.
 - **Risque(s) lié(s) :** RISK-CAT-01, RISK-CAT-02
 - **Préconditions :** session standard authentifiée; catalogue nominal accessible.
 - **Données / états utiles :** identifiants connus, absent, négatif, vide, dupliqué ou non numérique; paramètres supplémentaires; noms, prix, descriptions et sources d’image observés dans la liste.
@@ -75,7 +75,7 @@ Un charter peut évoluer entre ces statuts. `Candidat bug` n’est ni un défaut
 - **Observations recherchées :** ordre partiellement mis à jour, option et liste désynchronisées, carte associée au mauvais prix ou bouton, état instable après retour ou refresh.
 - **Impact potentiel :** recherche dégradée ou sélection du mauvais produit, généralement sans blocage du parcours principal.
 - **Référence attendue :** AC-SORT-01 à AC-SORT-04 pour l’ordre demandé; la persistance du choix après navigation n’est pas spécifiée et doit être évaluée par cohérence.
-- **Pourquoi explorer humainement :** la valeur réside dans les enchaînements et les désynchronisations visuelles transitoires, pas dans la répétition des quatre oracles de tri déjà automatisés.
+- **Pourquoi explorer humainement :** la valeur réside dans les enchaînements et les désynchronisations visuelles transitoires, pas dans la répétition des quatre références de tri déjà automatisées.
 - **Limites / hors périmètre :** performance sur catalogue volumineux et règles de collation internationale absentes des données SauceDemo.
 - **Statut :** À explorer
 
@@ -107,7 +107,7 @@ Un charter peut évoluer entre ces statuts. `Candidat bug` n’est ni un défaut
 - **Observations recherchées :** accès à une étape incohérente, données personnelles ou panier perdus/résiduels, récapitulatif obsolète, total différent du panier courant, confirmation sans contexte valide, boucle ou blocage sans récupération.
 - **Impact potentiel :** commande impossible, contenu ou montant incorrect, statut de commande ambigu ou exposition d’informations saisies.
 - **Référence attendue :** AC-CHK-01, AC-CHK-02 et AC-CHK-06 lorsque leur état initial est respecté; pour l’accès direct et la reprise, comportement à comparer avec les règles métier, les AC existants et la cohérence générale du produit.
-- **Pourquoi explorer humainement :** la politique de reprise et les préconditions des URL intermédiaires ne sont pas définies; l’objectif initial est d’apprendre les états réels, non d’imposer un oracle inventé.
+- **Pourquoi explorer humainement :** la politique de reprise et les préconditions des URL intermédiaires ne sont pas définies; l’objectif initial est d’apprendre les états réels, non d’imposer une référence attendue inventée.
 - **Limites / hors périmètre :** paiement réel, livraison, persistance serveur de commande et système aval inexistants dans SauceDemo.
 - **Statut :** À explorer
 
@@ -138,7 +138,7 @@ Un charter peut évoluer entre ces statuts. `Candidat bug` n’est ni un défaut
 - **Pistes d’exploration :** varier une dimension à la fois puis les combiner; comparer frappe et collage; provoquer une erreur obligatoire puis corriger; revenir depuis l’étape deux; rafraîchir avant ou après validation; observer transformations, troncatures et persistance.
 - **Observations recherchées :** acceptation incohérente, espace considéré comme donnée significative, perte ou altération silencieuse, champ impossible à corriger, erreur persistante après correction, données d’un essai précédent réutilisées.
 - **Impact potentiel :** livraison impossible, abandon du checkout ou données personnelles incorrectes.
-- **Référence attendue :** AC-CHK-03 à AC-CHK-05 pour l’absence de valeur; formats, longueurs et validité postale sont non spécifiés et doivent être observés sans oracle de rejet inventé.
+- **Référence attendue :** AC-CHK-03 à AC-CHK-05 pour l’absence de valeur; formats, longueurs et validité postale sont non spécifiés et doivent être observés sans règle de rejet inventée.
 - **Pourquoi explorer humainement :** les partitions acceptables et les règles de normalisation ne sont pas définies; une session humaine peut produire un inventaire factuel avant toute décision produit ou automatisation.
 - **Limites / hors périmètre :** validation auprès d’un service postal, règles internationales exhaustives et sécurité offensive des entrées.
 - **Statut :** À explorer

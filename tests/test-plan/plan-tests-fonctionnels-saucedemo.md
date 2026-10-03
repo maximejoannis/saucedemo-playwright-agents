@@ -106,7 +106,7 @@ Le catalogue concret, ses liens US/AC/TC, ses défenses, ses états de couvertur
 
 La stratégie générale consiste à renforcer les risques critiques et élevés par des contrôles ciblés, négatifs ou de transition, puis par un parcours E2E lorsque celui-ci apporte une défense distincte. Un nombre élevé de tests redondants n’est pas assimilé à plusieurs défenses. Les risques faibles reçoivent une couverture proportionnée et restent hors de la boucle Smoke sauf nécessité de parcours.
 
-Les états Couvert, Partiellement couvert, Non couvert et Accepté / hors périmètre sont décidés dans le registre après examen de l’oracle et du périmètre réellement exercé. Un lien TC ou un test vert ne suffit pas à supprimer le risque produit.
+Les états Couvert, Partiellement couvert, Non couvert et Accepté / hors périmètre sont décidés dans le registre après examen de la référence attendue et du périmètre réellement exercé. Un lien TC ou un test vert ne suffit pas à supprimer le risque produit.
 
 ### Lien entre risque et priorité des tests
 
@@ -120,7 +120,7 @@ La revue initiale a produit les écarts suivants. Ils sont désormais arbitrés 
 
 | TC concerné | Priorité actuelle | Lecture par le risque | Proposition argumentée |
 |---|---:|---|---|
-| TC-CHK-02 | P1 | RISK-CHK-02 élevé (6), oracle financier central. | **Arbitré P0 + Smoke** : un parcours confirmé avec un total faux n’est pas un succès métier. |
+| TC-CHK-02 | P1 | RISK-CHK-02 élevé (6), référence de calcul financier centrale. | **Arbitré P0 + Smoke** : un parcours confirmé avec un total faux n’est pas un succès métier. |
 | TC-SESSION-01 | P1 | RISK-CART-02 et RISK-SESSION-01 élevés (6). | **Arbitré P0 + Smoke** : ce contrôle court devient un garde-barrière de persistance. |
 | TC-CHK-06 | P2 | RISK-CHK-03 élevé (6) et défaillance observée. | **Arbitré P1** tant que le produit n’a pas accepté explicitement les commandes vides; il ne justifie pas P0 car il ne bloque pas l’achat nominal. |
 | TC-CAT-04 | P1 | RISK-CAT-02 faible (2), comportement spécial de `problem_user`. | **Arbitré P2**, maintenu dans la Regression comme caractérisation dédiée. |
@@ -134,7 +134,7 @@ Les P0 existants `TC-AUTH-01`, `TC-PAN-01`, `TC-CHK-01`, `TC-SESSION-02` et `TC-
 - **État de couverture :** le catalogue classe 9 risques comme couverts et 5 comme partiellement couverts; aucun n’est déclaré non couvert ou accepté/hors périmètre.
 - **Risques partiellement couverts :** `RISK-CART-02`, `RISK-CHK-03`, `RISK-CHK-04`, `RISK-SESSION-01` et `RISK-SESSION-02`; leurs gaps et réponses QA recommandées sont maintenus dans `../requirements/risk-register.md`.
 - **Priorités revues :** `TC-CHK-02` et `TC-SESSION-01` sont P0 + Smoke, `TC-CHK-06` est P1, `TC-CAT-04` et `TC-TRI-05/06` sont P2 en Regression de caractérisation.
-- **Recommandations de conception au Generator :** préserver les IDs et liens US/AC/TC; utiliser des oracles d’état et de calcul indépendants; concevoir un scénario multi-articles par transitions plutôt qu’une explosion combinatoire; séparer les tests métier nominaux des caractérisations `problem_user`/`error_user`; ne générer aucun nouveau test sur les gaps tant que les règles produit signalées ne sont pas clarifiées.
+- **Recommandations de conception au Generator :** préserver les IDs et liens US/AC/TC; utiliser des références d’état et de calcul indépendantes; concevoir un scénario multi-articles par transitions plutôt qu’une explosion combinatoire; séparer les tests métier nominaux des caractérisations `problem_user`/`error_user`; ne générer aucun nouveau test sur les gaps tant que les règles produit signalées ne sont pas clarifiées.
 
 ## 8. Priorité des tests, risque produit et sévérité des défauts
 
@@ -255,7 +255,7 @@ Ces partitions portent sur la présence et le statut fonctionnel explicitement d
 | Panier / Checkout | Passage de panier vide à panier contenant un article | 0 article : TC-PAN-04 et TC-CHK-06; 1 article : TC-PAN-01 et TC-CHK-01 | TC-PAN-01/04, TC-CHK-01/06 | Frontière métier exercée; l’attendu souhaité pour la commande à 0 article reste à arbitrer. Les valeurs à plusieurs articles de TC-PAN-03 et TC-CHK-02 renforcent les parcours, mais ne constituent pas des valeurs limites. |
 | Authentification | Longueur username/password | Aucune borne minimale ou maximale connue | — | BVA non justifiable actuellement; ne pas inventer 0/1/max sans spécification. |
 | Coordonnées Checkout | Longueur et format des trois champs | Aucune borne fonctionnelle connue | — | Gap documentaire; exploration avant toute BVA formelle. |
-| Montants | Arrondi de taxe et total | Règle de taxe et précision non spécifiées | TC-CHK-02 | Oracle arithmétique existant, mais BVA d’arrondi non justifiable. |
+| Montants | Arrondi de taxe et total | Règle de taxe et précision non spécifiées | TC-CHK-02 | Référence arithmétique existante, mais BVA d’arrondi non justifiable. |
 
 La valeur zéro d’un champ absent relève ici d’EP sur la présence, pas d’une BVA de longueur. La seule frontière actuellement démontrable est le seuil métier `0 article / au moins 1 article`, enrichi par un état à plusieurs articles.
 
@@ -338,7 +338,7 @@ Les huit charters de [`../exploratory/charters.md`](../exploratory/charters.md) 
 | Commande à zéro article acceptée | RISK-CHK-03 élevé | Forte | Techniquement stable, attendu métier non arbitré | Décision produit avant nouveau TC normatif. |
 | Accès direct et reprise des étapes Checkout | RISK-CHK-01 / SESSION-01 | Forte | À évaluer après exploration | Exécuter EXP-CHK-01; formaliser seulement les transitions décidées. |
 | Persistance logout/relogin ou changement d’utilisateur | RISK-CART-02 / SESSION-01 / SESSION-02 | Forte | À évaluer après règle de session | Exécuter EXP-SESSION-01 et clarifier la politique. |
-| Arrondis et règle de taxe | RISK-CHK-02 élevé | Forte | Oracle insuffisant | Obtenir la règle métier avant BVA ou nouvelles partitions de montants. |
+| Arrondis et règle de taxe | RISK-CHK-02 élevé | Forte | Référence attendue insuffisante | Obtenir la règle métier avant BVA ou nouvelles partitions de montants. |
 | Espace combinatoire multi-paramètres | Aucun besoin démontré à ce stade | Faible | Pairwise prématuré | Maintenir PW non applicable; revoir après stabilisation des règles. |
 
 **Techniques réellement utilisées :** EP, BVA sur la frontière du panier, DT, ST, SBT et EXP. **Technique non pertinente actuellement :** PW. **BVA non applicable actuellement :** longueurs des identifiants, coordonnées et arrondis sans bornes ou règles.
@@ -346,6 +346,10 @@ Les huit charters de [`../exploratory/charters.md`](../exploratory/charters.md) 
 **Transmission au Generator :** propager uniquement les champs `Technique(s) de conception` présents; ne pas inférer une technique depuis le type, le nombre d’étapes ou les tags; ne créer aucun TC pour les gaps sans arbitrage; maintenir `EXP` au niveau des charters et ne pas produire de Playwright à partir de cette section.
 
 ## 9. Cas de test
+
+### Convention d’enrichissement des Test Cases
+
+Les TC importants peuvent documenter, en plus de la traçabilité US/AC/RISK, leur impact potentiel, leur référence attendue et la justification de leur priorité. Ces champs restent distincts : la référence explique sur quelle règle repose le contrôle; le résultat attendu décrit la manifestation concrète pour les données du scénario; l’impact potentiel décrit une conséquence possible avant tout défaut confirmé. L’absence d’une référence fiable est indiquée par `Référence attendue à clarifier` et n’est pas remplacée par le comportement courant de l’application.
 
 ### Authentification
 
@@ -358,6 +362,9 @@ Les huit charters de [`../exploratory/charters.md`](../exploratory/charters.md) 
 **Type :** Passant  
 **Priorité :** P0  
 **Impact potentiel en cas d’échec :** accès au catalogue et parcours d’achat bloqués pour un utilisateur légitime.
+**Référence attendue :** AC-AUTH-01 et transition d’état Déconnecté → Inventory authentifié après credentials valides.
+
+**Justification de la priorité :** garde-barrière du parcours essentiel et de toutes les fonctionnalités authentifiées; signal Smoke court et indispensable.
 **Tags :** `@positive @smoke @regression @auth`
 
 **Préconditions :** Page de connexion ouverte dans un contexte vierge.  
@@ -378,6 +385,11 @@ Les huit charters de [`../exploratory/charters.md`](../exploratory/charters.md) 
 **Technique(s) de conception :** EP
 **Type :** Non passant  
 **Priorité :** P1  
+**Impact potentiel en cas d’échec :** accès accordé à une combinaison inconnue ou information de refus trompeuse.
+
+**Référence attendue :** AC-AUTH-02 impose le refus et le message d’incompatibilité pour la partition des identifiants inconnus.
+
+**Justification de la priorité :** contrôle important de la frontière d’accès lié à RISK-AUTH-02 élevé; exécuté en régression après le Smoke nominal.
 **Tags :** `@negative @regression @auth`
 
 **Préconditions :** Page de connexion vierge.  
@@ -395,6 +407,11 @@ Les huit charters de [`../exploratory/charters.md`](../exploratory/charters.md) 
 **Technique(s) de conception :** EP
 **Type :** Erreur  
 **Priorité :** P1  
+**Impact potentiel en cas d’échec :** validation incomplète permettant une tentative ambiguë ou message incapable de guider l’utilisateur.
+
+**Référence attendue :** AC-AUTH-03 définit le username comme obligatoire et le message associé.
+
+**Justification de la priorité :** partition négative stable protégeant la validation d’entrée; importante en régression mais non nécessaire au signal Smoke nominal.
 **Tags :** `@error @regression @auth`
 
 **Préconditions :** Page de connexion vierge.  
@@ -412,6 +429,11 @@ Les huit charters de [`../exploratory/charters.md`](../exploratory/charters.md) 
 **Technique(s) de conception :** EP
 **Type :** Erreur  
 **Priorité :** P1  
+**Impact potentiel en cas d’échec :** tentative sans secret correctement contrôlé ou message de validation incorrect.
+
+**Référence attendue :** AC-AUTH-04 définit le password comme obligatoire lorsque le username est présent.
+
+**Justification de la priorité :** partition négative complémentaire de la frontière d’accès; valeur de régression sans bloquer le Smoke nominal.
 **Tags :** `@error @regression @auth`
 
 **Préconditions :** Page de connexion vierge.  
@@ -429,6 +451,11 @@ Les huit charters de [`../exploratory/charters.md`](../exploratory/charters.md) 
 **Technique(s) de conception :** EP
 **Type :** Erreur  
 **Priorité :** P1  
+**Impact potentiel en cas d’échec :** un compte verrouillé pourrait accéder au domaine marchand malgré son statut.
+
+**Référence attendue :** AC-AUTH-05 et règle fonctionnelle explicite interdisant l’ouverture de session à `locked_out_user`.
+
+**Justification de la priorité :** protège une règle d’autorisation importante liée à RISK-AUTH-02 élevé; conservé en régression, distinct du Smoke d’un compte autorisé.
 **Tags :** `@error @regression @auth`
 
 **Préconditions :** Page de connexion vierge.  
@@ -448,6 +475,9 @@ Les huit charters de [`../exploratory/charters.md`](../exploratory/charters.md) 
 **Type :** Passant  
 **Priorité :** P0
 **Impact potentiel en cas d’échec :** catalogue indisponible ou informations produit essentielles absentes, empêchant une sélection fiable.
+**Référence attendue :** AC-CAT-01 et jeu de référence des six produits, avec nom, description, prix et image présents.
+
+**Justification de la priorité :** contrôle l’entrée dans le catalogue dont dépendent panier et checkout; fournit un signal Smoke rapide sans attribuer un impact élevé à chaque anomalie visuelle.
 **Tags :** `@positive @smoke @regression @catalog`
 
 **Préconditions :** `standard_user` connecté, Inventory ouverte.  
@@ -616,6 +646,9 @@ Les huit charters de [`../exploratory/charters.md`](../exploratory/charters.md) 
 **Type :** Passant  
 **Priorité :** P0  
 **Impact potentiel en cas d’échec :** impossibilité de constituer correctement la commande ou contenu du panier incohérent.
+**Référence attendue :** AC-CART-01; cohérence entre l’action Add, le bouton devenu Remove, le badge à 1 et la ligne correspondante au panier.
+
+**Justification de la priorité :** première transition critique de constitution de commande, dépendance directe du checkout et contrôle Smoke de RISK-CART-01 élevé.
 **Tags :** `@positive @smoke @regression @cart`
 
 **Préconditions :** `standard_user` connecté, panier vide.  
@@ -633,6 +666,11 @@ Les huit charters de [`../exploratory/charters.md`](../exploratory/charters.md) 
 **Technique(s) de conception :** ST
 **Type :** Passant  
 **Priorité :** P1  
+**Impact potentiel en cas d’échec :** article indésirable conservé, badge erroné ou commande ne reflétant plus la sélection de l’utilisateur.
+
+**Référence attendue :** AC-CART-02 et état précédent connu : retirer le dernier article fait passer lignes et badge de 1 à 0.
+
+**Justification de la priorité :** transition importante pour l’intégrité du panier, mais exécutée après la preuve Smoke qu’un article peut être ajouté.
 **Tags :** `@positive @regression @cart`
 
 **Préconditions :** Backpack seul au panier.  
@@ -650,6 +688,11 @@ Les huit charters de [`../exploratory/charters.md`](../exploratory/charters.md) 
 **Technique(s) de conception :** ST, SBT
 **Type :** Passant  
 **Priorité :** P1  
+**Impact potentiel en cas d’échec :** perte, duplication ou réapparition d’un article pendant la navigation.
+
+**Référence attendue :** AC-CART-03 et comparaison avec l’état de sélection précédent; badge, lignes et boutons doivent représenter les mêmes identités produit après chaque transition.
+
+**Justification de la priorité :** défense de régression plus profonde de RISK-CART-01 élevé; parcours multi-transition plus long que le garde-barrière Smoke.
 **Tags :** `@positive @regression @cart`
 
 **Préconditions :** `standard_user` connecté, panier vide.  
@@ -667,6 +710,11 @@ Les huit charters de [`../exploratory/charters.md`](../exploratory/charters.md) 
 **Technique(s) de conception :** BVA
 **Type :** Non passant  
 **Priorité :** P1  
+**Impact potentiel en cas d’échec :** possibilité de démarrer un parcours sans article, avec risque de commande vide et de données métier parasites.
+
+**Référence attendue :** Référence attendue à clarifier. AC-CART-04 documente l’accès actuellement observé à Step One, sans décider si ce comportement est souhaité.
+
+**Justification de la priorité :** RISK-CHK-03 est élevé et le comportement doit rester visible en régression; il n’est pas P0 tant que la règle produit sur le blocage n’est pas arbitrée.
 **Tags :** `@negative @regression @cart`
 
 **Préconditions :** `standard_user` connecté, panier vide.  
@@ -683,6 +731,11 @@ Les huit charters de [`../exploratory/charters.md`](../exploratory/charters.md) 
 **Risque(s) couvert(s) :** RISK-CART-01
 **Type :** Erreur  
 **Priorité :** P1  
+**Impact potentiel en cas d’échec :** sélection partielle et silencieuse pouvant conduire l’utilisateur affecté à un panier différent de son intention.
+
+**Référence attendue :** AC-CART-05 comme comportement spécial documenté de `problem_user`, et non comme référence métier nominale.
+
+**Justification de la priorité :** caractérisation utile de RISK-CART-01 en régression, exclue du Smoke car elle décrit un compte volontairement dégradé.
 **Tags :** `@error @regression @cart`
 
 **Préconditions :** `problem_user` connecté, panier vide.  
@@ -699,6 +752,11 @@ Les huit charters de [`../exploratory/charters.md`](../exploratory/charters.md) 
 **Risque(s) couvert(s) :** RISK-CART-01
 **Type :** Erreur  
 **Priorité :** P1  
+**Impact potentiel en cas d’échec :** sélection partielle et silencieuse pouvant rendre le contenu du panier imprévisible pour l’utilisateur affecté.
+
+**Référence attendue :** AC-CART-05 comme comportement spécial documenté de `error_user`, sans en faire une règle souhaitée.
+
+**Justification de la priorité :** caractérisation de régression d’un mode de défaillance du panier; non retenue dans la Smoke nominale.
 **Tags :** `@error @regression @cart`
 
 **Préconditions :** `error_user` connecté, panier vide.  
@@ -719,6 +777,9 @@ Les huit charters de [`../exploratory/charters.md`](../exploratory/charters.md) 
 **Type :** Passant  
 **Priorité :** P0  
 **Impact potentiel en cas d’échec :** achat impossible ou statut de commande ambigu après tentative de finalisation.
+**Référence attendue :** AC-CHK-01, règle R4 de la table de décision et modèle Step One → Step Two → Checkout Complete.
+
+**Justification de la priorité :** aboutissement du tunnel d’achat et RISK-CHK-01 critique; signal Smoke indispensable sur la conversion nominale.
 **Tags :** `@positive @smoke @regression @checkout`
 
 **Préconditions :** `standard_user` connecté, Backpack au panier.  
@@ -736,6 +797,9 @@ Les huit charters de [`../exploratory/charters.md`](../exploratory/charters.md) 
 **Type :** Passant  
 **Priorité :** P0
 **Impact potentiel en cas d’échec :** montant présenté incorrect, avec conséquence financière ou réglementaire potentielle.
+**Référence attendue :** le sous-total correspond à la somme des prix des lignes du panier; le total correspond au sous-total augmenté de la taxe affichée. Les valeurs 129,94 $, 10,40 $ et 140,34 $ dérivent des six produits du scénario et de ces relations.
+
+**Justification de la priorité :** contrôle d’intégrité financière de RISK-CHK-02 élevé; un tunnel techniquement finalisable avec un montant faux ne constitue pas un Smoke acceptable.
 **Tags :** `@positive @smoke @regression @checkout`
 
 **Préconditions :** Les six produits nominaux au panier.  
@@ -753,6 +817,11 @@ Les huit charters de [`../exploratory/charters.md`](../exploratory/charters.md) 
 **Technique(s) de conception :** EP, DT
 **Type :** Erreur  
 **Priorité :** P1  
+**Impact potentiel en cas d’échec :** progression avec identité de livraison incomplète ou absence d’indication exploitable pour corriger la saisie.
+
+**Référence attendue :** AC-CHK-03 et règle R1 de la table de décision : prénom absent implique maintien à Step One et message correspondant.
+
+**Justification de la priorité :** validation importante de RISK-CHK-04 moyen, répétable en régression; le parcours nominal P0 reste le premier signal.
 **Tags :** `@error @regression @checkout`
 
 **Préconditions :** `standard_user` à l’étape d’informations.  
@@ -770,6 +839,11 @@ Les huit charters de [`../exploratory/charters.md`](../exploratory/charters.md) 
 **Technique(s) de conception :** EP, DT
 **Type :** Erreur  
 **Priorité :** P1  
+**Impact potentiel en cas d’échec :** progression avec nom de livraison absent ou validation ciblant le mauvais champ.
+
+**Référence attendue :** AC-CHK-04 et règle R2 de la table de décision : prénom présent et nom absent impliquent le message Last Name.
+
+**Justification de la priorité :** complète la couverture des champs obligatoires et la règle de validation progressive en régression.
 **Tags :** `@error @regression @checkout`
 
 **Préconditions :** `standard_user` à l’étape d’informations.  
@@ -787,6 +861,11 @@ Les huit charters de [`../exploratory/charters.md`](../exploratory/charters.md) 
 **Technique(s) de conception :** EP, DT
 **Type :** Erreur  
 **Priorité :** P1  
+**Impact potentiel en cas d’échec :** progression sans information postale nécessaire à la livraison.
+
+**Référence attendue :** AC-CHK-05 et règle R3 de la table de décision : prénom et nom présents, code postal absent, impliquent le message Postal Code.
+
+**Justification de la priorité :** dernière règle obligatoire avant le récapitulatif; importante en régression sans justifier un contrôle Smoke distinct.
 **Tags :** `@error @regression @checkout`
 
 **Préconditions :** `standard_user` à l’étape d’informations.  
@@ -804,6 +883,11 @@ Les huit charters de [`../exploratory/charters.md`](../exploratory/charters.md) 
 **Technique(s) de conception :** BVA, DT, SBT
 **Type :** Non passant  
 **Priorité :** P1
+**Impact potentiel en cas d’échec :** commande sans article confirmée, métriques métier polluées ou statut utilisateur trompeur.
+
+**Référence attendue :** Référence attendue à clarifier. AC-CHK-06 et la règle R5 documentent le total nul et la confirmation observée, sans définir que cette confirmation est souhaitée.
+
+**Justification de la priorité :** RISK-CHK-03 élevé et comportement reproductible à surveiller; P1 plutôt que P0 tant que la décision produit n’est pas prise.
 **Tags :** `@negative @regression @checkout`
 
 **Préconditions :** `standard_user` connecté, panier vide.  
@@ -820,6 +904,11 @@ Les huit charters de [`../exploratory/charters.md`](../exploratory/charters.md) 
 **Risque(s) couvert(s) :** RISK-CHK-01, RISK-CHK-04
 **Type :** Erreur  
 **Priorité :** P1  
+**Impact potentiel en cas d’échec :** impossibilité pour l’utilisateur affecté de fournir une donnée obligatoire et donc de poursuivre sa commande.
+
+**Référence attendue :** AC-CHK-07 comme caractérisation explicite de `problem_user`; ce comportement n’est pas une règle métier souhaitée pour le checkout nominal.
+
+**Justification de la priorité :** mode de défaillance majeur pour le compte concerné, conservé en régression mais exclu du Smoke nominal.
 **Tags :** `@error @regression @checkout`
 
 **Préconditions :** `problem_user` à l’étape d’informations avec un produit au panier.  
@@ -837,6 +926,11 @@ Les huit charters de [`../exploratory/charters.md`](../exploratory/charters.md) 
 **Technique(s) de conception :** ST
 **Type :** Erreur  
 **Priorité :** P1  
+**Impact potentiel en cas d’échec :** commande impossible à finaliser et absence de retour explicatif pour l’utilisateur affecté.
+
+**Référence attendue :** AC-CHK-08 comme transition dégradée documentée de `error_user`; la référence métier nominale reste AC-CHK-01.
+
+**Justification de la priorité :** caractérise un mode de défaillance relié à RISK-CHK-01 critique, sans remplacer ni alourdir le Smoke nominal.
 **Tags :** `@error @regression @checkout`
 
 **Préconditions :** `error_user` au récapitulatif avec Backpack au panier et informations acceptées.  
@@ -857,6 +951,9 @@ Les huit charters de [`../exploratory/charters.md`](../exploratory/charters.md) 
 **Type :** Passant  
 **Priorité :** P0
 **Impact potentiel en cas d’échec :** perte du contexte d’achat ou du panier pendant une session active.
+**Référence attendue :** AC-SESSION-01 et état précédent connu : utilisateur authentifié, Backpack sélectionné et badge à 1 doivent rester cohérents après refresh.
+
+**Justification de la priorité :** garde-barrière court de RISK-CART-02 et RISK-SESSION-01 élevés; détecte tôt une perte de contexte affectant le parcours d’achat.
 **Tags :** `@positive @smoke @regression @session`
 
 **Préconditions :** `standard_user` connecté, Backpack ajouté.  
@@ -875,6 +972,9 @@ Les huit charters de [`../exploratory/charters.md`](../exploratory/charters.md) 
 **Type :** Passant  
 **Priorité :** P0  
 **Impact potentiel en cas d’échec :** session non terminée et accès possible par l’utilisateur suivant.
+**Référence attendue :** AC-SESSION-02 et transition Authentifié → Déconnecté déclenchée par Logout.
+
+**Justification de la priorité :** contrôle Smoke essentiel de terminaison de session lié à RISK-SESSION-02 élevé et préalable aux vérifications de routes protégées.
 **Tags :** `@positive @smoke @regression @session`
 
 **Préconditions :** `standard_user` connecté.  
@@ -893,6 +993,9 @@ Les huit charters de [`../exploratory/charters.md`](../exploratory/charters.md) 
 **Type :** Erreur  
 **Priorité :** P0  
 **Impact potentiel en cas d’échec :** accès non autorisé à une zone protégée après déconnexion.
+**Référence attendue :** AC-SESSION-03 et transition interdite Déconnecté → Cart; la route doit rester protégée après logout.
+
+**Justification de la priorité :** contrôle de sécurité fonctionnelle à impact fort sur RISK-AUTH-02 et RISK-SESSION-02; P0 même hors tag Smoke afin de rester prioritaire dans la régression de session.
 **Tags :** `@error @regression @session`
 
 **Préconditions :** Une connexion nominale vient d’être fermée par Logout.  
@@ -910,6 +1013,11 @@ Les huit charters de [`../exploratory/charters.md`](../exploratory/charters.md) 
 **Technique(s) de conception :** ST
 **Type :** Passant  
 **Priorité :** P1  
+**Impact potentiel en cas d’échec :** état d’achat résiduel après Reset ou déconnexion involontaire interrompant le parcours.
+
+**Référence attendue :** AC-SESSION-04 et transition Authentifié avec panier → Authentifié avec panier vide.
+
+**Justification de la priorité :** contrôle de régression de RISK-SESSION-03 faible; utile mais exécuté après les protections P0 de persistance et logout.
 **Tags :** `@positive @regression @session`
 
 **Préconditions :** `standard_user` connecté avec Backpack au panier.  
@@ -972,8 +1080,17 @@ La Smoke contient sept cas : TC-AUTH-01, TC-CAT-01, TC-PAN-01, TC-CHK-01, TC-CHK
 - Les 33 cas sont automatisables avec des interactions utilisateur et des observations déterministes dans Chromium; aucun ne requiert de manipulation du DOM, d’injection de script ou de comparaison visuelle subjective.
 - Les cas de caractérisation TC-CAT-04, TC-TRI-05, TC-TRI-06, TC-PAN-05, TC-PAN-06, TC-CHK-07 et TC-CHK-08 sont volontairement couplés à la version publique de la démo. Ils sont déterministes à la date de référence mais devront être reconfirmés avant implémentation si SauceDemo évolue.
 - TC-CAT-03 dépend d’une navigation directe vers une référence inexistante et reste reproductible depuis une session authentifiée.
-- TC-CHK-02 utilise des montants observés exacts; son oracle devra comparer les lignes, le sous-total, la taxe et le total, sans dépendre d’une observation visuelle.
+- TC-CHK-02 utilise des montants observés exacts; sa référence attendue compare les lignes, le sous-total, la taxe et le total, sans dépendre d’une simple observation visuelle.
 - TC-CHK-08 doit construire l’étape 2 par le parcours normal; aucun état interne ne doit être forcé. Si ce parcours n’est plus accessible lors de la prochaine exploration, le cas devra être révisé plutôt que contourné.
+
+### Revue de la raison d’être et des priorités
+
+- **TC enrichis :** 24 cas — les cinq cas d’authentification, TC-CAT-01, les six cas panier, les huit cas checkout et les quatre cas session — documentent désormais leur impact, leur référence attendue et leur justification de priorité.
+- **TC non enrichis :** TC-CAT-02/03/04 et TC-TRI-01 à TC-TRI-06 conservent leur documentation existante. Leur priorité et leur résultat sont suffisamment lisibles; répéter leur AC et une justification générique ajouterait du bruit. Le tri reste un contrôle P1/P2 de recherche et de confort, sans impact artificiellement élevé.
+- **Références identifiées :** AC explicites, partitions, règles R1 à R5 de la table de décision, modèle de transitions, état précédent du panier et relations arithmétiques des montants.
+- **Références à clarifier :** TC-PAN-04 et TC-CHK-06 décrivent l’acceptation observée d’un panier vide; aucune règle produit ne dit encore si le parcours doit être bloqué.
+- **Priorités confirmées :** les huit P0 restent des garde-barrières d’accès, catalogue, panier, commande, calcul et session. Les validations et transitions approfondies restent P1; les caractérisations de faible impact restent P2.
+- **Priorité à revoir avec le Planner :** TC-PAN-05 et TC-PAN-06 sont P1 alors que d’autres caractérisations de comptes spéciaux comparables sont P2. RISK-CART-01 est élevé, ce qui peut justifier P1, mais l’existence de défenses nominales fortes rend une proposition P2 également défendable. Aucune modification n’est appliquée sans arbitrage.
 
 ## Synthèse chiffrée
 

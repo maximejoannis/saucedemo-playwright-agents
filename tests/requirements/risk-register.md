@@ -36,12 +36,12 @@ Le niveau de risque oriente la réponse QA. Il ne détermine automatiquement ni 
 
 | État | Définition |
 |---|---|
-| Couvert | Une ou plusieurs défenses pertinentes exercent le risque sur son périmètre défini, avec un oracle capable de détecter sa matérialisation. Un risque résiduel peut néanmoins subsister. |
+| Couvert | Une ou plusieurs défenses pertinentes exercent le risque sur son périmètre défini, avec une référence attendue capable de détecter sa matérialisation. Un risque résiduel peut néanmoins subsister. |
 | Partiellement couvert | Une défense pertinente existe, mais une condition, une transition, une règle métier ou une classe de données significative reste non testée ou non définie. |
 | Non couvert | Aucune défense actuelle ne permet de détecter de façon crédible la matérialisation du risque. |
 | Accepté / hors périmètre | Le risque est identifié mais sa couverture n’est pas prévue dans le périmètre actuel à la suite d’une décision explicite. |
 
-Les campagnes Smoke et Regression, ou plusieurs tests répétant le même oracle, ne sont pas comptés comme défenses indépendantes à eux seuls. L’indépendance vient d’un niveau ou d’un mode de détection différent : contrôle fonctionnel ciblé, test négatif, transition d’état, E2E ou exploration.
+Les campagnes Smoke et Regression, ou plusieurs tests répétant la même référence attendue, ne sont pas comptés comme défenses indépendantes à eux seuls. L’indépendance vient d’un niveau ou d’un mode de détection différent : contrôle fonctionnel ciblé, test négatif, transition d’état, E2E ou exploration.
 
 ## Catalogue
 
@@ -55,7 +55,7 @@ Les campagnes Smoke et Regression, ou plusieurs tests répétant le même oracle
 | RISK-CART-01 | Panier | Un ajout ou retrait échoue, ou un article est perdu, dupliqué ou remplacé pendant la navigation. | Commande incorrecte, abandon ou facturation potentielle d’un mauvais contenu. | US-04 | AC-CART-01, AC-CART-02, AC-CART-03, AC-CART-05 | 2 | 3 | Élevé (6) | Smoke sur l’ajout; transitions multi-articles; E2E d’achat. | TC-PAN-01, TC-PAN-02, TC-PAN-03, TC-PAN-05, TC-PAN-06 | Couvert | Volumes et modifications concurrentes non couverts. |
 | RISK-CART-02 | Panier | Le panier disparaît au rafraîchissement ou réapparaît dans une session ultérieure de façon inattendue. | Perte de sélection ou exposition d’un état d’achat résiduel. | US-04, US-06 | AC-SESSION-01 | 2 | 3 | Élevé (6) | Transition après rafraîchissement; clarification inter-session requise. | TC-SESSION-01 | Partiellement couvert | Logout/relogin, changement d’utilisateur et nouveau contexte non testés. |
 | RISK-CHK-01 | Checkout | Une commande valide ne peut pas être finalisée ou aucune confirmation n’est produite. | Conversion bloquée ou statut de commande ambigu. | US-05 | AC-CHK-01, AC-CHK-07, AC-CHK-08 | 3 | 3 | Critique (9) | Smoke + régression du parcours complet; E2E d’achat. | TC-CHK-01, TC-CHK-07, TC-CHK-08 | Couvert | Statut persistant hors page de confirmation non vérifié. |
-| RISK-CHK-02 | Checkout | Sous-total, taxe, total ou lignes du récapitulatif incorrects. | Montant annoncé ou facturé incorrect et risque financier/réglementaire. | US-05 | AC-CHK-02 | 2 | 3 | Élevé (6) | Oracle arithmétique indépendant multi-articles; contrôle E2E sur un article. | TC-CHK-02 | Couvert | Règle de taxe et arrondis limites non spécifiés. |
+| RISK-CHK-02 | Checkout | Sous-total, taxe, total ou lignes du récapitulatif incorrects. | Montant annoncé ou facturé incorrect et risque financier/réglementaire. | US-05 | AC-CHK-02 | 2 | 3 | Élevé (6) | Référence arithmétique indépendante multi-articles; contrôle E2E sur un article. | TC-CHK-02 | Couvert | Règle de taxe et arrondis limites non spécifiés. |
 | RISK-CHK-03 | Checkout | Une commande vide peut être finalisée. | Données parasites et métriques de commande faussées. | US-04, US-05 | AC-CART-04, AC-CHK-06 | 3 | 2 | Élevé (6) | Caractérisation négative; décision produit sur le blocage souhaité. | TC-PAN-04, TC-CHK-06 | Partiellement couvert | Comportement détecté mais attendu métier non arbitré. |
 | RISK-CHK-04 | Checkout | Des données de livraison obligatoires manquent mais le parcours continue, ou une saisie valide est rejetée. | Livraison impossible ou abandon d’une saisie pourtant valide. | US-05 | AC-CHK-03, AC-CHK-04, AC-CHK-05, AC-CHK-07 | 2 | 2 | Moyen (4) | Tests négatifs des champs requis et exploration des classes de saisie. | TC-CHK-03, TC-CHK-04, TC-CHK-05, TC-CHK-07 | Partiellement couvert | Formats, longueurs et validité postale non définis. |
 | RISK-SESSION-01 | Session | La session active est perdue ou son contexte est mal conservé pendant le parcours. | Interruption, perte du panier et abandon. | US-06 | AC-SESSION-01 | 2 | 3 | Élevé (6) | Smoke après rafraîchissement; exploration du cycle de vie. | TC-SESSION-01 | Partiellement couvert | Cart, Checkout, expiration et reprise non couverts. |
@@ -108,7 +108,7 @@ Les campagnes Smoke et Regression, ou plusieurs tests répétant le même oracle
 
 - **Besoin menacé :** vérifier un montant de commande exact avant confirmation (US-05).
 - **Conséquence :** montant annoncé ou facturé incorrect, perte de confiance et risque financier/réglementaire.
-- **Réponse QA :** oracle arithmétique indépendant sur plusieurs articles en Smoke et régression; contrôle transverse sur un article dans E2E-01.
+- **Réponse QA :** référence arithmétique indépendante sur plusieurs articles en Smoke et régression; contrôle transverse sur un article dans E2E-01.
 - **Défenses effectives :** TC-CHK-02 compare chaque ligne, la somme, la taxe et le total; E2E-01 contrôle la cohérence financière du parcours nominal.
 - **Risque résiduel :** règle de taxe, partitions de montant et arrondis limites non spécifiés.
 
@@ -153,7 +153,7 @@ Les campagnes Smoke et Regression, ou plusieurs tests répétant le même oracle
 | RISK-CART-01 | AC-CART-01/02/03 | TC-PAN-01/02/03 | Transition multi-articles dans TC-PAN-03 | Oui | E2E-01 | Volumes hors périmètre actuel | Plusieurs défenses complémentaires. |
 | RISK-CART-02 | AC-SESSION-01 | TC-SESSION-01 | Rafraîchissement seulement | Oui | — | Clarification inter-session | Une seule défense fonctionnelle. |
 | RISK-CHK-01 | AC-CHK-01 | TC-CHK-01 | Caractérisations TC-CHK-07/08 | Oui | E2E-01 | — | Plusieurs niveaux nominaux; caractérisations non comptées comme exigence métier. |
-| RISK-CHK-02 | AC-CHK-02 | TC-CHK-02 | Oracle arithmétique indépendant | Oui | E2E-01 | Règle taxe/arrondi à clarifier | Deux jeux de données et niveaux de parcours. |
+| RISK-CHK-02 | AC-CHK-02 | TC-CHK-02 | Référence arithmétique indépendante | Oui | E2E-01 | Règle taxe/arrondi à clarifier | Deux jeux de données et niveaux de parcours. |
 | RISK-CHK-03 | AC-CART-04, AC-CHK-06 | TC-PAN-04, TC-CHK-06 | Parcours vide | Non | — | Décision Product Owner | Une seule chaîne de défense; attendu métier non arbitré. |
 | RISK-SESSION-01 | AC-SESSION-01 | TC-SESSION-01 | Rafraîchissement seulement | Oui | — | Cycle de vie à explorer | Une seule défense, partagée avec RISK-CART-02. |
 | RISK-SESSION-02 | AC-SESSION-02/03 | TC-SESSION-02 | TC-SESSION-03 | Logout seulement | E2E-03 | Inventaire des routes | Plusieurs niveaux, périmètre de routes partiel. |

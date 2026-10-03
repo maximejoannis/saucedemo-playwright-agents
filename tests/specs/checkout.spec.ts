@@ -60,14 +60,16 @@ test.describe('Checkout', () => {
     await expect(checkout.items).toHaveCount(products.length);
     for (const product of products) await expect(checkout.itemPrice(product.name)).toHaveText(product.price);
     const amounts = await checkout.items.getByTestId('inventory-item-price').allTextContents();
+    const expectedSubtotalCents = products.reduce((total, product) => total + moneyToCents(product.price), 0);
     const subtotalCents = amounts.reduce((total, value) => total + moneyToCents(value), 0);
     const taxCents = moneyToCents(await checkout.tax.innerText());
     const totalCents = moneyToCents(await checkout.total.innerText());
-    expect(subtotalCents).toBe(12_994);
-    await expect(checkout.subtotal).toHaveText('Item total: $129.94');
+    const expectedTotalCents = expectedSubtotalCents + taxCents;
+    expect(subtotalCents).toBe(expectedSubtotalCents);
+    await expect(checkout.subtotal).toHaveText(`Item total: $${(expectedSubtotalCents / 100).toFixed(2)}`);
     await expect(checkout.tax).toHaveText('Tax: $10.40');
-    await expect(checkout.total).toHaveText('Total: $140.34');
-    expect(subtotalCents + taxCents).toBe(totalCents);
+    await expect(checkout.total).toHaveText(`Total: $${(expectedTotalCents / 100).toFixed(2)}`);
+    expect(totalCents).toBe(expectedTotalCents);
   });
 
   // US-05

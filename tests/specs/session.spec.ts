@@ -34,6 +34,7 @@ test.describe('Session', () => {
   }) => {
     const inventory = new InventoryPage(page);
     const login = new LoginPage(page);
+    await expect(inventory.title).toHaveText('Products');
     // 1. Ouvrir le menu. 2. Choisir Logout.
     await inventory.logout();
     await expect(page).toHaveURL('https://www.saucedemo.com/');
@@ -51,6 +52,7 @@ test.describe('Session', () => {
   }) => {
     const inventory = new InventoryPage(page);
     const login = new LoginPage(page);
+    await expect(inventory.title).toHaveText('Products');
     await inventory.logout();
     // 1. Demander directement la route du panier.
     await page.goto('/cart.html');
