@@ -25,13 +25,15 @@ async function loadReport() {
     ['Risques acceptés / hors périmètre', summary.riskCoverage['Accepté / hors périmètre']],
     ['Risques critiques/élevés en Smoke', ratio(summary.significantRisks, 'smoke')],
     ['Risques critiques/élevés avec plusieurs défenses', ratio(summary.significantRisks, 'multipleDefenses')],
+    ['Charters exploratoires planifiés', summary.exploratoryCharters.total],
+    ['Sessions exploratoires terminées', summary.exploratoryCharters.completed],
     ['E2E complémentaires', summary.e2e],
     ['Tests Playwright', summary.playwrightTests],
   ];
   q('#kpis').innerHTML = cards
     .map(
       ([label, value]) =>
-        `<article><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong><small>${label.startsWith('Risques') ? 'Couverture des risques distincte' : label === 'E2E complémentaires' ? 'Couche transverse' : 'Couverture automatisée'}</small></article>`,
+        `<article><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong><small>${label.includes('exploratoire') || label.includes('Charters') ? 'Hors couverture automatisée' : label.startsWith('Risques') ? 'Couverture des risques distincte' : label === 'E2E complémentaires' ? 'Couche transverse' : 'Couverture automatisée'}</small></article>`,
     )
     .join('');
   q('#types').innerHTML = Object.entries(summary.types)
@@ -72,6 +74,12 @@ async function loadReport() {
     .map(
       (risk) =>
         `<article class="feature"><div><p>${risk.id}</p><h3>${escapeHtml(risk.feature)}</h3></div>${badge(risk.coverageStatus === 'Couvert', risk.coverageStatus, risk.coverageStatus)}<p>${escapeHtml(risk.scenario)}</p><dl><div><dt>Niveau</dt><dd>${escapeHtml(risk.level)}</dd></div><div><dt>Score</dt><dd>${risk.probability * risk.impact}</dd></div><div><dt>TC liés</dt><dd>${risk.testCases.length}</dd></div><div><dt>E2E complémentaires</dt><dd>${risk.e2e.length}</dd></div></dl><p><strong>Résiduel :</strong> ${escapeHtml(risk.residualRisk)}</p><footer>${risk.testCases.map((id) => `<code>${id}</code>`).join('')}</footer></article>`,
+    )
+    .join('');
+  q('#exploratoryCards').innerHTML = data.exploratoryCharters
+    .map(
+      (charter) =>
+        `<article class="feature"><div><p>${charter.id}</p><h3>${escapeHtml(charter.title)}</h3></div>${badge(charter.status === 'Exploré', charter.status, charter.status)}<p>${escapeHtml(charter.objective)}</p><dl><div><dt>Domaine</dt><dd>${escapeHtml(charter.domain)}</dd></div><div><dt>Risques liés</dt><dd>${charter.risks.length}</dd></div></dl><footer>${charter.risks.map((id) => `<code>${id}</code>`).join('')}</footer></article>`,
     )
     .join('');
   const renderCases = () => {

@@ -10,6 +10,7 @@ const sources = {
   criteria: read('tests', 'requirements', 'acceptance-criteria.md'),
   traceability: read('tests', 'requirements', 'traceability-matrix.md'),
   riskRegister: read('tests', 'requirements', 'risk-register.md'),
+  exploratory: read('tests', 'exploratory', 'charters.md'),
   plan: read('tests', 'test-plan', 'plan-tests-fonctionnels-saucedemo.md'),
 };
 
@@ -117,6 +118,62 @@ assertUnique(
   'Risque produit',
 );
 if (!risks.length) fail("aucun risque produit n'est défini dans le plan");
+
+const charterMatches = [...sources.exploratory.matchAll(/^### (EXP-[A-Z]+-\d+)\s+[—-]\s+(.+)$/gmu)];
+const exploratoryCharters = charterMatches.map((match, index) => {
+  const body = sources.exploratory.slice(match.index, charterMatches[index + 1]?.index ?? sources.exploratory.length);
+  return {
+    id: match[1],
+    title: match[2].trim(),
+    domain: body.match(/^- \*\*Domaine\s*:\*\*\s*(.+)$/mu)?.[1].trim(),
+    objective: body.match(/^- \*\*Objectif\s*:\*\*\s*(.+)$/mu)?.[1].trim(),
+    uncertainty: body.match(/^- \*\*Zone d’incertitude\s*:\*\*\s*(.+)$/mu)?.[1].trim(),
+    explorationIdeas: body.match(/^- \*\*Pistes d’exploration\s*:\*\*\s*(.+)$/mu)?.[1].trim(),
+    observations: body.match(/^- \*\*Observations recherchées\s*:\*\*\s*(.+)$/mu)?.[1].trim(),
+    potentialImpact: body.match(/^- \*\*Impact potentiel\s*:\*\*\s*(.+)$/mu)?.[1].trim(),
+    risks: body.match(/^- \*\*Risque\(s\) lié\(s\)\s*:\*\*\s*(.+)$/mu)?.[1].match(/RISK-[A-Z]+-\d+/gu) ?? [],
+    status: body.match(/^- \*\*Statut\s*:\*\*\s*(.+)$/mu)?.[1].trim(),
+  };
+});
+assertUnique(
+  exploratoryCharters.map(({ id }) => id),
+  'Charter exploratoire',
+);
+for (const charter of exploratoryCharters) {
+  if (!charter.domain || !charter.objective || !charter.uncertainty)
+    fail(`${charter.id} ne documente pas son domaine, son objectif ou sa zone d'incertitude`);
+  if (!charter.explorationIdeas || !charter.observations || !charter.potentialImpact)
+    fail(`${charter.id} ne documente pas ses pistes, observations recherchées ou son impact potentiel`);
+  if (!charter.risks.length) fail(`${charter.id} ne référence aucun risque produit`);
+  for (const id of charter.risks)
+    if (!risks.some((risk) => risk.id === id)) fail(`${charter.id} référence un risque inexistant : ${id}`);
+  if (
+    !['À explorer', 'En cours', 'Exploré', 'Investigation complémentaire', 'Candidat TC', 'Candidat bug'].includes(
+      charter.status,
+    )
+  )
+    fail(`${charter.id} porte un statut invalide : ${charter.status}`);
+}
+const exploratoryTraceRows = sources.traceability
+  .split(/\r?\n/u)
+  .map(row)
+  .filter((cells) => cells.length === 4 && /^EXP-[A-Z]+-\d+$/u.test(cells[0]));
+assertUnique(
+  exploratoryTraceRows.map(([id]) => id),
+  'Charter dans la matrice',
+);
+for (const charter of exploratoryCharters) {
+  const trace = exploratoryTraceRows.find(([id]) => id === charter.id);
+  if (!trace) fail(`${charter.id} est absent de la couverture exploratoire de la matrice`);
+  const [, domain, rawRisks, status] = trace;
+  const tracedRisks = rawRisks.match(/RISK-[A-Z]+-\d+/gu) ?? [];
+  if (domain !== charter.domain) fail(`${charter.id} porte un domaine différent dans la matrice`);
+  if ([...tracedRisks].sort().join() !== [...charter.risks].sort().join())
+    fail(`${charter.id} porte des risques différents dans la matrice`);
+  if (status !== charter.status) fail(`${charter.id} porte un statut différent dans la matrice`);
+}
+for (const [id] of exploratoryTraceRows)
+  if (!exploratoryCharters.some((charter) => charter.id === id)) fail(`${id} existe dans la matrice sans charter`);
 
 const traceRows = sources.traceability
   .split(/\r?\n/u)
@@ -354,6 +411,11 @@ const summary = {
     singleDefense: risks.filter(({ significant, independentDefenses }) => significant && independentDefenses === 1)
       .length,
   },
+  exploratoryCharters: {
+    total: exploratoryCharters.length,
+    completed: exploratoryCharters.filter(({ status }) => status === 'Exploré').length,
+    linkedRisks: new Set(exploratoryCharters.flatMap(({ risks: linked }) => linked)).size,
+  },
   e2eSmoke: e2e.filter(({ tags }) => tags.includes('@smoke')).length,
   e2eRegression: e2e.filter(({ tags }) => tags.includes('@regression')).length,
 };
@@ -368,6 +430,7 @@ const data = {
   userStories,
   acceptanceCriteria,
   risks,
+  exploratoryCharters,
   testCases,
   e2e,
 };

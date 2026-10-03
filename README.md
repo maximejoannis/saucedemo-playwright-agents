@@ -178,6 +178,8 @@ Soit :
 
 > Le taux de 100 % correspond à la couverture automatisée du périmètre QA défini et documenté : 6/6 fonctionnalités, 6/6 User Stories, 32/32 Acceptance Criteria et 33/33 Test Cases. Il ne s’agit pas d’une couverture exhaustive de SauceDemo ni d’une couverture du code source.
 
+La couche d’investigation humaine est documentée séparément dans [`tests/exploratory/charters.md`](tests/exploratory/charters.md). Un charter `EXP-*` planifié ou exécuté ne devient pas automatiquement un TC et n’augmente jamais la couverture automatisée ci-dessus.
+
 ### Important
 
 La couverture fonctionnelle mesure la proportion du périmètre fonctionnel défini disposant de tests Playwright automatisés.

@@ -27,6 +27,7 @@ const data = {
     automatedRisks: coverage.automatedRisks,
     riskCoverage: coverage.riskCoverage,
     significantRisks: coverage.significantRisks,
+    exploratoryCharters: coverage.exploratoryCharters,
     qaScopeCoverage: coverage.qaScopeCoverage,
   },
 };

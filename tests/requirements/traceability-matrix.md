@@ -69,3 +69,26 @@ Cette matrice relie chaque cas au besoin, aux critères définis et aux risques 
 - Les 14 risques du registre sont reliés à au moins un TC; cela mesure la traçabilité, pas la suffisance de leur couverture ni l’automatisation de leurs gaps résiduels.
 - Les métriques de risque sont distinctes du taux de couverture fonctionnelle : 32/32 AC couverts ne signifie pas que les 14 risques sont entièrement maîtrisés.
 - Aucun ID dupliqué, aucune référence orpheline et aucun cas absent de la matrice.
+
+## Couverture exploratoire
+
+Cette vue relie les risques aux questions d’investigation planifiées. Elle est indépendante de la couverture fonctionnelle scriptée : un charter `À explorer` n’est ni un TC, ni une exécution, ni une preuve de maîtrise du risque.
+
+| Charter | Domaine | Risque(s) exploré(s) | Statut |
+|---|---|---|---|
+| EXP-AUTH-01 | Authentification / Session | RISK-AUTH-02, RISK-SESSION-02 | À explorer |
+| EXP-CAT-01 | Catalogue | RISK-CAT-01, RISK-CAT-02 | À explorer |
+| EXP-SORT-01 | Tri | RISK-SORT-01 | À explorer |
+| EXP-CART-01 | Panier | RISK-CART-01, RISK-CART-02, RISK-SESSION-01 | À explorer |
+| EXP-CHK-01 | Checkout | RISK-CART-01, RISK-CHK-01, RISK-CHK-02, RISK-CHK-03, RISK-SESSION-01 | À explorer |
+| EXP-CHK-02 | Checkout | RISK-CHK-01, RISK-CHK-03 | À explorer |
+| EXP-CHK-03 | Checkout / Données de formulaire | RISK-CHK-04 | À explorer |
+| EXP-SESSION-01 | Session | RISK-CART-02, RISK-SESSION-01, RISK-SESSION-02, RISK-SESSION-03 | À explorer |
+
+| Mesure exploratoire | Résultat |
+|---|---:|
+| Charters identifiés | 8 |
+| Sessions exploratoires terminées | 0 |
+| Risques liés à au moins une question exploratoire | 13 / 14 |
+
+La présence d’un lien `RISK → EXP` signifie qu’une investigation est prévue. Elle ne change ni l’état de couverture du registre, ni les 32 AC couverts, ni les 33 TC automatisés, ni les 36 tests Playwright.
