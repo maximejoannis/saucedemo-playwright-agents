@@ -25,7 +25,7 @@ test.describe('Checkout', () => {
   // US-05
   // AC-CHK-01
   // RISK-CHK-01
-  // Technique: EP, BVA, DT, ST, SBT
+  // Technique: EP, DT, ST, SBT
   // TC-CHK-01
   test('TC-CHK-01 @positive @smoke @regression @checkout @risk-chk-01 - finalisation d’une commande nominale', async ({
     authenticatedPage: page,
@@ -124,7 +124,7 @@ test.describe('Checkout', () => {
   // US-05
   // AC-CHK-06
   // RISK-CHK-03
-  // Technique: BVA, DT, SBT
+  // Technique: DT, SBT
   // TC-CHK-06
   test('TC-CHK-06 @negative @regression @checkout @risk-chk-03 - commande finalisée avec panier vide', async ({
     authenticatedPage: page,

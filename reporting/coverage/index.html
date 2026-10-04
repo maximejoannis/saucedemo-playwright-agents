@@ -55,6 +55,10 @@
             </article>
             <article class="panel">
               <h3>Techniques de conception</h3>
+              <p>
+                EP : Partition d’équivalence · BVA : Analyse des valeurs limites · DT : Table de décision · ST :
+                Transition d’état · SBT : Test basé sur les scénarios · PW : Pairwise
+              </p>
               <div id="techniques"></div>
             </article>
           </div>
@@ -99,10 +103,11 @@
         </section>
         <section id="exploratory">
           <p class="eyebrow">INVESTIGATION HUMAINE</p>
-          <h2>Charters exploratoires</h2>
+          <h2>Missions de test exploratoire</h2>
           <p>
-            Un charter planifie une investigation. Tant que son statut n’est pas « Exploré », il ne représente aucune
-            session terminée; dans tous les cas, il ne compte jamais comme TC ou test Playwright.
+            Une mission de test exploratoire (charter) guide une investigation humaine sans imposer une procédure
+            rigide. Tant qu’elle n’est pas exécutée et documentée, elle représente un test prévu, mais aucune couverture
+            réellement vérifiée. Elle ne compte jamais comme TC ou test Playwright.
           </p>
           <div id="exploratoryCards" class="feature-grid"></div>
         </section>
@@ -125,8 +130,12 @@
                   <th>Mode d’exécution</th>
                   <th>Type</th>
                   <th>Priorité</th>
-                  <th>Impact potentiel en cas d’échec</th>
+                  <th>Impact si échec</th>
                   <th>Référence attendue</th>
+                  <th>Type de référence</th>
+                  <th>Justification du test</th>
+                  <th>Justification de la priorité</th>
+                  <th>Incertitude métier</th>
                   <th>Smoke</th>
                   <th>Regression</th>
                   <th>Automatisé</th>

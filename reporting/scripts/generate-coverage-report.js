@@ -13,6 +13,7 @@ const sources = {
   exploratory: read('tests', 'exploratory', 'charters.md'),
   plan: read('tests', 'test-plan', 'plan-tests-fonctionnels-saucedemo.md'),
 };
+const exploratorySessionDirectory = path.join(root, 'tests', 'exploratory', 'session-reports');
 
 const fail = (message) => {
   throw new Error(`Contrôle de cohérence impossible : ${message}`);
@@ -28,6 +29,13 @@ function row(line) {
     .replace(/^\||\|$/gu, '')
     .split('|')
     .map((cell) => cell.trim().replace(/`/gu, ''));
+}
+function acceptanceCriterionIds(value) {
+  const ids = value.match(/AC-[A-Z]+-\d+/gu) ?? [];
+  for (const match of value.matchAll(/AC-([A-Z]+)-(\d+)((?:\/\d+)+)/gu)) {
+    for (const suffix of match[3].slice(1).split('/')) ids.push(`AC-${match[1]}-${suffix}`);
+  }
+  return [...new Set(ids)];
 }
 function walk(directory) {
   return fs.readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
@@ -103,7 +111,7 @@ const risks = sources.riskRegister
       scenario,
       consequence,
       userStories: rawStories.match(/US-\d+/gu) ?? [],
-      acceptanceCriteria: rawCriteria.match(/AC-[A-Z]+-\d+/gu) ?? [],
+      acceptanceCriteria: acceptanceCriterionIds(rawCriteria),
       probability: Number(probability),
       impact: Number(impact),
       level,
@@ -119,6 +127,40 @@ assertUnique(
 );
 if (!risks.length) fail("aucun risque produit n'est défini dans le plan");
 
+const defenseRows = sources.riskRegister
+  .split(/\r?\n/u)
+  .map(row)
+  .filter((cells) => cells.length === 7 && /^RISK-[A-Z]+-\d+$/u.test(cells[0]))
+  .map(([id, level, rawCriteria, associatedControls, independentDefenses, coverageStatus, gap]) => ({
+    id,
+    level,
+    acceptanceCriteria: acceptanceCriterionIds(rawCriteria),
+    associatedControls,
+    independentDefenses: Number(independentDefenses),
+    coverageStatus,
+    gap,
+  }));
+assertUnique(
+  defenseRows.map(({ id }) => id),
+  'Risque dans la vue consolidée des défenses',
+);
+for (const risk of risks) {
+  const defense = defenseRows.find(({ id }) => id === risk.id);
+  if (!defense) fail(`${risk.id} est absent de la vue consolidée des défenses`);
+  if (defense.level !== risk.level) fail(`${risk.id} porte un niveau différent dans la vue des défenses`);
+  if (defense.coverageStatus !== risk.coverageStatus)
+    fail(`${risk.id} porte un état différent dans la vue des défenses`);
+  if ([...defense.acceptanceCriteria].sort().join() !== [...risk.acceptanceCriteria].sort().join())
+    fail(`${risk.id} porte des AC différents dans la vue des défenses`);
+  if (!Number.isInteger(defense.independentDefenses) || defense.independentDefenses < 0)
+    fail(`${risk.id} porte un nombre de défenses indépendantes invalide`);
+  risk.associatedControls = defense.associatedControls;
+  risk.independentDefenses = defense.independentDefenses;
+  risk.defenseGap = defense.gap;
+}
+for (const { id } of defenseRows)
+  if (!risks.some((risk) => risk.id === id)) fail(`${id} existe dans la vue des défenses sans risque au catalogue`);
+
 const charterMatches = [...sources.exploratory.matchAll(/^### (EXP-[A-Z]+-\d+)\s+[—-]\s+(.+)$/gmu)];
 const exploratoryCharters = charterMatches.map((match, index) => {
   const body = sources.exploratory.slice(match.index, charterMatches[index + 1]?.index ?? sources.exploratory.length);
@@ -131,10 +173,48 @@ const exploratoryCharters = charterMatches.map((match, index) => {
     explorationIdeas: body.match(/^- \*\*Pistes d’exploration\s*:\*\*\s*(.+)$/mu)?.[1].trim(),
     observations: body.match(/^- \*\*Observations recherchées\s*:\*\*\s*(.+)$/mu)?.[1].trim(),
     potentialImpact: body.match(/^- \*\*Impact potentiel\s*:\*\*\s*(.+)$/mu)?.[1].trim(),
+    qaQuestion: body.match(/^- \*\*Question QA\s*:\*\*\s*(.+)$/mu)?.[1].trim(),
+    explorationPriority: body.match(/^- \*\*Priorité exploratoire\s*:\*\*\s*([^—\r\n]+)/mu)?.[1].trim(),
+    timeBoxMinutes: Number(body.match(/^- \*\*Time-box\s*:\*\*\s*(\d+) minutes?\./mu)?.[1]),
+    stopCriteria: body.match(/^- \*\*Critères d’arrêt\s*:\*\*\s*(.+)$/mu)?.[1].trim(),
+    automationDecision: body.match(/^- \*\*Décision d’automatisation\s*:\*\*\s*(.+)$/mu)?.[1].trim(),
     risks: body.match(/^- \*\*Risque\(s\) lié\(s\)\s*:\*\*\s*(.+)$/mu)?.[1].match(/RISK-[A-Z]+-\d+/gu) ?? [],
     status: body.match(/^- \*\*Statut\s*:\*\*\s*(.+)$/mu)?.[1].trim(),
   };
 });
+const executedExploratoryStatuses = new Set(['Exploré', 'Investigation complémentaire', 'Candidat TC', 'Candidat bug']);
+for (const charter of exploratoryCharters) {
+  const declaresExecution = executedExploratoryStatuses.has(charter.status);
+  const sessionReportPath = path.join(exploratorySessionDirectory, `${charter.id}.md`);
+  const hasSessionReport = fs.existsSync(sessionReportPath);
+  if (declaresExecution && !hasSessionReport)
+    fail(
+      `${charter.id} est déclaré ${charter.status} sans compte rendu de session ${path.relative(root, sessionReportPath)}`,
+    );
+  if (!declaresExecution && hasSessionReport)
+    fail(
+      `${charter.id} possède un compte rendu de session mais son statut ${charter.status} ne déclare pas une mission exécutée`,
+    );
+  if (hasSessionReport) {
+    const report = fs.readFileSync(sessionReportPath, 'utf8');
+    if (!new RegExp(`\\b${charter.id}\\b`, 'u').test(report))
+      fail(`le compte rendu de ${charter.id} ne référence pas explicitement la mission exécutée`);
+    for (const field of ['Date', 'Testeur', 'Observations', 'Conclusion']) {
+      if (!new RegExp(`^#{1,6}\\s+${field}\\s*$|^[-*]\\s+\\*\\*${field}\\s*:\\*\\*\\s+\\S`, 'imu').test(report))
+        fail(`le compte rendu de ${charter.id} ne renseigne pas le champ obligatoire ${field}`);
+    }
+    const verifiedRisksLine = report.match(/^[-*]\s+\*\*Risques réellement éclairés\s*:\*\*\s+(.+)$/imu)?.[1];
+    if (!verifiedRisksLine) fail(`le compte rendu de ${charter.id} ne renseigne pas les risques réellement éclairés`);
+    charter.verifiedRisks = verifiedRisksLine.match(/RISK-[A-Z]+-\d+/gu) ?? [];
+    for (const risk of charter.verifiedRisks)
+      if (!charter.risks.includes(risk))
+        fail(`le compte rendu de ${charter.id} déclare ${risk} sans lien prévu avec cette mission`);
+  } else {
+    charter.verifiedRisks = [];
+  }
+  charter.sessionReport = hasSessionReport ? path.relative(root, sessionReportPath).replaceAll('\\', '/') : null;
+  charter.executed = declaresExecution && hasSessionReport;
+}
 assertUnique(
   exploratoryCharters.map(({ id }) => id),
   'Charter exploratoire',
@@ -144,6 +224,12 @@ for (const charter of exploratoryCharters) {
     fail(`${charter.id} ne documente pas son domaine, son objectif ou sa zone d'incertitude`);
   if (!charter.explorationIdeas || !charter.observations || !charter.potentialImpact)
     fail(`${charter.id} ne documente pas ses pistes, observations recherchées ou son impact potentiel`);
+  if (!charter.qaQuestion || !charter.stopCriteria || !charter.automationDecision)
+    fail(`${charter.id} ne documente pas sa question QA, ses critères d'arrêt ou sa décision d'automatisation`);
+  if (!['Haute', 'Moyenne', 'Basse'].includes(charter.explorationPriority))
+    fail(`${charter.id} porte une priorité exploratoire invalide : ${charter.explorationPriority}`);
+  if (!Number.isInteger(charter.timeBoxMinutes) || charter.timeBoxMinutes <= 0)
+    fail(`${charter.id} porte une durée maximale invalide : ${charter.timeBoxMinutes}`);
   if (!charter.risks.length) fail(`${charter.id} ne référence aucun risque produit`);
   for (const id of charter.risks)
     if (!risks.some((risk) => risk.id === id)) fail(`${charter.id} référence un risque inexistant : ${id}`);
@@ -210,6 +296,9 @@ const planned = plannedMatches.map((match, index) => {
       body.match(/^\*\*Technique\(s\) de conception\s*:\*\*\s*(.+)$/mu)?.[1].match(/EP|BVA|DT|ST|PW|SBT/gu) ?? [],
     potentialImpact: body.match(/^\*\*Impact potentiel en cas d’échec\s*:\*\*\s*(.+)$/mu)?.[1].trim(),
     expectedReference: body.match(/^\*\*Référence attendue\s*:\*\*\s*(.+)$/mu)?.[1].trim(),
+    referenceType: body.match(/^\*\*Type de référence\s*:\*\*\s*(.+)$/mu)?.[1].trim(),
+    testJustification: body.match(/^\*\*Justification du test\s*:\*\*\s*(.+)$/mu)?.[1].trim(),
+    businessUncertainty: body.match(/^\*\*Incertitude métier\s*:\*\*\s*(.+)$/mu)?.[1].trim(),
     priorityJustification: body.match(/^\*\*Justification de la priorité\s*:\*\*\s*(.+)$/mu)?.[1].trim(),
     executionMode: body.match(/^\*\*Mode d’exécution\s*:\*\*\s*(.+)$/mu)?.[1].trim(),
     executionModeJustification: body.match(/^\*\*Justification du mode d’exécution\s*:\*\*\s*(.+)$/mu)?.[1].trim(),
@@ -226,6 +315,9 @@ for (const testCase of testCases) {
   testCase.title = planCase.title;
   testCase.potentialImpact = planCase.potentialImpact;
   testCase.expectedReference = planCase.expectedReference;
+  testCase.referenceType = planCase.referenceType;
+  testCase.testJustification = planCase.testJustification;
+  testCase.businessUncertainty = planCase.businessUncertainty;
   testCase.priorityJustification = planCase.priorityJustification;
   testCase.executionModeJustification = planCase.executionModeJustification;
   if (planCase.priority !== testCase.priority)
@@ -374,7 +466,6 @@ for (const risk of risks) {
   risk.smoke =
     risk.testCases.some((id) => testCases.find((testCase) => testCase.id === id).tags.includes('@smoke')) ||
     risk.e2e.some((id) => e2e.find((test) => test.id === id).tags.includes('@smoke'));
-  risk.independentDefenses = Number(risk.testCases.length > 0) + Number(risk.e2e.length > 0);
   if (risk.coverageStatus === 'Couvert' && !risk.testCases.length)
     fail(`${risk.id} est déclaré couvert sans aucun TC identifiable`);
 }
@@ -456,11 +547,20 @@ const summary = {
       .length,
     singleDefense: risks.filter(({ significant, independentDefenses }) => significant && independentDefenses === 1)
       .length,
+    needingAdditionalCoverage: risks.filter(
+      ({ significant, coverageStatus }) => significant && coverageStatus === 'Partiellement couvert',
+    ).length,
   },
   exploratoryCharters: {
     total: exploratoryCharters.length,
-    completed: exploratoryCharters.filter(({ status }) => status === 'Exploré').length,
+    completed: exploratoryCharters.filter(({ executed }) => executed).length,
     linkedRisks: new Set(exploratoryCharters.flatMap(({ risks: linked }) => linked)).size,
+    priorities: Object.fromEntries(
+      ['Haute', 'Moyenne', 'Basse'].map((priority) => [
+        priority,
+        exploratoryCharters.filter(({ explorationPriority }) => explorationPriority === priority).length,
+      ]),
+    ),
   },
   e2eSmoke: e2e.filter(({ tags }) => tags.includes('@smoke')).length,
   e2eRegression: e2e.filter(({ tags }) => tags.includes('@regression')).length,
@@ -469,7 +569,17 @@ summary.automationRate = rate(summary.functionalTestCases.automated, summary.fun
 summary.qaScopeCoverage = summary.automationRate;
 summary.globalSmoke = summary.functionalSmoke + summary.e2eSmoke;
 summary.globalRegression = summary.functionalRegression + summary.e2eRegression;
+summary.exploratoryCharters.remaining = summary.exploratoryCharters.total - summary.exploratoryCharters.completed;
+summary.exploratoryCharters.verifiedRiskCoverage = new Set(
+  exploratoryCharters.filter(({ executed }) => executed).flatMap(({ verifiedRisks }) => verifiedRisks),
+).size;
 
+if (
+  summary.exploratoryCharters.priorities.Haute !== 5 ||
+  summary.exploratoryCharters.priorities.Moyenne !== 2 ||
+  summary.exploratoryCharters.priorities.Basse !== 1
+)
+  fail('la répartition des priorités exploratoires ne correspond pas à la décision validée 5 / 2 / 1');
 const data = {
   generatedAt: new Date().toISOString(),
   summary,
@@ -486,5 +596,5 @@ for (const asset of ['index.html', 'styles.css', 'app.js'])
   fs.copyFileSync(path.join(sourceDirectory, asset), path.join(outputDirectory, asset));
 fs.writeFileSync(path.join(outputDirectory, 'data.json'), `${JSON.stringify(data, null, 2)}\n`);
 console.log(
-  `Rapport QA généré et cohérent.\nFonctionnalités : ${summary.features.covered}/${summary.features.total}\nUser Stories : ${summary.userStories.covered}/${summary.userStories.total}\nAC : ${summary.acceptanceCriteria.covered}/${summary.acceptanceCriteria.total}\nTC automatisés : ${summary.functionalTestCases.automated}/${summary.functionalTestCases.total}\nTC manuels : ${summary.functionalTestCases.manual}\nTC candidats : ${summary.functionalTestCases.candidates}\nCharters exploratoires : ${summary.exploratoryCharters.total}\nE2E : ${summary.e2e}\nTests Playwright : ${summary.playwrightTests}\nTaux descriptif d’automatisation des TC : ${summary.automationRate} %`,
+  `Rapport QA généré et cohérent.\nFonctionnalités : ${summary.features.covered}/${summary.features.total}\nUser Stories : ${summary.userStories.covered}/${summary.userStories.total}\nAC : ${summary.acceptanceCriteria.covered}/${summary.acceptanceCriteria.total}\nTC automatisés : ${summary.functionalTestCases.automated}/${summary.functionalTestCases.total}\nTC manuels : ${summary.functionalTestCases.manual}\nTC candidats : ${summary.functionalTestCases.candidates}\nTests exploratoires : ${summary.exploratoryCharters.completed} exécuté sur ${summary.exploratoryCharters.total} prévus\nE2E : ${summary.e2e}\nTests Playwright : ${summary.playwrightTests}\nTaux descriptif d’automatisation des TC : ${summary.automationRate} %`,
 );

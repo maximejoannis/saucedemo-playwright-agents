@@ -46,6 +46,7 @@
     setText('coverage-playwright', playwright.total);
     for (const id of ['playwright-status', 'playwright-report-status']) {
       const status = document.getElementById(id);
+      status?.classList.remove('ready');
       status?.classList.toggle('pass', playwright.status === 'PASS');
       status?.classList.toggle('fail', playwright.status !== 'PASS');
     }
@@ -61,10 +62,11 @@
   if (coverage) {
     setText('coverage-features', coverage.features.total);
     setText('coverage-stories', coverage.userStories.total);
-    setText('coverage-ac', coverage.acceptanceCriteria.total);
+    setText('coverage-ac', ratio(coverage.acceptanceCriteria, 'covered'));
     setText('coverage-tc-total', coverage.testCases.total);
     setText('coverage-tc', ratio(coverage.testCases, 'automated'));
-    setText('coverage-scope', `${coverage.qaScopeCoverage} %`);
+    setText('coverage-exploratory', `${coverage.exploratoryCharters.completed}/${coverage.exploratoryCharters.total}`);
+    setText('coverage-automation-rate', `${coverage.automationRate} %`);
     setText('trace-features', ratio(coverage.features, 'covered'));
     setText('trace-stories', ratio(coverage.userStories, 'covered'));
     setText('trace-ac', ratio(coverage.acceptanceCriteria, 'covered'));

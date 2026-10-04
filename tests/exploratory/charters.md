@@ -1,8 +1,8 @@
-# Charters de tests exploratoires — SauceDemo
+# Missions de test exploratoire — SauceDemo
 
 ## Objectif
 
-Ce référentiel guide des sessions d’exploration ciblées sur les incertitudes que les Test Cases scriptés ne lèvent pas encore : séquences inhabituelles, états intermédiaires, interruptions du navigateur, entrées non nominales et règles produit absentes. Il complète la chaîne Besoin → US → AC → Risque → TC → Playwright sans recopier les contrôles automatisés et sans présumer qu’une observation constitue un défaut.
+Ce référentiel décrit des **missions de test exploratoire (charters)** ciblées sur les incertitudes que les Test Cases scriptés ne lèvent pas encore : séquences inhabituelles, états intermédiaires, interruptions du navigateur, entrées non nominales et règles produit absentes. Il complète la chaîne Besoin → US → AC → Risque → TC → Playwright sans recopier les contrôles automatisés et sans présumer qu’une observation constitue un défaut.
 
 Le [catalogue des risques](../requirements/risk-register.md) reste la source de référence des `RISK-*`. Un charter peut éclairer un risque existant ou révéler un sujet à analyser; il ne crée ni risque, ni exigence, ni Test Case par sa seule existence.
 
@@ -29,6 +29,14 @@ Le [catalogue des risques](../requirements/risk-register.md) reste la source de 
 
 Un charter peut évoluer entre ces statuts. `Candidat bug` n’est ni un défaut confirmé ni une sévérité. La sévérité S1 à S4 ne s’attribue qu’après constat, analyse d’impact réel et qualification du défaut.
 
+## Priorité, time-box et valeur de couverture
+
+La **priorité exploratoire** organise les sessions lorsque le temps humain est limité; elle ne réutilise pas P0/P1/P2, réservés aux Test Cases. `Haute` cible d’abord un risque critique/élevé encore peu contrôlé ou une incertitude susceptible de bloquer un parcours essentiel; `Moyenne` vise un apprentissage utile sans urgence équivalente; `Basse` complète une zone déjà bien contrôlée ou de moindre impact.
+
+Le **time-box** borne l’investissement et préserve l’adaptation du testeur. Il n’impose ni un nombre d’actions ni une couverture exhaustive. À son terme, la session est conclue ou une investigation complémentaire est décidée sur la base des notes.
+
+Une mission `À explorer` représente une **intention de test**, jamais une couverture réellement vérifiée. Même prioritaire, elle reste hors des 34 TC, de la Smoke, de la Regression, du taux d’automatisation et du décompte des contrôles réellement différents tant qu’aucune session et aucun résultat ne sont consignés.
+
 ## Charters
 
 ### EXP-AUTH-01 — Frontières d’accès et historique après changement d’état
@@ -45,6 +53,11 @@ Un charter peut évoluer entre ces statuts. `Candidat bug` n’est ni un défaut
 - **Référence attendue :** AC-AUTH-02, AC-AUTH-05, AC-SESSION-02 et AC-SESSION-03 pour les situations spécifiées; ailleurs, comportement à comparer avec les règles métier, les AC existants et la cohérence générale du produit.
 - **Pourquoi explorer humainement :** l’espace des routes, historiques et combinaisons multi-onglets n’est pas encore inventorié; l’exploration permet d’identifier les transitions significatives avant de paramétrer un contrôle stable.
 - **Limites / hors périmètre :** pas de contournement offensif, interception réseau, vol de cookie ou test de pénétration.
+- **Question QA :** une frontière d’autorisation devient-elle franchissable ou ambiguë lorsque l’état de session change hors du parcours nominal ?
+- **Priorité exploratoire :** Haute — complète les risques élevés d’accès indu et de session terminée, actuellement partiellement exercés sur les routes et contextes.
+- **Time-box :** 45 minutes.
+- **Critères d’arrêt :** time-box atteinte; routes et variations d’historique prioritaires échantillonnées; observation à impact fort rendue reproductible; ou blocage empêchant toute poursuite.
+- **Décision d’automatisation :** Rester exploratoire. Formaliser ensuite un TC seulement pour une transition reproductible, régie par une référence attendue validée; l’automatisation ferait l’objet d’une décision séparée.
 - **Statut :** À explorer
 
 ### EXP-CAT-01 — Identité produit, images et navigation par URL
@@ -61,6 +74,11 @@ Un charter peut évoluer entre ces statuts. `Candidat bug` n’est ni un défaut
 - **Référence attendue :** AC-CAT-01 à AC-CAT-03 lorsque leur périmètre s’applique; pour les paramètres non définis, comportement à comparer avec les règles métier, les AC existants et la cohérence générale du produit.
 - **Pourquoi explorer humainement :** l’exactitude sémantique des images et les partitions d’URL ne sont pas entièrement spécifiées; un jugement comparatif apporte plus de valeur qu’une liste arbitraire de paramètres automatisés.
 - **Limites / hors périmètre :** qualité artistique des visuels, responsive exhaustif et disponibilité du CDN hors application.
+- **Question QA :** une navigation ou un identifiant inhabituel peut-il désynchroniser l’identité fonctionnelle du produit, notamment sans image manifestement cassée ?
+- **Priorité exploratoire :** Moyenne — le risque visuel est faible, mais l’absence de référence sémantique fiable justifie une investigation humaine ciblée.
+- **Time-box :** 45 minutes.
+- **Critères d’arrêt :** time-box atteinte; familles d’identifiants et comparaisons liste/fiche/panier échantillonnées; incohérence reproductible isolée; ou absence de référence empêchant une qualification plus poussée.
+- **Décision d’automatisation :** Rester exploratoire et manuel tant qu’aucune référence produit/image stable n’existe. Une observation ne devient candidate à un TC qu’après validation de cette référence.
 - **Statut :** À explorer
 
 ### EXP-SORT-01 — Tri répété au sein d’un catalogue en mouvement
@@ -77,6 +95,11 @@ Un charter peut évoluer entre ces statuts. `Candidat bug` n’est ni un défaut
 - **Référence attendue :** AC-SORT-01 à AC-SORT-04 pour l’ordre demandé; la persistance du choix après navigation n’est pas spécifiée et doit être évaluée par cohérence.
 - **Pourquoi explorer humainement :** la valeur réside dans les enchaînements et les désynchronisations visuelles transitoires, pas dans la répétition des quatre références de tri déjà automatisées.
 - **Limites / hors périmètre :** performance sur catalogue volumineux et règles de collation internationale absentes des données SauceDemo.
+- **Question QA :** les représentations du catalogue restent-elles synchronisées lorsque le tri est répété ou interrompu par d’autres actions ?
+- **Priorité exploratoire :** Basse — le tri nominal est déjà automatisé et le risque produit est faible; la valeur recherchée concerne uniquement des désynchronisations non nominales.
+- **Time-box :** 30 minutes.
+- **Critères d’arrêt :** time-box atteinte; répétition, navigation et refresh échantillonnés; désynchronisation reproductible isolée; ou absence de nouvel apprentissage après plusieurs variations.
+- **Décision d’automatisation :** Rester exploratoire. Ne promouvoir qu’une séquence minimale reproductible apportant un signal distinct des quatre tris nominaux existants.
 - **Statut :** À explorer
 
 ### EXP-CART-01 — Robustesse du panier sous transitions rapides et navigation inhabituelle
@@ -93,6 +116,11 @@ Un charter peut évoluer entre ces statuts. `Candidat bug` n’est ni un défaut
 - **Référence attendue :** AC-CART-01 à AC-CART-03 et AC-SESSION-01 pour les états spécifiés; les comportements multi-onglets et actions concurrentes sont non spécifiés.
 - **Pourquoi explorer humainement :** les rythmes, interruptions et combinaisons d’état utiles doivent être découverts avant de retenir une petite suite de transitions déterministes.
 - **Limites / hors périmètre :** charge, concurrence distribuée et modification réelle par plusieurs utilisateurs.
+- **Question QA :** une séquence rapide, interrompue ou exécutée depuis plusieurs points peut-elle produire des représentations contradictoires du panier ?
+- **Priorité exploratoire :** Haute — cible `RISK-CART-02` et `RISK-SESSION-01`, risques élevés avec un seul contrôle réellement différent, ainsi que des modes d’intégrité non couverts par les transitions scriptées.
+- **Time-box :** 45 minutes.
+- **Critères d’arrêt :** time-box atteinte; au moins les axes répétition, changement de page et interruption échantillonnés; divergence reproductible réduite à une séquence utile; ou environnement devenu incohérent sans moyen fiable de reprise.
+- **Décision d’automatisation :** Rester exploratoire. Une transition découverte pourra devenir un TC après clarification de la persistance attendue; son automatisation dépendra ensuite de sa stabilité et de sa valeur de régression.
 - **Statut :** À explorer
 
 ### EXP-CHK-01 — Navigation et reprise aux étapes intermédiaires du checkout
@@ -109,6 +137,11 @@ Un charter peut évoluer entre ces statuts. `Candidat bug` n’est ni un défaut
 - **Référence attendue :** AC-CHK-01, AC-CHK-02 et AC-CHK-06 lorsque leur état initial est respecté; pour l’accès direct et la reprise, comportement à comparer avec les règles métier, les AC existants et la cohérence générale du produit.
 - **Pourquoi explorer humainement :** la politique de reprise et les préconditions des URL intermédiaires ne sont pas définies; l’objectif initial est d’apprendre les états réels, non d’imposer une référence attendue inventée.
 - **Limites / hors périmètre :** paiement réel, livraison, persistance serveur de commande et système aval inexistants dans SauceDemo.
+- **Question QA :** quels états incohérents ou obsolètes deviennent possibles lorsque l’ordre normal des étapes du checkout est interrompu ou contourné ?
+- **Priorité exploratoire :** Haute — investigue des incertitudes sur la finalisation, les montants, la commande vide et la conservation de session, dont plusieurs risques élevés restent partiels.
+- **Time-box :** 60 minutes.
+- **Critères d’arrêt :** time-box atteinte; refresh, historique, accès direct et reprise après modification du panier échantillonnés; état incohérent reproductible isolé; ou règle attendue manquante consignée comme question produit.
+- **Décision d’automatisation :** Rester exploratoire. Aucun calcul de taxe ou résultat de commande vide ne sera automatisé comme règle métier avant arbitrage; seule une transition stable et spécifiée pourra être promue.
 - **Statut :** À explorer
 
 ### EXP-CHK-02 — Répétition de Continue et Finish
@@ -125,6 +158,11 @@ Un charter peut évoluer entre ces statuts. `Candidat bug` n’est ni un défaut
 - **Référence attendue :** AC-CHK-01 garantit une confirmation nominale unique observée mais ne spécifie pas l’idempotence; le reste doit être comparé avec la cohérence générale et soumis à décision métier.
 - **Pourquoi explorer humainement :** le produit ne fournit ni identifiant de commande ni système aval permettant d’affirmer une duplication réelle; l’exploration doit d’abord distinguer répétition d’affichage, répétition d’action et défaut métier potentiel.
 - **Limites / hors périmètre :** aucune affirmation sur une transaction serveur ou une facturation non observable.
+- **Question QA :** la répétition d’une action de progression ou de finalisation laisse-t-elle un état visible unique, récupérable et cohérent ?
+- **Priorité exploratoire :** Haute — examine un mode de défaillance distinct autour de la finalisation critique et de la commande vide sans prétendre observer une transaction aval.
+- **Time-box :** 30 minutes.
+- **Critères d’arrêt :** time-box atteinte; répétitions par souris, clavier et historique échantillonnées; effet visible reproductible caractérisé; ou impossibilité d’observer plus qu’une répétition d’affichage consignée.
+- **Décision d’automatisation :** Rester exploratoire. Une automatisation ne serait envisagée qu’après définition de l’idempotence attendue et identification d’un résultat observable fiable.
 - **Statut :** À explorer
 
 ### EXP-CHK-03 — Variété et correction des données de livraison
@@ -141,6 +179,11 @@ Un charter peut évoluer entre ces statuts. `Candidat bug` n’est ni un défaut
 - **Référence attendue :** AC-CHK-03 à AC-CHK-05 pour l’absence de valeur; formats, longueurs et validité postale sont non spécifiés et doivent être observés sans règle de rejet inventée.
 - **Pourquoi explorer humainement :** les partitions acceptables et les règles de normalisation ne sont pas définies; une session humaine peut produire un inventaire factuel avant toute décision produit ou automatisation.
 - **Limites / hors périmètre :** validation auprès d’un service postal, règles internationales exhaustives et sécurité offensive des entrées.
+- **Question QA :** quelles transformations, pertes ou incohérences apparaissent avec des données inhabituelles ou corrigées, sans présumer de leur validité métier ?
+- **Priorité exploratoire :** Moyenne — `RISK-CHK-04` est moyen et partiel; la session vise d’abord à produire des faits utiles à une décision produit.
+- **Time-box :** 45 minutes.
+- **Critères d’arrêt :** time-box atteinte; principales familles de données et correction après erreur échantillonnées; comportement reproductible documenté; ou absence de règle empêchant toute qualification au-delà de l’observation.
+- **Décision d’automatisation :** Rester exploratoire. Les observations ne deviennent partitions, TC ou automatisations qu’après définition des formats acceptables et d’un résultat attendu stable.
 - **Statut :** À explorer
 
 ### EXP-SESSION-01 — Cycle de vie, reconnexion et Reset App State
@@ -157,6 +200,11 @@ Un charter peut évoluer entre ces statuts. `Candidat bug` n’est ni un défaut
 - **Référence attendue :** AC-SESSION-01 à AC-SESSION-04 dans leurs contextes définis; persistance inter-session/inter-utilisateur et Reset pendant checkout sont à comparer avec les règles métier, les AC existants et la cohérence générale du produit.
 - **Pourquoi explorer humainement :** la politique de durée et de portée de session n’est pas spécifiée; explorer plusieurs points du cycle évite d’automatiser une règle supposée.
 - **Limites / hors périmètre :** expiration longue nécessitant une infrastructure de temps contrôlée, concurrence réelle et manipulation technique des cookies.
+- **Question QA :** quel état utilisateur ou panier traverse à tort ou disparaît à tort lors des frontières logout, reconnexion, changement d’utilisateur et Reset ?
+- **Priorité exploratoire :** Haute — cible directement trois risques élevés partiels, dont `RISK-CART-02` et `RISK-SESSION-01` avec un seul contrôle réellement différent.
+- **Time-box :** 60 minutes.
+- **Critères d’arrêt :** time-box atteinte; logout/reconnexion, changement d’utilisateur, Reset multi-écrans et reprise d’URL échantillonnés; fuite ou perte reproductible isolée; ou politique produit manquante enregistrée pour arbitrage.
+- **Décision d’automatisation :** Rester exploratoire. Aucun comportement de persistance ou d’expiration ne sera figé en TC avant clarification; l’automatisation restera une décision distincte après formalisation.
 - **Statut :** À explorer
 
 ## Questions transverses
@@ -183,6 +231,25 @@ Pendant chaque session, poser explicitement les questions suivantes :
 | Comportement non spécifié | Aucune référence ne permet encore de conclure; clarification ou observation complémentaire requise.           |
 | Anomalie probable         | Incohérence reproductible avec le parcours, l’état ou un besoin, mais qualification métier encore nécessaire. |
 | Défaut confirmé           | Contradiction reproductible avec une référence établie et validée; un bug report peut alors être créé.        |
+
+## Trace d’une session exploratoire
+
+Conserver les résultats dans une note de session datée, séparée du charter, avec au minimum :
+
+- ID du charter, date, testeur et environnement/version;
+- priorité prévue, time-box prévue et durée réelle;
+- état initial, comptes et données réellement utilisés;
+- variations et enchaînements effectivement essayés;
+- observations factuelles, avec séquence minimale et éléments de preuve utiles;
+- qualification provisoire : attendu, connu, non spécifié, anomalie probable ou défaut confirmé;
+- anomalies ou bugs potentiels, sans sévérité automatique;
+- questions produit/QA ouvertes et nouvelles idées d’exploration;
+- limites rencontrées, couverture réellement atteinte et critères d’arrêt appliqués;
+- risques réellement éclairés par les observations, ou `Aucun` si les résultats ne permettent pas encore d’apporter une information concrète sur un risque;
+- décision de sortie : aucune action, investigation complémentaire, candidat TC, candidat bug ou clarification métier;
+- statut du charter après la session.
+
+L’absence d’anomalie est un résultat de session valide, mais ne prouve pas l’absence de risque. Aucun résultat, observation ou statut `Exploré` n’est prérempli avant exécution.
 
 ## Passage exploration → test formel
 
@@ -211,16 +278,18 @@ Décision QA et, si nécessaire, arbitrage produit
 
 ## Synthèse
 
-| Indicateur                                                 | Résultat                                                    |
-| ---------------------------------------------------------- | ----------------------------------------------------------- |
-| Nombre de charters                                         | 8                                                           |
-| Domaines explorés                                          | Authentification, Catalogue, Tri, Panier, Checkout, Session |
-| Risques liés                                               | 13 / 14                                                     |
-| Risque sans charter dédié                                  | RISK-AUTH-01                                                |
-| Charters prioritaires pour les risques à une seule défense | EXP-CART-01, EXP-CHK-01, EXP-CHK-02, EXP-SESSION-01         |
+| Indicateur                                                                        | Résultat                                                    |
+| --------------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| Nombre de charters                                                                | 8                                                           |
+| Sessions exécutées                                                                | 0                                                           |
+| Priorité exploratoire Haute / Moyenne / Basse                                     | 5 / 2 / 1                                                   |
+| Domaines explorés                                                                 | Authentification, Catalogue, Tri, Panier, Checkout, Session |
+| Risques disposant d’une investigation prévue                                      | 13 / 14                                                     |
+| Risque sans charter dédié                                                         | RISK-AUTH-01                                                |
+| Missions prioritaires pour les risques avec un seul contrôle réellement différent | EXP-CART-01, EXP-CHK-01, EXP-CHK-02, EXP-SESSION-01         |
 
 `RISK-AUTH-01` ne reçoit pas de charter dédié : la connexion nominale est déterministe, couverte par un Smoke ciblé et par le parcours E2E d’achat. Elle pourra être intégrée à une future session uniquement si une incertitude distincte apparaît; créer un charter pour répéter le TC nominal n’apporterait pas d’apprentissage.
 
 Les principales zones d’incertitude sont la persistance entre sessions et utilisateurs, le cycle de vie après logout, la reprise des étapes du checkout, l’idempotence apparente de Finish, la cohérence du panier après interruptions, la validité des données de livraison et l’exactitude sémantique des images produit.
 
-Recommandations pour les sessions : timeboxer chaque charter à 45–60 minutes; privilégier `EXP-SESSION-01`, `EXP-CHK-01`, `EXP-CART-01` puis `EXP-CHK-02`; travailler en binôme QA/Produit lorsque la règle attendue est absente; conserver des notes de session séparées du charter; ne promouvoir une découverte vers Risk, AC, TC ou Bug qu’après qualification.
+Recommandations pour les sessions : respecter les time-box de 30 à 60 minutes définis par charter; privilégier les cinq charters de priorité Haute, en commençant par `EXP-SESSION-01`, `EXP-CHK-01` et `EXP-CART-01` selon le risque à investiguer; travailler en binôme QA/Produit lorsque la règle attendue est absente; conserver des notes de session séparées du charter; ne promouvoir une découverte vers Risk, AC, TC ou Bug qu’après qualification.

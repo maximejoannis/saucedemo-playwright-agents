@@ -158,7 +158,7 @@ Le périmètre fonctionnel actuel contient :
 6 User Stories
 32 Acceptance Criteria
 33 Test Cases fonctionnels
-15 TC passants / 3 non passants / 15 erreurs
+15 TC passants / 3 non passants / 16 erreurs
 ```
 
 La couverture actuelle du périmètre défini est :
@@ -167,10 +167,10 @@ La couverture actuelle du périmètre défini est :
 Fonctionnalités : 6 / 6
 User Stories    : 6 / 6
 AC              : 32 / 32
-TC automatisés  : 33 / 33
+TC automatisés  : 34 / 34
 TC manuels      : 0
 TC candidats    : 0
-Charters EXP    : 8 (hors dénominateur des TC)
+Tests exploratoires : 0 exécuté sur 8 prévus (hors dénominateur des TC)
 ```
 
 Soit :
@@ -179,9 +179,9 @@ Soit :
 100 % de taux descriptif d’automatisation des TC actuellement définis
 ```
 
-> Le ratio 33/33 décrit l’état actuel : chacun des TC fonctionnels définis a un mode d’exécution `Automatisé` validé et une implémentation Playwright. Ce taux n’est ni un objectif qualité à maintenir pour les futurs TC, ni une couverture exhaustive de SauceDemo ou de son code source. Un futur contrôle peut légitimement rester manuel, candidat ou exploratoire lorsque sa valeur le justifie.
+> Le ratio 34/34 décrit l’état actuel : chacun des TC fonctionnels définis a un mode d’exécution `Automatisé` validé et une implémentation Playwright. Ce taux n’est ni un objectif qualité à maintenir pour les futurs TC, ni une couverture exhaustive de SauceDemo ou de son code source. Un futur contrôle peut légitimement rester manuel, candidat ou exploratoire lorsque sa valeur le justifie.
 
-La couche d’investigation humaine est documentée séparément dans [`tests/exploratory/charters.md`](tests/exploratory/charters.md). Un charter `EXP-*` planifié ou exécuté ne devient pas automatiquement un TC et n’augmente jamais la couverture automatisée ci-dessus.
+La couche d’investigation humaine est documentée séparément dans [`tests/exploratory/charters.md`](tests/exploratory/charters.md). Une mission de test exploratoire (charter) `EXP-*` ne devient pas automatiquement un TC. Les 8 missions sont actuellement prévues mais pas encore exécutées : elles n’apportent donc encore aucune couverture réellement vérifiée des risques et n’augmentent jamais la couverture automatisée ci-dessus.
 
 ### Important
 
@@ -223,23 +223,23 @@ Les TC fonctionnels utilisent notamment :
 @e2e
 ```
 
-Sur les 33 TC fonctionnels actuels :
+Sur les 34 TC fonctionnels actuels :
 
 ```text
 @positive   : 15
 @negative   : 3
-@error      : 15
-@smoke      : 5
-@regression : 33
+@error      : 16
+@smoke      : 7
+@regression : 34
 ```
 
 Chaque TC porte un seul tag de nature (`@positive`, `@negative` ou `@error`). Les tags de campagne s’ajoutent à cette classification :
 
 ```text
-Smoke fonctionnelle     : 5
-Regression fonctionnelle : 33
-Smoke globale           : 6 (5 TC + 1 E2E)
-Regression globale      : 36 (33 TC + 3 E2E)
+Smoke fonctionnelle     : 7
+Regression fonctionnelle : 34
+Smoke globale           : 8 (7 TC + 1 E2E)
+Regression globale      : 37 (34 TC + 3 E2E)
 ```
 
 ---
@@ -258,7 +258,7 @@ Elle couvre notamment :
 - une erreur de checkout ;
 - un contrôle de session après déconnexion.
 
-Les E2E sont volontairement distingués des 33 TC fonctionnels du plan afin d’éviter de compter deux fois une même couverture métier. La suite complète contient ainsi 33 TC fonctionnels et 3 E2E complémentaires, soit 36 tests Playwright.
+Les E2E sont volontairement distingués des 34 TC fonctionnels du plan afin d’éviter de compter deux fois une même couverture métier. La suite complète contient ainsi 34 TC fonctionnels et 3 E2E complémentaires, soit 37 tests Playwright.
 
 Exécution :
 
@@ -1026,10 +1026,10 @@ npm run portal:data
 6 / 6 fonctionnalités couvertes
 6 / 6 User Stories couvertes
 32 / 32 Acceptance Criteria couverts
-33 / 33 TC fonctionnels automatisés
+34 / 34 TC fonctionnels automatisés
 0 TC manuel / 0 candidat à l’automatisation
 8 charters exploratoires hors dénominateur des TC
-15 passants / 3 non passants / 15 erreurs
+15 passants / 3 non passants / 16 erreurs
 3 E2E complémentaires
 36 tests Playwright
 7 Smoke fonctionnels / 8 Smoke globaux

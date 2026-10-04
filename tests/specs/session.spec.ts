@@ -82,4 +82,23 @@ test.describe('Session', () => {
     await expect(cart.items).toHaveCount(0);
     await expect(page).toHaveURL(/cart\.html$/);
   });
+
+  // US-06
+  // AC-SESSION-03
+  // RISK-AUTH-02, RISK-SESSION-02
+  // Technique: ST
+  // TC-SESSION-05
+  test("TC-SESSION-05 @error @regression @session @risk-auth-02 @risk-session-02 - refus d'accès direct au panier depuis une session jamais authentifiée", async ({
+    page,
+  }) => {
+    const login = new LoginPage(page);
+    // 1. Depuis une session vierge, ouvrir directement la route du panier.
+    await page.goto('/cart.html');
+    // 2. Vérifier la redirection vers la connexion et le message d'accès refusé.
+    await expect(page).toHaveURL('https://www.saucedemo.com/');
+    await expect(login.loginButton).toBeVisible();
+    await expect(login.errorMessage).toHaveText(
+      "Epic sadface: You can only access '/cart.html' when you are logged in.",
+    );
+  });
 });

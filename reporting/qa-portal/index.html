@@ -43,29 +43,30 @@
             <p class="muted">Les agents Playwright/Codex accompagnent le workflow sans remplacer la démarche QA.</p>
           </div>
           <aside class="snapshot">
-            <p class="overline" id="snapshot-title">Dernière validation locale connue</p>
+            <p class="overline" id="snapshot-title">Dernière validation non disponible</p>
             <h2>
-              <span class="status pass" id="playwright-status">PASS</span> <span id="playwright-score">36 / 36</span>
+              <span class="status ready" id="playwright-status">INDISPONIBLE</span>
+              <span id="playwright-score">—</span>
             </h2>
             <dl>
               <div>
                 <dt>Tests fonctionnels</dt>
-                <dd id="playwright-functional">33</dd>
+                <dd id="playwright-functional">—</dd>
               </div>
               <div>
                 <dt>Parcours E2E</dt>
-                <dd id="playwright-e2e">3</dd>
+                <dd id="playwright-e2e">—</dd>
               </div>
               <div>
                 <dt>Échecs</dt>
-                <dd id="playwright-failed">0</dd>
+                <dd id="playwright-failed">—</dd>
               </div>
               <div>
                 <dt>Navigateur</dt>
                 <dd>Chromium</dd>
               </div>
             </dl>
-            <p id="snapshot-message">Valeurs issues de la dernière validation locale.</p>
+            <p id="snapshot-message">Les résultats apparaissent lorsque les données d’exécution sont disponibles.</p>
             <p class="ci-meta" id="ci-meta" hidden></p>
           </aside>
         </div>
@@ -98,23 +99,32 @@
               <h2>Couverture du périmètre QA défini</h2>
             </div>
             <p>
-              <strong>100 %</strong> des exigences et TC définis sont automatisés. Ce n’est pas une couverture de code
-              source.
+              La couverture des critères d’acceptation et le taux d’automatisation des Test Cases sont deux mesures
+              distinctes.
             </p>
           </div>
           <div class="kpis">
             <article><strong id="coverage-features">6</strong><span>Fonctionnalités</span></article>
             <article><strong id="coverage-stories">6</strong><span>User Stories</span></article>
-            <article><strong id="coverage-ac">32</strong><span>Acceptance Criteria</span></article>
-            <article><strong id="coverage-tc-total">33</strong><span>TC fonctionnels</span></article>
-            <article><strong id="coverage-tc">33/33</strong><span>TC automatisés</span></article>
+            <article><strong id="coverage-ac">—</strong><span>Critères d’acceptation couverts</span></article>
+            <article><strong id="coverage-tc-total">—</strong><span>TC fonctionnels</span></article>
+            <article><strong id="coverage-tc">—</strong><span>Test Cases automatisés</span></article>
             <article><strong>3</strong><span>E2E complémentaires</span></article>
             <article><strong id="coverage-playwright">36</strong><span>Tests Playwright</span></article>
-            <article class="accent"><strong id="coverage-scope">100 %</strong><span>Périmètre QA défini</span></article>
+            <article>
+              <strong id="coverage-exploratory">0/8</strong><span>Tests exploratoires exécutés / prévus</span>
+            </article>
+            <article class="accent">
+              <strong id="coverage-automation-rate">—</strong><span>Taux actuel d’automatisation des TC</span>
+            </article>
           </div>
+          <p class="muted">
+            Le taux d’automatisation décrit l’état actuel des Test Cases. Il ne mesure pas à lui seul la qualité de la
+            stratégie QA. Un contrôle manuel ou exploratoire peut être le choix le plus pertinent.
+          </p>
           <div class="panels">
             <article>
-              <h3>Classification des 33 TC fonctionnels</h3>
+              <h3>Classification des TC fonctionnels</h3>
               <div class="triple">
                 <span><b>15</b>Passants</span><span><b>3</b>Non passants</span><span><b>15</b>Erreurs</span>
               </div>
@@ -123,9 +133,9 @@
             <article>
               <h3>Suites ciblées</h3>
               <div class="suites">
-                <p><b>Fonctionnel</b><span>Smoke 5</span><span>Regression 33</span></p>
+                <p><b>Fonctionnel</b><span>Smoke 7</span><span>Regression 33</span></p>
                 <p><b>E2E</b><span>Smoke 1</span><span>Regression 3</span></p>
-                <p><b>Global</b><span>Smoke 6</span><span>Regression 36</span></p>
+                <p><b>Global</b><span>Smoke 8</span><span>Regression 36</span></p>
               </div>
               <p>36 tests Playwright ne signifie pas 36 TC fonctionnels.</p>
             </article>
@@ -154,7 +164,7 @@
             </div>
             <div>
               <dt>Test Cases</dt>
-              <dd id="trace-tc">33/33</dd>
+              <dd id="trace-tc">—</dd>
             </div>
           </dl>
         </div>
@@ -175,10 +185,10 @@
           <div class="reports">
             <article>
               <div class="report-top">
-                <b>PW</b><span class="status pass" id="playwright-report-status">36 PASS · 0 FAIL</span>
+                <b>PW</b><span class="status ready" id="playwright-report-status">RÉSULTATS INDISPONIBLES</span>
               </div>
               <h3>Playwright</h3>
-              <p>Dernier rapport connu sous Chromium : 33 tests fonctionnels et 3 E2E.</p>
+              <p>Le dernier résultat Chromium publié est affiché lorsque les données d’exécution sont disponibles.</p>
               <a href="./playwright/">Ouvrir Playwright Report →</a>
             </article>
             <article>
@@ -188,7 +198,7 @@
               <a href="./allure/">Ouvrir Allure Report →</a>
             </article>
             <article>
-              <div class="report-top"><b>%</b><span class="status pass">100 % QA</span></div>
+              <div class="report-top"><b>%</b><span class="status pass">TRAÇABILITÉ QA</span></div>
               <h3>Coverage</h3>
               <p>Traçabilité détaillée des fonctionnalités, US, AC, TC et automatisation.</p>
               <a href="./coverage/">Ouvrir Coverage Report →</a>

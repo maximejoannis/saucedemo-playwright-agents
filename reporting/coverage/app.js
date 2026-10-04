@@ -26,9 +26,23 @@ async function loadReport() {
     ['Risques non couverts', summary.riskCoverage['Non couvert']],
     ['Risques acceptés / hors périmètre', summary.riskCoverage['Accepté / hors périmètre']],
     ['Risques critiques/élevés en Smoke', ratio(summary.significantRisks, 'smoke')],
-    ['Risques critiques/élevés avec plusieurs défenses', ratio(summary.significantRisks, 'multipleDefenses')],
-    ['Charters exploratoires planifiés', summary.exploratoryCharters.total],
-    ['Sessions exploratoires terminées', summary.exploratoryCharters.completed],
+    [
+      'Risques critiques/élevés avec plusieurs contrôles réellement différents',
+      ratio(summary.significantRisks, 'multipleDefenses'),
+    ],
+    [
+      'Risques critiques/élevés avec un seul contrôle réellement différent',
+      ratio(summary.significantRisks, 'singleDefense'),
+    ],
+    [
+      'Risques critiques/élevés nécessitant une couverture supplémentaire',
+      ratio(summary.significantRisks, 'needingAdditionalCoverage'),
+    ],
+    [
+      'Tests exploratoires',
+      `${summary.exploratoryCharters.completed} exécuté sur ${summary.exploratoryCharters.total} prévus`,
+    ],
+    ['Couverture vérifiée par exploration', summary.exploratoryCharters.verifiedRiskCoverage],
     ['E2E complémentaires', summary.e2e],
     ['Tests Playwright', summary.playwrightTests],
   ];
@@ -78,13 +92,13 @@ async function loadReport() {
   q('#riskCards').innerHTML = data.risks
     .map(
       (risk) =>
-        `<article class="feature"><div><p>${risk.id}</p><h3>${escapeHtml(risk.feature)}</h3></div>${badge(risk.coverageStatus === 'Couvert', risk.coverageStatus, risk.coverageStatus)}<p>${escapeHtml(risk.scenario)}</p><dl><div><dt>Niveau</dt><dd>${escapeHtml(risk.level)}</dd></div><div><dt>Score</dt><dd>${risk.probability * risk.impact}</dd></div><div><dt>TC liés</dt><dd>${risk.testCases.length}</dd></div><div><dt>E2E complémentaires</dt><dd>${risk.e2e.length}</dd></div></dl><p><strong>Résiduel :</strong> ${escapeHtml(risk.residualRisk)}</p><footer>${risk.testCases.map((id) => `<code>${id}</code>`).join('')}</footer></article>`,
+        `<article class="feature"><div><p>${risk.id}</p><h3>${escapeHtml(risk.feature)}</h3></div>${badge(risk.coverageStatus === 'Couvert', risk.coverageStatus, risk.coverageStatus)}<p>${escapeHtml(risk.scenario)}</p><dl><div><dt>Niveau</dt><dd>${escapeHtml(risk.level)}</dd></div><div><dt>Score</dt><dd>${risk.probability * risk.impact}</dd></div><div><dt>Contrôles réellement différents</dt><dd>${risk.independentDefenses}</dd></div><div><dt>TC liés</dt><dd>${risk.testCases.length}</dd></div><div><dt>E2E complémentaires</dt><dd>${risk.e2e.length}</dd></div></dl><p><strong>Gap / limite :</strong> ${escapeHtml(risk.defenseGap)}</p><p><strong>Résiduel :</strong> ${escapeHtml(risk.residualRisk)}</p><footer>${risk.testCases.map((id) => `<code>${id}</code>`).join('')}</footer></article>`,
     )
     .join('');
   q('#exploratoryCards').innerHTML = data.exploratoryCharters
     .map(
       (charter) =>
-        `<article class="feature"><div><p>${charter.id}</p><h3>${escapeHtml(charter.title)}</h3></div>${badge(charter.status === 'Exploré', charter.status, charter.status)}<p>${escapeHtml(charter.objective)}</p><dl><div><dt>Domaine</dt><dd>${escapeHtml(charter.domain)}</dd></div><div><dt>Risques liés</dt><dd>${charter.risks.length}</dd></div></dl><footer>${charter.risks.map((id) => `<code>${id}</code>`).join('')}</footer></article>`,
+        `<article class="feature"><div><p>${charter.id}</p><h3>${escapeHtml(charter.title)}</h3></div>${badge(charter.status === 'Exploré', charter.status, charter.status)}<p>${escapeHtml(charter.objective)}</p><p><strong>Question QA :</strong> ${escapeHtml(charter.qaQuestion)}</p><dl><div><dt>Domaine</dt><dd>${escapeHtml(charter.domain)}</dd></div><div><dt>Risques à investiguer</dt><dd>${charter.risks.length}</dd></div><div><dt>Priorité exploratoire</dt><dd>${escapeHtml(charter.explorationPriority)}</dd></div><div><dt>Durée maximale</dt><dd>${charter.timeBoxMinutes} min</dd></div></dl><footer>${charter.risks.map((id) => `<code>${id}</code>`).join('')}</footer></article>`,
     )
     .join('');
   const renderCases = () => {
@@ -93,7 +107,7 @@ async function loadReport() {
       .filter((testCase) => !term || JSON.stringify(testCase).toLowerCase().includes(term))
       .map(
         (testCase) =>
-          `<tr><td><strong>${testCase.id}</strong></td><td>${escapeHtml(testCase.feature)}</td><td>${testCase.userStory}</td><td>${testCase.acceptanceCriteria.map((id) => `<code>${id}</code>`).join(' ')}</td><td>${testCase.risks.map((id) => `<code>${id}</code>`).join(' ')}</td><td>${testCase.techniques.length ? testCase.techniques.map((id) => `<code>${id}</code>`).join(' ') : '—'}</td><td>${escapeHtml(testCase.executionMode)}</td><td>${escapeHtml(testCase.type)}</td><td>${testCase.priority}</td><td>${escapeHtml(testCase.potentialImpact ?? '—')}</td><td>${escapeHtml(testCase.expectedReference ?? '—')}</td><td>${testCase.tags.includes('@smoke') ? 'Oui' : '—'}</td><td>${testCase.tags.includes('@regression') ? 'Oui' : '—'}</td><td>${badge(testCase.automated, 'OUI', 'NON')}</td></tr>`,
+          `<tr><td><strong>${testCase.id}</strong></td><td>${escapeHtml(testCase.feature)}</td><td>${testCase.userStory}</td><td>${testCase.acceptanceCriteria.map((id) => `<code>${id}</code>`).join(' ')}</td><td>${testCase.risks.map((id) => `<code>${id}</code>`).join(' ')}</td><td>${testCase.techniques.length ? testCase.techniques.map((id) => `<code>${id}</code>`).join(' ') : '—'}</td><td>${escapeHtml(testCase.executionMode)}</td><td>${escapeHtml(testCase.type)}</td><td>${testCase.priority}</td><td>${escapeHtml(testCase.potentialImpact ?? '—')}</td><td>${escapeHtml(testCase.expectedReference ?? '—')}</td><td>${escapeHtml(testCase.referenceType ?? '—')}</td><td>${escapeHtml(testCase.testJustification ?? '—')}</td><td>${escapeHtml(testCase.priorityJustification ?? '—')}</td><td>${escapeHtml(testCase.businessUncertainty ?? '—')}</td><td>${testCase.tags.includes('@smoke') ? 'Oui' : '—'}</td><td>${testCase.tags.includes('@regression') ? 'Oui' : '—'}</td><td>${badge(testCase.automated, 'OUI', 'NON')}</td></tr>`,
       )
       .join('');
   };
