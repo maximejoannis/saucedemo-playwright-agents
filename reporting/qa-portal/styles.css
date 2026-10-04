@@ -314,6 +314,38 @@ dd {
   gap: 18px;
   margin-top: 18px;
 }
+
+.table-wrap {
+  overflow-x: auto;
+  margin-top: 1.5rem;
+}
+
+.table-wrap table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 900px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+
+.table-wrap caption {
+  text-align: left;
+  font-weight: 700;
+  padding: 0 0 0.75rem;
+}
+
+.table-wrap th,
+.table-wrap td {
+  border-bottom: 1px solid var(--line);
+  padding: 0.75rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+.table-wrap thead th {
+  color: var(--muted);
+  font-size: 0.82rem;
+}
 .panels h3 {
   margin-top: 0;
 }

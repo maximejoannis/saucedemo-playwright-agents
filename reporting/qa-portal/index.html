@@ -18,8 +18,8 @@
           ><b>QA</b><span><strong>QA Automation</strong><small>SauceDemo</small></span></a
         >
         <nav aria-label="Navigation principale">
-          <a href="#strategie">Stratégie</a><a href="#couverture">Couverture</a><a href="#rapports">Rapports</a
-          ><a href="#architecture">Architecture</a>
+          <a href="#risques">Risques</a><a href="#execution">Exécution</a><a href="#couverture">Couverture</a
+          ><a href="#rapports">Rapports</a><a href="#architecture">Architecture</a>
         </nav>
         <button id="theme-toggle" aria-label="Activer le thème sombre" aria-pressed="false">
           ◐ <span>Thème</span>
@@ -71,6 +71,110 @@
           </aside>
         </div>
       </section>
+      <section class="section" id="risques">
+        <div class="wrap">
+          <div class="heading">
+            <div>
+              <p class="overline">Pilotage QA orienté risques</p>
+              <h2>État des risques produit</h2>
+            </div>
+            <p>
+              Les contrôles indiquent ce qui est vérifié dans le périmètre actuel ; ils ne suppriment pas
+              automatiquement le risque.
+            </p>
+          </div>
+          <div class="kpis">
+            <article><strong id="risk-total">—</strong><span>Risques totaux</span></article>
+            <article><strong id="risk-critical">—</strong><span>Risques critiques</span></article>
+            <article><strong id="risk-high">—</strong><span>Risques élevés</span></article>
+            <article><strong id="risk-covered">—</strong><span>Couvert</span></article>
+            <article><strong id="risk-partial">—</strong><span>Partiellement couvert</span></article>
+            <article>
+              <strong id="risk-multiple">—</strong
+              ><span>Critiques/élevés avec plusieurs contrôles réellement différents</span>
+            </article>
+            <article>
+              <strong id="risk-single">—</strong
+              ><span>Critiques/élevés avec un seul contrôle réellement différent</span>
+            </article>
+            <article class="accent">
+              <strong id="risk-additional">—</strong><span>Nécessitant encore une couverture supplémentaire</span>
+            </article>
+          </div>
+          <p class="muted">
+            <strong>Couvert</strong> signifie que les contrôles définis pour le périmètre actuel sont présents. Le
+            risque produit peut toujours exister.
+          </p>
+          <div class="table-wrap">
+            <table>
+              <caption>
+                Risques critiques et élevés
+              </caption>
+              <thead>
+                <tr>
+                  <th>Risque</th>
+                  <th>Impact</th>
+                  <th>Niveau</th>
+                  <th>État</th>
+                  <th>Contrôles réellement différents</th>
+                  <th>Risque résiduel</th>
+                </tr>
+              </thead>
+              <tbody id="risk-rows"></tbody>
+            </table>
+          </div>
+          <p class="muted">
+            <strong>Risque résiduel</strong> : partie du risque qui reste présente malgré les contrôles déjà en place.
+            Un contrôle réellement différent vérifie le risque sous un angle suffisamment distinct pour apporter une
+            information supplémentaire.
+          </p>
+          <div class="panels">
+            <article>
+              <h3>Incertitudes métier</h3>
+              <p>
+                Une incertitude est une information métier ou produit qui manque encore pour pouvoir conclure
+                correctement. Ce n’est pas automatiquement une anomalie.
+              </p>
+              <ul>
+                <li>Taux, formule et arrondi de la taxe non définis.</li>
+                <li>Commande vide, persistance et expiration de session non définies.</li>
+                <li>Protection des routes autres que Cart non définie.</li>
+                <li>Formats des données de livraison et référence image non définis.</li>
+              </ul>
+            </article>
+            <article>
+              <h3>Investigations exploratoires</h3>
+              <p>
+                <b id="exploratory-planned">—</b> prévues · <b id="exploratory-completed">—</b> réalisée(s) ·
+                <b id="exploratory-remaining">—</b> restante(s)
+              </p>
+              <p>Une mission prévue n’est pas une investigation réalisée.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+      <section class="section tint" id="execution">
+        <div class="wrap">
+          <div class="heading">
+            <div>
+              <p class="overline">Résultats fiables</p>
+              <h2>Définis, collectés, exécutés</h2>
+            </div>
+            <p>Une collecte avec <code>--list</code> détecte les tests ; elle ne les exécute pas.</p>
+          </div>
+          <div class="kpis">
+            <article><strong id="execution-defined">—</strong><span>Tests définis</span></article>
+            <article><strong id="execution-collected">—</strong><span>Tests collectés</span></article>
+            <article><strong id="execution-executed">—</strong><span>Tests réellement exécutés</span></article>
+            <article>
+              <strong id="p0-defined">—</strong><span>P0 définis, sans résultat d’exécution disponible</span>
+            </article>
+          </div>
+          <p class="muted" id="execution-source">
+            Dernière exécution officielle : non disponible dans les données actuelles.
+          </p>
+        </div>
+      </section>
       <section class="section" id="strategie">
         <div class="wrap">
           <div class="heading">
@@ -106,11 +210,13 @@
           <div class="kpis">
             <article><strong id="coverage-features">6</strong><span>Fonctionnalités</span></article>
             <article><strong id="coverage-stories">6</strong><span>User Stories</span></article>
-            <article><strong id="coverage-ac">—</strong><span>Critères d’acceptation couverts</span></article>
+            <article>
+              <strong id="coverage-ac">—</strong><span>Critères d’acceptation reliés à au moins un Test Case</span>
+            </article>
             <article><strong id="coverage-tc-total">—</strong><span>TC fonctionnels</span></article>
             <article><strong id="coverage-tc">—</strong><span>Test Cases automatisés</span></article>
             <article><strong>3</strong><span>E2E complémentaires</span></article>
-            <article><strong id="coverage-playwright">36</strong><span>Tests Playwright</span></article>
+            <article><strong id="coverage-playwright">37</strong><span>Tests Playwright</span></article>
             <article>
               <strong id="coverage-exploratory">0/8</strong><span>Tests exploratoires exécutés / prévus</span>
             </article>
@@ -124,20 +230,23 @@
           </p>
           <div class="panels">
             <article>
-              <h3>Classification des TC fonctionnels</h3>
+              <h3>Classification documentaire des TC fonctionnels</h3>
               <div class="triple">
-                <span><b>15</b>Passants</span><span><b>3</b>Non passants</span><span><b>15</b>Erreurs</span>
+                <span><b>15</b>Passants</span><span><b>3</b>Non passants</span><span><b>16</b>Erreurs</span>
               </div>
-              <p>Les E2E ne sont pas inclus.</p>
+              <p>
+                Statuts documentés des TC fonctionnels, indépendants du résultat de la dernière exécution Playwright.
+                Les E2E ne sont pas inclus.
+              </p>
             </article>
             <article>
               <h3>Suites ciblées</h3>
               <div class="suites">
-                <p><b>Fonctionnel</b><span>Smoke 7</span><span>Regression 33</span></p>
+                <p><b>Fonctionnel</b><span>Smoke 7</span><span>Regression 34</span></p>
                 <p><b>E2E</b><span>Smoke 1</span><span>Regression 3</span></p>
-                <p><b>Global</b><span>Smoke 8</span><span>Regression 36</span></p>
+                <p><b>Global</b><span>Smoke 8</span><span>Regression 37</span></p>
               </div>
-              <p>36 tests Playwright ne signifie pas 36 TC fonctionnels.</p>
+              <p>37 tests Playwright ne signifie pas 37 TC fonctionnels.</p>
             </article>
           </div>
         </div>

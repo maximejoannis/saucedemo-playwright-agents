@@ -35,20 +35,40 @@
   const coverage = data.coverage;
 
   document.body.dataset.portalGeneratedAt = String(data.generatedAt);
-  setText('snapshot-title', 'Dernière exécution CI/CD');
-  setText('snapshot-message', 'Dernière exécution CI/CD publiée automatiquement.');
+  setText(
+    'snapshot-title',
+    playwright?.lastExecutionAvailable ? 'Dernière exécution Playwright' : 'Exécution Playwright non disponible',
+  );
+  setText(
+    'snapshot-message',
+    playwright?.lastExecutionAvailable
+      ? 'Résultats issus d’une campagne réellement exécutée.'
+      : 'Les données disponibles proviennent d’une collecte --list ; elles ne prouvent pas une exécution.',
+  );
 
   if (playwright) {
     setText('playwright-status', playwright.status);
-    setText('playwright-score', `${playwright.passed} / ${playwright.total}`);
-    setText('playwright-failed', playwright.failed);
-    setText('playwright-report-status', `${playwright.passed} PASS · ${playwright.failed} FAIL`);
-    setText('coverage-playwright', playwright.total);
+    setText(
+      'playwright-score',
+      playwright.lastExecutionAvailable ? `${playwright.passed} / ${playwright.executed}` : 'Non disponible',
+    );
+    setText('playwright-failed', playwright.lastExecutionAvailable ? playwright.failed : '—');
+    setText(
+      'playwright-report-status',
+      playwright.lastExecutionAvailable
+        ? `${playwright.passed} PASS · ${playwright.failed} FAIL`
+        : 'RÉSULTATS INDISPONIBLES',
+    );
+    setText('coverage-playwright', playwright.defined);
+    setText('execution-defined', playwright.defined);
+    setText('execution-collected', playwright.collected);
+    setText('execution-executed', playwright.lastExecutionAvailable ? playwright.executed : '—');
+    setText('execution-source', playwright.source);
     for (const id of ['playwright-status', 'playwright-report-status']) {
       const status = document.getElementById(id);
       status?.classList.remove('ready');
       status?.classList.toggle('pass', playwright.status === 'PASS');
-      status?.classList.toggle('fail', playwright.status !== 'PASS');
+      status?.classList.toggle('fail', playwright.status === 'FAIL');
     }
   }
 
@@ -67,13 +87,42 @@
     setText('coverage-tc', ratio(coverage.testCases, 'automated'));
     setText('coverage-exploratory', `${coverage.exploratoryCharters.completed}/${coverage.exploratoryCharters.total}`);
     setText('coverage-automation-rate', `${coverage.automationRate} %`);
+    const riskSummary = coverage.riskSummary;
+    setText('risk-total', riskSummary.total);
+    setText('risk-critical', riskSummary.critical);
+    setText('risk-high', riskSummary.high);
+    setText('risk-covered', riskSummary.covered);
+    setText('risk-partial', riskSummary.partiallyCovered);
+    setText('risk-multiple', riskSummary.significantWithMultipleControls);
+    setText('risk-single', riskSummary.significantWithSingleControl);
+    setText('risk-additional', riskSummary.significantNeedingAdditionalCoverage);
+    setText('p0-defined', coverage.priorities?.P0 ?? '—');
+    setText('exploratory-planned', coverage.exploratoryCharters.total);
+    setText('exploratory-completed', coverage.exploratoryCharters.completed);
+    setText('exploratory-remaining', coverage.exploratoryCharters.remaining);
+    const riskRows = document.getElementById('risk-rows');
+    if (riskRows) {
+      riskRows.innerHTML = coverage.criticalAndHighRisks
+        .map(
+          (risk) => `
+        <tr>
+          <th scope="row">${risk.id}</th>
+          <td>${risk.consequence}</td>
+          <td>${risk.level}</td>
+          <td>${risk.coverageStatus}</td>
+          <td>${risk.independentDefenses}</td>
+          <td>${risk.residualRisk}</td>
+        </tr>`,
+        )
+        .join('');
+    }
     setText('trace-features', ratio(coverage.features, 'covered'));
     setText('trace-stories', ratio(coverage.userStories, 'covered'));
     setText('trace-ac', ratio(coverage.acceptanceCriteria, 'covered'));
     setText('trace-tc', ratio(coverage.testCases, 'automated'));
     if (playwright) {
       setText('playwright-functional', coverage.testCases.total);
-      setText('playwright-e2e', Math.max(0, playwright.total - coverage.testCases.total));
+      setText('playwright-e2e', Math.max(0, playwright.defined - coverage.testCases.total));
     }
   }
 

@@ -10,7 +10,7 @@
 ![ESLint](https://img.shields.io/badge/ESLint-10.x-4B32C3?logo=eslint&logoColor=white)
 ![Prettier](https://img.shields.io/badge/Prettier-3.x-F7B93E?logo=prettier&logoColor=black)
 ![Coverage](https://img.shields.io/badge/Functional%20Coverage-100%25-brightgreen)
-![Test Cases](https://img.shields.io/badge/Functional%20TC-33%2F33-brightgreen)
+![Test Cases](https://img.shields.io/badge/Functional%20TC-34%2F34-brightgreen)
 ![E2E](https://img.shields.io/badge/E2E-3%20tests-brightgreen)
 ![License](https://img.shields.io/badge/License-ISC-blue)
 
@@ -157,7 +157,7 @@ Le périmètre fonctionnel actuel contient :
 6 fonctionnalités
 6 User Stories
 32 Acceptance Criteria
-33 Test Cases fonctionnels
+34 Test Cases fonctionnels
 15 TC passants / 3 non passants / 16 erreurs
 ```
 
@@ -182,6 +182,8 @@ Soit :
 > Le ratio 34/34 décrit l’état actuel : chacun des TC fonctionnels définis a un mode d’exécution `Automatisé` validé et une implémentation Playwright. Ce taux n’est ni un objectif qualité à maintenir pour les futurs TC, ni une couverture exhaustive de SauceDemo ou de son code source. Un futur contrôle peut légitimement rester manuel, candidat ou exploratoire lorsque sa valeur le justifie.
 
 La couche d’investigation humaine est documentée séparément dans [`tests/exploratory/charters.md`](tests/exploratory/charters.md). Une mission de test exploratoire (charter) `EXP-*` ne devient pas automatiquement un TC. Les 8 missions sont actuellement prévues mais pas encore exécutées : elles n’apportent donc encore aucune couverture réellement vérifiée des risques et n’augmentent jamais la couverture automatisée ci-dessus.
+
+Lorsqu’une observation est réellement reproduite et comparée à une Référence attendue, le modèle de rapport d’anomalie est disponible dans [`tests/templates/bug-report-template.md`](tests/templates/bug-report-template.md). Aucun rapport ni indicateur de défaut n’est créé tant qu’une anomalie n’est pas suffisamment démontrée.
 
 ### Important
 
@@ -805,7 +807,7 @@ installe Node.js 24 et Java 17
 installe les dépendances avec npm ci
 installe Chromium et ses dépendances Linux
 exécute le Quality Gate
-exécute les 36 tests Playwright
+exécute les 37 tests Playwright
 génère la couverture QA
 génère Allure avec Java 17
 assemble le portail et génère portal-data.js
@@ -1031,9 +1033,9 @@ npm run portal:data
 8 charters exploratoires hors dénominateur des TC
 15 passants / 3 non passants / 16 erreurs
 3 E2E complémentaires
-36 tests Playwright
+37 tests Playwright
 7 Smoke fonctionnels / 8 Smoke globaux
-33 Regression fonctionnels / 36 Regression globaux
+34 Regression fonctionnels / 37 Regression globaux
 100 % de taux descriptif d’automatisation des TC actuellement définis (pas un objectif futur)
 Quality Gate : 3 / 3 PASS
 ```

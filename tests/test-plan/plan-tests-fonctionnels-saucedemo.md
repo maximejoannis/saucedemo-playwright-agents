@@ -1675,3 +1675,108 @@ Le Generator a validé la proposition : TC-SESSION-05 est désormais un TC canon
 | Regression | 34 |
 | Critères couverts | 32 / 32 |
 | Taux de couverture des critères | 100 % |
+
+## Partie 10 — Reporting QA orienté risques
+
+### Objectif et règle de lecture
+
+Le reporting doit aider à décider où se trouve le risque résiduel — la partie du risque qui reste présente malgré les contrôles déjà en place — avant de présenter le volume de tests ou leur automatisation. Il doit répondre dans cet ordre :
+
+1. Quels risques importants existent et quel est leur état actuel ?
+2. Quels contrôles réellement différents sont associés à ces risques ?
+3. Quels risques restent partiellement contrôlés et pourquoi ?
+4. Quelles incertitudes métier empêchent encore de conclure ?
+5. Quels résultats d'exécution identifiables sont disponibles ?
+6. Combien de missions exploratoires ont réellement été réalisées ?
+7. Combien de TC possèdent une implémentation automatisée ?
+
+Le taux d'automatisation décrit la proportion des TC actuellement définis qui possèdent une implémentation automatique. Il ne mesure ni la qualité globale de la stratégie QA, ni la couverture complète de SauceDemo, ni la disparition des risques.
+
+### Audit de l'état actuel
+
+Les sources actuellement utilisées sont :
+
+- `tests/requirements/risk-register.md` pour les niveaux, états, contrôles réellement différents, écarts et risques résiduels ;
+- `tests/requirements/traceability-matrix.md` pour les liens entre fonctionnalité, US, AC, risque, TC, priorité et mode ;
+- `tests/test-plan/plan-tests-fonctionnels-saucedemo.md` pour la stratégie et les limites connues ;
+- `tests/exploratory/charters.md` pour les missions prévues et leur statut ;
+- `coverage-report/data.json` pour les agrégats calculés depuis ces sources ;
+- `test-results/results.json` pour le résultat de la collecte ou de la dernière exécution Playwright effectivement produite ;
+- `site/portal-data.js` pour les données injectées dans le portail.
+
+Les indicateurs suivants sont actuellement utiles lorsqu'ils sont nommés précisément : 6 fonctionnalités, 6 US, 32 AC reliés à au moins un TC, 34 TC fonctionnels, 3 E2E, 37 tests Playwright, P0/P1/P2 = 8/20/6, Smoke fonctionnelle = 7, Regression fonctionnelle = 34 et 34/34 TC automatisés. Ils décrivent le périmètre documenté et l'état d'automatisation ; ils ne constituent pas une note de qualité.
+
+Deux limites de conception doivent être traitées par le Generator :
+
+- `automatedRisks.covered = 14/14` signifie actuellement qu'au moins un TC automatisé est relié à chaque risque. Ce n'est pas la couverture réelle du risque et cela ne doit pas être affiché comme « risques couverts ». L'état `Couvert` ou `Partiellement couvert` et les contrôles réellement différents restent la référence de décision.
+- `qaScopeCoverage` recopie le taux d'automatisation. Ce doublon ne doit pas être présenté comme une couverture indépendante.
+
+### Hiérarchie recommandée du portail
+
+Le portail devrait présenter les sections dans l'ordre suivant :
+
+1. **État des risques produit** : 14 risques, dont 2 critiques et 7 élevés, 7 `Couvert` et 7 `Partiellement couvert`, 3 risques importants avec plusieurs contrôles réellement différents, 6 avec un seul et 5 nécessitant encore une couverture supplémentaire.
+2. **Détail des risques critiques et élevés** : `Risque | Impact | Niveau | État | Contrôles réellement différents | Risque résiduel`. `Couvert` signifie que les contrôles définis pour le périmètre actuel existent ; cela ne signifie pas que le risque a disparu.
+3. **Risques résiduels et incertitudes** : taxe, commande vide, persistance, routes protégées et autres limites explicitement confirmées par les sources.
+4. **Contrôles prioritaires P0** : seulement si un résultat d'exécution identifiable permet de distinguer défini, exécuté, réussi, échoué et non exécuté.
+5. **Résultat de la dernière exécution** : nombre exécuté, réussi, échoué, ignoré ou en erreur, avec sa date, sa provenance et son statut ; ne pas confondre avec le nombre de tests définis.
+6. **Critères d'acceptation reliés à au moins un TC** : 32/32, sans présenter ce ratio comme 100 % du produit.
+7. **Investigations exploratoires** : 8 prévues, 0 réalisée, 8 restantes ; une mission prévue ne constitue pas une vérification effectuée.
+8. **Automatisation** : 34/34 TC et 100 % descriptif, avec l'explication de ses limites.
+9. **Traçabilité et anomalies confirmées** : liens US/AC/RISK/TC et `Anomalies produit confirmées : 0` tant qu'aucun rapport réel n'existe.
+
+### Risques et incertitudes confirmés
+
+Les risques importants nécessitant encore une couverture supplémentaire sont :
+
+- `RISK-CART-02` : reconnexion, changement d'utilisateur et nouveau contexte non spécifiés ;
+- `RISK-CHK-02` : taux, formule et arrondi de taxe non spécifiés ;
+- `RISK-CHK-03` : comportement attendu d'une commande vide non arbitré ;
+- `RISK-SESSION-01` : Cart, Checkout, expiration et reprise non couverts par une règle suffisamment précise ;
+- `RISK-SESSION-02` : seule la route Cart est explicitement contrôlée, sans politique générale pour les autres routes.
+
+Les autres incertitudes confirmées dans les sources sont les formats, longueurs et règles de validité des données de livraison, ainsi que la correspondance sémantique entre produit et image. Une incertitude n'est pas une anomalie et ne doit pas être transformée en indicateur de défaut.
+
+### P0 et résultats d'exécution
+
+Le périmètre contient 8 TC P0. Le reporting peut afficher `P0 définis = 8`, mais ne doit afficher `P0 exécutés`, `P0 réussis`, `P0 échoués` et `P0 non exécutés` que si un rapport d'exécution identifiable permet de relier chaque résultat à un TC et à une date.
+
+La présence actuelle de `test-results/results.json` ne suffit pas à conclure à une exécution réussie : le fichier inspecté provient d'une collecte `--list` et contient 37 tests `skipped`. Une collecte prouve que les tests sont détectables, pas qu'ils ont été exécutés. Le Generator doit donc distinguer `tests définis`, `collectés` et `exécutés`, et ne jamais convertir une collecte en résultat PASS.
+
+### Règles de séparation obligatoires
+
+Le portail doit conserver séparément :
+
+- les comportements prévus par les AC et reliés à des TC ;
+- les TC définis ;
+- les TC réellement exécutés lors d'une campagne identifiable ;
+- les résultats de cette campagne ;
+- les missions exploratoires prévues et celles réellement réalisées ;
+- l'état des risques ;
+- le taux d'automatisation.
+
+Un test vert signifie seulement que le contrôle correspondant à sa Référence attendue a réussi pendant l'exécution concernée. Il ne signifie pas que tous les risques sont maîtrisés. Aucun score global, taux de défaut, score de maturité, pondération de KPI ou tableau S1/S2/S3/S4 ne doit être créé sans rapports d'anomalie réels.
+
+### Recommandations de génération
+
+Le Generator devra :
+
+- calculer les cartes de risques depuis le registre, sans utiliser `automatedRisks` comme état de couverture ;
+- exposer les 2 risques critiques et 7 élevés avec leur état, leur impact, leurs contrôles réellement différents et leur risque résiduel ;
+- afficher les 5 risques importants nécessitant encore une couverture supplémentaire ;
+- distinguer une collecte Playwright d'une exécution et afficher la provenance de la campagne ;
+- calculer les P0 exécutés et leurs résultats uniquement lorsque les données d'exécution le permettent ;
+- afficher `Critères d'acceptation reliés à au moins un TC : 32/32` ;
+- conserver `8 investigations exploratoires prévues, 0 réalisée, 8 restantes` ;
+- afficher l'automatisation comme information secondaire et descriptive ;
+- afficher `Anomalies produit confirmées : 0` sans créer de KPI de défaut ;
+- ne pas ajouter de colonne de raisonnement longue à la matrice de traçabilité.
+
+### Décisions humaines encore nécessaires
+
+- définir le taux, la formule et l'arrondi officiels de la taxe ;
+- décider si une commande vide doit être acceptée ou refusée ;
+- définir la persistance après reconnexion et le changement d'utilisateur ;
+- définir les routes protégées au-delà de Cart et la politique d'expiration/reprise de session ;
+- préciser les formats, longueurs et règles de validité des données de livraison ;
+- fournir une référence fiable pour juger la correspondance sémantique des images.
