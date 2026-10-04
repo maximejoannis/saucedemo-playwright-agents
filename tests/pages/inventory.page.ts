@@ -5,6 +5,7 @@ export class InventoryPage {
   readonly title: Locator;
   readonly sortSelect: Locator;
   readonly products: Locator;
+  readonly productDetail: Locator;
   readonly productNames: Locator;
   readonly productDescriptions: Locator;
   readonly productPrices: Locator;
@@ -20,6 +21,7 @@ export class InventoryPage {
     this.title = page.getByTestId('title');
     this.sortSelect = page.getByTestId('product-sort-container');
     this.products = page.getByTestId('inventory-item');
+    this.productDetail = page.locator('[data-test="inventory-item"].inventory_details_container');
     this.productNames = page.getByTestId('inventory-item-name');
     this.productDescriptions = page.getByTestId('inventory-item-desc');
     this.productPrices = page.getByTestId('inventory-item-price');

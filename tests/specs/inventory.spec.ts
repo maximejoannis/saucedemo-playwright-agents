@@ -45,10 +45,13 @@ test.describe('Catalogue', () => {
     // 1. Ouvrir le produit par son nom. 2. Comparer nom, description, prix et image.
     await inventory.openProductByName('Sauce Labs Backpack');
     await expect(page).toHaveURL(/inventory-item\.html\?id=4$/);
-    await expect(page.getByTestId('inventory-item-name')).toHaveText('Sauce Labs Backpack');
-    await expect(page.getByTestId('inventory-item-desc')).toHaveText(description);
-    await expect(page.getByTestId('inventory-item-price')).toHaveText('$29.99');
-    await expect(page.getByRole('img', { name: 'Sauce Labs Backpack' })).toHaveAttribute('src', imageSource!);
+    await expect(inventory.productDetail.getByTestId('inventory-item-name')).toHaveText('Sauce Labs Backpack');
+    await expect(inventory.productDetail.getByTestId('inventory-item-desc')).toHaveText(description);
+    await expect(inventory.productDetail.getByTestId('inventory-item-price')).toHaveText('$29.99');
+    await expect(inventory.productDetail.getByRole('img', { name: 'Sauce Labs Backpack' })).toHaveAttribute(
+      'src',
+      imageSource!,
+    );
     // 3. Choisir Back to products.
     await page.getByRole('button', { name: 'Back to products' }).click();
     await expect(page).toHaveURL(/inventory\.html$/);
